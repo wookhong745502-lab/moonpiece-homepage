@@ -53,7 +53,7 @@ Return ONLY a valid JSON object:
   "html": "<h1>...</h1><p>...</p> full HTML content"
 }`;
 
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${env.GEMINI_API_KEY}`;
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${env.GEMINI_API_KEY}`;
         const response = await fetch(geminiUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
