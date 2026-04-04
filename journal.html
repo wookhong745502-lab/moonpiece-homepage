@@ -66,15 +66,9 @@
                 <!-- Posts will be injected here -->
             </div>
             
-            <!-- Pagination (Placeholder) -->
-            <div class="mt-20 flex justify-center gap-2" id="pagination">
-                <button class="p-2 rounded-full surface-container-high hover:bg-primary-container transition">
-                    <span class="material-symbols-outlined">chevron_left</span>
-                </button>
-                <button class="w-10 h-10 rounded-full bg-primary text-on-primary font-bold">1</button>
-                <button class="p-2 rounded-full surface-container-high hover:bg-primary-container transition">
-                    <span class="material-symbols-outlined">chevron_right</span>
-                </button>
+            <!-- Pagination Container -->
+            <div class="mt-20 flex justify-center gap-4" id="pagination-container">
+                <!-- Buttons will be injected here -->
             </div>
         </div>
     </section>
@@ -151,26 +145,85 @@
                 url: "journal/pregnancy-sleep-positions.html"
             },
             {
-                title: "[임산부 옆으로 자는 이유] 산부인과 전문의가 '왼쪽 눕기'를 강조하는 의학적 근거",
+                title: "[임산부 옆으로 자는 이유] 산부인과 전문위가 '왼쪽 눕기'를 강조하는 의학적 근거",
                 category: "의학 & 지식",
                 categoryKey: "psychology",
                 image: "https://images.unsplash.com/photo-1522818987309-8d7d91ebd400?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
                 date: "2024.04.04",
                 desc: "혈류 개선과 태아 건강을 위한 '왼쪽 눕기'의 비밀과 의학적 근거를 심층 분석합니다.",
                 url: "journal/why-pregnant-women-sleep-on-side.html"
+            },
+            // Sample data for pagination testing (총 10개)
+            {
+                title: "[임신 중기 식단] 속쓰림 완화와 숙면을 돕는 추천 음식 Top 5",
+                category: "건강 관리",
+                categoryKey: "health",
+                image: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+                date: "2024.04.05",
+                desc: "소화 불량으로 잠 못 드는 밤을 해결하는 최적의 임산부 식단표 공개.",
+                url: "#"
+            },
+            {
+                title: "[태교음악 가이드] 엄마도 아기도 편안하게 잠드는 클래식 플레이리스트",
+                category: "심리 & 지식",
+                categoryKey: "psychology",
+                image: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+                date: "2024.04.05",
+                desc: "청각 발달은 물론 산모의 스트레스 수치를 낮춰주는 최적의 태교 수면 음악.",
+                url: "#"
+            },
+            {
+                title: "[임신 후기 허리통증] 32주 이후 만삭 산모를 위한 고탄성 지지 필로우 활용법",
+                category: "통증 완화",
+                categoryKey: "pain",
+                image: "https://images.unsplash.com/photo-1519451241315-74149053359d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+                date: "2024.04.05",
+                desc: "만삭의 하중을 0에 가깝게 분산시키는 중력 분산 수면 자세의 비밀.",
+                url: "#"
+            },
+            {
+                title: "[산후조리원 준비물] 선배 엄마들이 꼽은 수면 질을 바꾸는 의외의 필수템",
+                category: "건강 관리",
+                categoryKey: "health",
+                image: "https://images.unsplash.com/photo-1550133730-695473e544be?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+                date: "2024.04.05",
+                desc: "출산 직후 회복을 좌우하는 것은 숙면입니다. 준비물 리스트를 체크하세요.",
+                url: "#"
+            },
+            {
+                title: "[임산부 부종 케어] 밤마다 붓는 다리, 수면 중 림프 순환을 돕는 베개 배치법",
+                category: "통증 완화",
+                categoryKey: "pain",
+                image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+                date: "2024.04.05",
+                desc: "다리 부종을 80% 이상 줄여주는 올바른 다리 높이와 바디필로우 사용법.",
+                url: "#"
             }
         ];
 
         const grid = document.getElementById('journal-grid');
         const filterBtns = document.querySelectorAll('.filter-btn');
+        const paginationContainer = document.getElementById('pagination-container');
 
-        function renderJournal(filter = 'all') {
+        let currentPage = 1;
+        const itemsPerPage = 9;
+        let currentFilter = 'all';
+
+        function renderJournal(filter = 'all', page = 1) {
+            currentFilter = filter;
+            currentPage = page;
             grid.innerHTML = '';
+
             const filteredPosts = filter === 'all' 
                 ? journalPosts 
                 : journalPosts.filter(post => post.categoryKey === filter);
 
-            filteredPosts.forEach(post => {
+            const totalItems = filteredPosts.length;
+            const startIdx = (page - 1) * itemsPerPage;
+            const endIdx = startIdx + itemsPerPage;
+            const pagePosts = filteredPosts.slice(startIdx, endIdx);
+
+            pagePosts.forEach(post => {
                 const article = document.createElement('article');
                 article.className = 'flex flex-col gap-6 cursor-pointer group';
                 article.onclick = () => window.location.href = post.url;
@@ -192,6 +245,25 @@
                 `;
                 grid.appendChild(article);
             });
+
+            renderPagination(totalItems);
+        }
+
+        function renderPagination(totalItems) {
+            paginationContainer.innerHTML = '';
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            if (totalPages <= 1) return;
+
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.innerText = i;
+                btn.className = `w-12 h-12 rounded-full font-bold transition ${i === currentPage ? 'bg-primary text-on-primary' : 'surface-container-high hover:bg-primary-container'}`;
+                btn.onclick = () => {
+                    renderJournal(currentFilter, i);
+                    window.scrollTo({ top: grid.offsetTop - 200, behavior: 'smooth' });
+                };
+                paginationContainer.appendChild(btn);
+            }
         }
 
         // Filter Logic
@@ -199,7 +271,7 @@
             btn.addEventListener('click', () => {
                 filterBtns.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-                renderJournal(btn.dataset.filter);
+                renderJournal(btn.dataset.filter, 1);
             });
         });
 
