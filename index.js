@@ -61,6 +61,13 @@ Return ONLY a valid JSON object:
         });
 
         const geminiData = await response.json();
+        
+        // Gemini API 응답 검증
+        if (!geminiData.candidates || !geminiData.candidates[0]) {
+          const errMsg = geminiData.error ? geminiData.error.message : JSON.stringify(geminiData);
+          return new Response(JSON.stringify({ error: "Gemini API 오류: " + errMsg }), { status: 500 });
+        }
+        
         const rawText = geminiData.candidates[0].content.parts[0].text.replace(/```json|```/g, "").trim();
         const aiContent = JSON.parse(rawText);
 
