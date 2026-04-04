@@ -38,7 +38,7 @@
             status.style.display = 'none';
 
             try {
-                const res = await fetch('/functions/generate-journal', {
+                const res = await fetch('/generate-journal', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ keyword: kw })

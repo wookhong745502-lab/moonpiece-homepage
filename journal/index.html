@@ -27,7 +27,7 @@
         async function loadJournals() {
             const listEl = document.getElementById('journalList');
             try {
-                const res = await fetch('/functions/list-journals');
+                const res = await fetch('/list-journals');
                 const keys = await res.json();
 
                 if (keys.length === 0) {
