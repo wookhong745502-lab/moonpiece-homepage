@@ -1,0 +1,28 @@
+User-agent: *
+Allow: /
+
+# 구글 봇 탐색 우선 허용 (SEO 및 AEO 최적화 목적)
+User-agent: Googlebot
+Allow: /
+
+# AI 기반 검색 엔진 최적화 (AEO/생성형 AI)를 위한 허용
+# Perplexity, ChatGPT, Claude 등의 봇이 저널 콘텐츠를 학습하고 답변에 인용할 수 있도록 지원
+User-agent: GPTBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+User-agent: CCBot
+Allow: /
+User-agent: anthropic-ai
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+
+# 보안 및 내부 관리 페이지에 대한 크롤링 접근 방지
+Disallow: /admin/
+Disallow: /private/
+Disallow: /api/
+
+# 웹사이트 구조를 명확히 알려주기 위한 사이트맵 URL 정보 추가
+# (실제 출시되는 도메인 주소로 변경하여 사용하시기 바랍니다.)
+Sitemap: https://www.moonpiece.co.kr/sitemap.xml

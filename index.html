@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>문피스 Moonpiece | 임산부의 밤을 바꿉니다</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <!-- Top Navigation -->
+    <nav class="nav-bar">
+        <div class="nav-container">
+            <a href="index.html" class="logo font-serif">Moonpiece</a>
+            <div class="nav-links">
+                <a href="brand.html" class="nav-link">문피스의 약속</a>
+                <a href="why.html" class="nav-link">편안함의 비밀</a>
+                <a href="review.html" class="nav-link">엄마들의 이야기</a>
+                <a href="journal.html" class="nav-link">임산부 저널</a>
+                <a href="keywords.html" class="nav-link">키워드 분석</a>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank"
+                    class="btn-primary mobile-hidden">구매하기</a>
+                <button class="hamburger-btn" id="menu-toggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Navigation Overlay -->
+    <div class="nav-overlay" id="overlay"></div>
+    <div class="mobile-nav" id="mobile-menu">
+        <a href="brand.html" class="nav-link">문피스의 약속</a>
+        <a href="why.html" class="nav-link">편안함의 비밀</a>
+        <a href="review.html" class="nav-link">엄마들의 이야기</a>
+        <a href="journal.html" class="nav-link">임산부 저널</a>
+        <a href="keywords.html" class="nav-link">키워드 분석</a>
+        <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank"
+            class="btn-primary text-center mt-8">구매하기</a>
+    </div>
+
+    <!-- Hero Section -->
+    <header class="py-24" style="min-height: 80vh; display: flex; align-items: center;">
+        <div class="container grid md:grid-cols-2 gap-12 items-center">
+            <div>
+                <h1 class="font-serif"
+                    style="font-size: 4.5rem; line-height: 1.1; color: var(--primary); margin-bottom: 2rem;">
+                    임산부의 밤을<br>바꿉니다
+                </h1>
+                <p class="mb-12" style="font-size: 1.25rem; color: var(--on-surface-variant); max-width: 480px;">
+                    10년의 진심, U자형의 기적. 환도선다부터 수유까지 문피스가 안아드립니다.
+                </p>
+                <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank"
+                    class="btn-primary" style="padding: 1.25rem 2.5rem; font-size: 1.1rem;">지금 시작하기</a>
+            </div>
+            <div style="position: relative;">
+                <div
+                    style="position: absolute; inset: -2rem; background: var(--primary-container); filter: blur(60px); opacity: 0.15; border-radius: 50%; z-index: -1;">
+                </div>
+                <img src="assets/images/hero_pillow.jpg" alt="Moonpiece U-shaped Pillow" class="rounded-3xl shadow-2xl"
+                    style="width: 100%; aspect-ratio: 4/5; object-fit: cover;">
+            </div>
+        </div>
+    </header>
+
+    <!-- Empathy Section -->
+    <section class="py-32 surface-low">
+        <div class="container text-center" style="max-width: 800px;">
+            <span
+                style="letter-spacing: 0.2em; text-transform: uppercase; font-weight: 700; color: var(--primary); font-size: 0.8rem; display: block; margin-bottom: 1rem;">Our
+                Story</span>
+            <h2 class="font-serif mb-12" style="font-size: 3rem;">임신 후, 잠이 사라졌어요</h2>
+            <div class="space-y-6" style="font-size: 1.15rem; color: var(--on-surface-variant);">
+                <p class="mb-4">배가 불러올수록 가중되는 허리의 통증, 한 번 돌아누울 때마다 느껴지는 날카로운 환도선다.</p>
+                <p class="mb-4">밤새 뒤척이다 창밖의 새벽을 마주하는 그 고통을 우리는 잘 알고 있습니다.</p>
+                <p style="font-weight: 800; color: var(--primary);">"엄마가 편안해야 아기도 행복하니까."</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trust Section -->
+    <section class="py-32">
+        <div class="container grid md:grid-cols-2 gap-16 items-center">
+            <div class="mobile-hidden">
+                <img src="assets/images/craftsmanship.jpg" alt="Craftsmanship" class="rounded-3xl"
+                    style="width: 100%; aspect-ratio: 1/1; object-fit: cover;">
+            </div>
+            <div>
+                <h2 class="font-serif mb-12" style="font-size: 3rem; color: var(--primary); line-height: 1.2;">10년간
+                    오직<br>임산부의 잠만 연구했습니다</h2>
+                <div class="flex flex-col gap-8">
+                    <div class="card p-10 surface-container-lowest flex gap-8 items-center shadow-sm">
+                        <span class="font-serif"
+                            style="font-size: 3.5rem; color: var(--primary); font-weight: 900; opacity: 0.8; min-width: 100px;">10+</span>
+                        <div>
+                            <h3 style="font-weight: 800; font-size: 1.25rem; margin-bottom: 0.5rem;">업계 선도 기술력</h3>
+                            <p style="color: var(--on-surface-variant); line-height: 1.6;">2014년부터 시작된 임산부 체형 연구를 바탕으로
+                                가장 완벽한 지지력을 구현합니다.</p>
+                        </div>
+                    </div>
+                    <div class="card p-10 surface-container-lowest flex gap-8 items-center shadow-sm">
+                        <span class="font-serif"
+                            style="font-size: 3.5rem; color: var(--primary); font-weight: 900; opacity: 0.8; min-width: 100px;">50k</span>
+                        <div>
+                            <h3 style="font-weight: 800; font-size: 1.25rem; margin-bottom: 0.5rem;">선택받은 만족도</h3>
+                            <p style="color: var(--on-surface-variant); line-height: 1.6;">5만 명의 엄마들이 직접 경험하고 입소문으로 증명한
+                                문피스의 기적.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Bento Grid -->
+    <section class="py-32 surface-container">
+        <div class="container">
+            <h2 class="text-center font-serif mb-16" style="font-size: 3rem;">편안함에는 이유가 있습니다</h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="card text-center p-16">
+                    <div class="flex justify-center mb-6">
+                        <div
+                            style="width: 4rem; height: 4rem; background: var(--primary-container); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <span class="material-symbols-outlined fill"
+                                style="font-size: 2rem; color: var(--on-primary-container); margin-top: 1rem;">architecture</span>
+                        </div>
+                    </div>
+                    <h3 class="font-serif mb-4" style="font-size: 1.5rem;">U-shaped 디자인</h3>
+                    <p style="color: var(--on-surface-variant);">전신을 포근하게 감싸주어 복부의 하중을 분산시키고 무릎 사이의 압박을 완화합니다.</p>
+                </div>
+                <!-- Feature 2 -->
+                <div class="card text-center p-16">
+                    <div class="flex justify-center mb-6">
+                        <div
+                            style="width: 4rem; height: 4rem; background: var(--primary-container); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <span class="material-symbols-outlined fill"
+                                style="font-size: 2rem; color: var(--on-primary-container); margin-top: 1rem;">eco</span>
+                        </div>
+                    </div>
+                    <h3 class="font-serif mb-4" style="font-size: 1.5rem;">Organic Cotton</h3>
+                    <p style="color: var(--on-surface-variant);">예민해진 임산부의 피부에 닿는 모든 면은 100% 유기농 면으로 제작되어 안심할 수 있습니다.
+                    </p>
+                </div>
+                <!-- Feature 3 -->
+                <div class="card text-center p-16">
+                    <div class="flex justify-center mb-6">
+                        <div
+                            style="width: 4rem; height: 4rem; background: var(--primary-container); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <span class="material-symbols-outlined fill"
+                                style="font-size: 2rem; color: var(--on-primary-container); margin-top: 1rem;">pill</span>
+                        </div>
+                    </div>
+                    <h3 class="font-serif mb-4" style="font-size: 1.5rem;">Premium Filling</h3>
+                    <p style="color: var(--on-surface-variant);">복원력이 뛰어난 마이크로화이버 충전재가 세탁 후에도 처음 같은 탄탄함을 유지합니다.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Asymmetric Image Grid -->
+    <section class="py-32">
+        <div class="container">
+            <div class="grid md:grid-cols-12 gap-16">
+                <div class="md:col-span-7">
+                    <div class="card" style="position: relative; height: 400px;">
+                        <img src="assets/images/bedroom_interior.jpg" alt="Cozy Lifestyle"
+                            style="width: 100%; height: 100%; object-fit: cover;">
+                        <div
+                            style="position: absolute; bottom: 1.5rem; left: 1.5rem; color: var(--on-secondary-container); background: rgba(239, 221, 196, 0.85); padding: 0.75rem 1.25rem; border-radius: 9999px; backdrop-filter: blur(8px); font-size: 0.9rem; font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                            침실의 조각, 편안함의 완성</div>
+                    </div>
+                </div>
+                <div class="md:col-span-5">
+                    <div class="card" style="position: relative; height: 100%; min-height: 400px;">
+                        <img src="assets/images/lifestyle_nursing.jpg" alt="Nursing Transition"
+                            style="width: 100%; height: 100%; object-fit: cover;">
+                        <div
+                            style="position: absolute; bottom: 1.5rem; left: 1.5rem; color: var(--on-secondary-container); background: rgba(239, 221, 196, 0.85); padding: 0.75rem 1.25rem; border-radius: 9999px; backdrop-filter: blur(8px); font-size: 0.9rem; font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                            수유 쿠션으로의 완벽한 변신</div>
+                    </div>
+                </div>
+                <div class="md:col-span-4 mobile-hidden">
+                    <div class="card" style="height: 300px;">
+                        <img src="assets/images/interior.jpg" alt="Home interior"
+                            style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                </div>
+                <div class="md:col-span-8">
+                    <div class="card"
+                        style="height: 300px; display: flex; align-items: center; justify-content: center; position: relative;">
+                        <img src="assets/images/fabric_detail.jpg" alt="Fabric Detail"
+                            style="width: 100%; height: 100%; object-fit: cover;">
+                        <span class="font-serif"
+                            style="position: absolute; color: white; font-size: 2.5rem; font-weight: 700; text-shadow: 0 4px 12px rgba(0,0,0,0.3);">Natural
+                            & Pure</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Review Preview -->
+    <section class="py-32 surface-low">
+        <div class="container">
+            <div class="flex justify-between items-end mb-16">
+                <div>
+                    <h2 class="font-serif mb-4" style="font-size: 2.5rem;">함께하는 엄마들의 진심</h2>
+                    <p style="color: var(--on-surface-variant);">직접 사용해본 엄마들의 리얼 보이스</p>
+                </div>
+                <a href="review.html"
+                    style="font-weight: 700; color: var(--primary); border-bottom: 2px solid var(--primary-container);">전체
+                    리뷰 보기</a>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="card p-16">
+                    <div style="color: var(--primary-container); margin-bottom: 1.5rem;">
+                        <span class="material-symbols-outlined fill">star</span>
+                        <span class="material-symbols-outlined fill">star</span>
+                        <span class="material-symbols-outlined fill">star</span>
+                        <span class="material-symbols-outlined fill">star</span>
+                        <span class="material-symbols-outlined fill">star</span>
+                    </div>
+                    <p class="mb-8" style="font-size: 1.1rem; line-height: 1.6; font-style: italic;">"환도선다 때문에 밤마다 울었는데
+                        문피스 쓰고 나서 처음으로 통잠 잤어요. 왜 이제 샀나 싶을 정도예요."</p>
+                    <div class="flex items-center gap-4">
+                        <div
+                            style="width: 2.5rem; height: 2.5rem; border-radius: 50%; background: var(--secondary-container);">
+                        </div>
+                        <span style="font-weight: 700; font-size: 0.9rem;">김*주 님 (임신 28주차)</span>
+                    </div>
+                </div>
+                <div class="card p-10">
+                    <div style="color: var(--primary-container); margin-bottom: 1.5rem;">
+                        <span class="material-symbols-outlined fill">star</span>
+                        <span class="material-symbols-outlined fill">star</span>
+                        <span class="material-symbols-outlined fill">star</span>
+                        <span class="material-symbols-outlined fill">star</span>
+                        <span class="material-symbols-outlined fill">star</span>
+                    </div>
+                    <p class="mb-8" style="font-size: 1.1rem; line-height: 1.6; font-style: italic;">"출산 후에도 수유 쿠션으로 너무
+                        잘 쓰고 있어요. 세탁해도 솜이 안 죽고 탄탄하네요. 선물용으로도 최고입니다."</p>
+                    <div class="flex items-center gap-4">
+                        <div
+                            style="width: 2.5rem; height: 2.5rem; border-radius: 50%; background: var(--secondary-container);">
+                        </div>
+                        <span style="font-weight: 700; font-size: 0.9rem;">박*서 님 (출산 3개월차)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Journal Section -->
+    <section class="py-32">
+        <div class="container">
+            <h2 class="text-center font-serif mb-16" style="font-size: 2.5rem;">건강한 내일을 위한 임산부 저널</h2>
+            <div class="grid md:grid-cols-3 gap-16">
+                <article>
+                    <div class="card mb-6" style="aspect-ratio: 4/3;">
+                        <img src="assets/images/journal_1.jpg" alt="Journal 1"
+                            style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <h3 class="font-serif mb-3" style="font-size: 1.25rem;">환도선다 완화를 위한 수면 자세 가이드</h3>
+                    <p style="color: var(--on-surface-variant); font-size: 0.9rem;">통증을 줄여주는 왼쪽으로 눕는 자세의 비밀과 보조 기구 활용법을
+                        알아봅니다.</p>
+                </article>
+                <article>
+                    <div class="card mb-6" style="aspect-ratio: 4/3;">
+                        <img src="assets/images/journal_2.jpg" alt="Journal 2"
+                            style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <h3 class="font-serif mb-3" style="font-size: 1.25rem;">임신 중기, 꿀잠을 위한 식단 관리</h3>
+                    <p style="color: var(--on-surface-variant); font-size: 0.9rem;">숙면을 방해하는 카페인 대신 몸을 이완시켜주는 따뜻한 차와 영양소
+                        이야기.</p>
+                </article>
+                <article>
+                    <div class="card mb-6" style="aspect-ratio: 4/3;">
+                        <img src="assets/images/journal_3.jpg" alt="Journal 3"
+                            style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <h3 class="font-serif mb-3" style="font-size: 1.25rem;">출산 가방 필수 아이템 체크리스트</h3>
+                    <p style="color: var(--on-surface-variant); font-size: 0.9rem;">산후조리원부터 집까지, 엄마와 아기에게 꼭 필요한 실전 준비물
+                        리스트.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="text-center"
+        style="padding-top: 1rem; padding-bottom: 8rem; margin-top: 6rem; background: linear-gradient(to top, var(--primary-container) 0%, transparent 100%);">
+        <div class="container relative z-10">
+            <h2 class="font-serif" style="font-size: 3.5rem; color: var(--primary); line-height: 1.3;">지금 문피스와 함께<br>어제와
+                다른 아침을 맞이하세요</h2>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container grid md:grid-cols-2 gap-12">
+            <div>
+                <div class="logo font-serif mb-4" style="color: var(--primary);">Moonpiece</div>
+                <p style="max-width: 320px; color: var(--on-surface-variant); line-height: 1.8;">
+                    소중한 엄마와 아기를 위한 달릿의 조각, 문피스. 10년의 진심을 담아 가장 편안한 휴식을 설계합니다.
+                </p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div>
+                    <h4 style="font-weight: 800; margin-bottom: 1.5rem;">Company</h4>
+                    <ul
+                        style="list-style: none; display: flex; flex-direction: column; gap: 0.75rem; color: var(--on-surface-variant);">
+                        <li><a href="#">회사소개</a></li>
+                        <li><a href="#">이용약관</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="font-weight: 800; margin-bottom: 1.5rem;">Support</h4>
+                    <ul
+                        style="list-style: none; display: flex; flex-direction: column; gap: 0.75rem; color: var(--on-surface-variant);">
+                        <li><a href="#">개인정보처리방침</a></li>
+                        <li><a href="#">네이버 스마트스토어</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="font-weight: 800; margin-bottom: 1.5rem;">Social</h4>
+                    <ul
+                        style="list-style: none; display: flex; flex-direction: column; gap: 0.75rem; color: var(--on-surface-variant);">
+                        <li><a href="#">Instagram</a></li>
+                        <li><a href="#">YouTube</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="container"
+            style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--outline-variant); text-align: center; color: var(--on-surface-variant); font-size: 0.85rem;">
+            © 2024 Moonpiece. All rights reserved.
+        </div>
+    </footer>
+    <!-- Script -->
+    <script>
+        const menuToggle = document.getElementById('menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const overlay = document.getElementById('overlay');
+
+        menuToggle.addEventListener('click', () => {
+            const isActive = mobileMenu.classList.toggle('active');
+            menuToggle.classList.toggle('active');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = isActive ? 'hidden' : 'auto';
+        });
+
+        overlay.addEventListener('click', () => {
+            mobileMenu.classList.remove('active');
+            menuToggle.classList.remove('active');
+            overlay.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        });
+    </script>
+</body>
+
+</html>

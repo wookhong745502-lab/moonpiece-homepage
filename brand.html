@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>문피스의 약속 | Moonpiece Brand Website</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="nav-bar">
+        <div class="nav-container">
+            <a href="index.html" class="logo font-serif">Moonpiece</a>
+            <div class="nav-links">
+                <a href="brand.html" class="nav-link active">문피스의 약속</a>
+                <a href="why.html" class="nav-link">편안함의 비밀</a>
+                <a href="review.html" class="nav-link">엄마들의 이야기</a>
+                <a href="journal.html" class="nav-link">임산부 저널</a>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" class="btn-primary mobile-hidden">구매하기</a>
+                <button class="hamburger-btn" id="menu-toggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Navigation Overlay -->
+    <div class="nav-overlay" id="overlay"></div>
+    <div class="mobile-nav" id="mobile-menu">
+        <a href="brand.html" class="nav-link active">문피스의 약속</a>
+        <a href="why.html" class="nav-link">편안함의 비밀</a>
+        <a href="review.html" class="nav-link">엄마들의 이야기</a>
+        <a href="journal.html" class="nav-link">임산부 저널</a>
+        <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" class="btn-primary text-center mt-8">구매하기</a>
+    </div>
+
+    <!-- Brand Hero Section -->
+    <section class="py-32 text-center" style="background: radial-gradient(circle at center, rgba(253, 224, 71, 0.1) 0%, var(--background) 100%); min-height: 70vh; display: flex; align-items: center; justify-content: center;">
+        <div class="container">
+            <h1 class="font-serif text-primary" style="font-size: 5rem; margin-bottom: 2rem;">문피스의 약속.</h1>
+            <p style="font-size: 1.25rem; color: var(--on-surface-variant); max-width: 600px; margin: 0 auto 4rem;">
+                어두운 밤, 엄마를 비추는 따뜻한 달빛 한 조각. 당신의 가장 아름다운 기다림을 함께합니다.
+            </p>
+            <div class="card" style="max-width: 1000px; margin: 0 auto;">
+                <img src="assets/images/brand_hero.jpg" alt="Brand Lifestyle" style="width: 100%; aspect-ratio: 21/9; object-fit: cover;">
+            </div>
+        </div>
+    </section>
+
+    <!-- Why we started & Name Meaning -->
+    <section class="py-32 surface-low">
+        <div class="container grid md:grid-cols-12 gap-16 items-center">
+            <div class="md:col-span-7" style="transform: rotate(-2deg);">
+                <div class="card p-4" style="background: var(--surface-container-highest);">
+                     <img src="assets/images/history.jpg" alt="History" class="rounded-xl" style="width: 100%; height: 500px; object-fit: cover;">
+                </div>
+            </div>
+            <div class="md:col-span-5 flex flex-col gap-12">
+                <div>
+                    <h2 class="font-serif text-primary mb-6" style="font-size: 2.5rem;">10년의 기록, 하나의 진심</h2>
+                    <p style="color: var(--on-surface-variant); font-size: 1.1rem; line-height: 1.8;">
+                        문피스는 지난 10년 동안 수많은 엄마들의 이야기를 기록해왔습니다. 우리는 단순한 제품을 넘어, 엄마가 되는 긴 밤을 견뎌내는 따뜻한 동행자가 되고자 시작되었습니다.
+                    </p>
+                </div>
+                <div class="card p-16 shadow-xl" style="border: 1px solid rgba(109, 94, 0, 0.05); background-color: var(--surface-container-lowest);">
+                    <h2 class="font-serif text-primary mb-6 italic" style="font-size: 2.25rem;">Moonpiece</h2>
+                    <p style="font-size: 1.5rem; font-weight: 700; color: var(--on-surface); margin-bottom: 2rem; line-height: 1.4;">
+                        "어두운 밤, 엄마를 비추는 따뜻한 달빛 한 조각"
+                    </p>
+                    <p style="color: var(--on-surface-variant); font-size: 1.1rem; line-height: 1.8;">가장 외롭고 힘든 순간에도 당신 곁에는 늘 은은한 빛이 머물기를 바랍니다.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- History Timeline -->
+    <section class="py-32" style="background-color: var(--surface-container-low);">
+        <div class="container" style="max-width: 800px;">
+            <h2 class="font-serif text-primary text-center mb-16" style="font-size: 3rem;">문피스가 걸어온 길</h2>
+            <div style="position: relative; padding-left: 2rem; border-left: 2px solid var(--primary-container);">
+                
+                <div style="position: relative; margin-bottom: 4rem;">
+                    <div style="position: absolute; left: -2.45rem; top: 0; width: 1rem; height: 1rem; border-radius: 50%; background: var(--primary); border: 4px solid var(--surface-container-low);"></div>
+                    <span style="color: var(--primary); font-weight: 800; font-size: 1.25rem;">2014</span>
+                    <h3 class="font-serif mt-2 mb-4" style="font-size: 1.75rem;">브랜드 설립 및 수면 연구 시작</h3>
+                    <p style="color: var(--on-surface-variant); font-size: 1.1rem; line-height: 1.7;">임산부의 수면 부족 문제를 해결하기 위해, 수면 전문가와 산부인과 전문의가 모여 임산부 체형 맞춤 수면 자세 연구를 시작했습니다.</p>
+                </div>
+
+                <div style="position: relative; margin-bottom: 4rem;">
+                    <div style="position: absolute; left: -2.45rem; top: 0; width: 1rem; height: 1rem; border-radius: 50%; background: var(--primary); border: 4px solid var(--surface-container-low);"></div>
+                    <span style="color: var(--primary); font-weight: 800; font-size: 1.25rem;">2016</span>
+                    <h3 class="font-serif mt-2 mb-4" style="font-size: 1.75rem;">문피스 U-pillow 1세대 런칭</h3>
+                    <p style="color: var(--on-surface-variant); font-size: 1.1rem; line-height: 1.7;">수백 번의 프로토타입 수정 끝에, 배와 등, 무릎을 완벽히 지지해주는 문피스의 첫 번째 바디 필로우가 세상에 공개되었습니다.</p>
+                </div>
+
+                <div style="position: relative; margin-bottom: 4rem;">
+                    <div style="position: absolute; left: -2.45rem; top: 0; width: 1rem; height: 1rem; border-radius: 50%; background: var(--primary); border: 4px solid var(--surface-container-low);"></div>
+                    <span style="color: var(--primary); font-weight: 800; font-size: 1.25rem;">2020</span>
+                    <h3 class="font-serif mt-2 mb-4" style="font-size: 1.75rem;">국제 오가닉(GOTS/OCS) 인증 획득</h3>
+                    <p style="color: var(--on-surface-variant); font-size: 1.1rem; line-height: 1.7;">예민해진 엄마의 피부를 위해 모든 원단을 100% 최상급 유기농 면사로 전면 리뉴얼하여 국제 인증으로 안전성을 입증받았습니다.</p>
+                </div>
+
+                <div style="position: relative;">
+                    <div style="position: absolute; left: -2.45rem; top: 0; width: 1rem; height: 1rem; border-radius: 50%; background: var(--primary); border: 4px solid var(--surface-container-low);"></div>
+                    <span style="color: var(--primary); font-weight: 800; font-size: 1.25rem;">2024</span>
+                    <h3 class="font-serif mt-2 mb-4" style="font-size: 1.75rem;">누적 판매 5만 명 돌파</h3>
+                    <p style="color: var(--on-surface-variant); font-size: 1.1rem; line-height: 1.7;">자체적인 광고 없이, 오직 엄마들의 진심 어린 추천과 입소문만으로 기적적인 성과를 이루어내며 프리미엄 브랜드로 굳건히 자리 잡았습니다.</p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section class="py-32 surface-low">
+        <div class="container flex flex-col gap-12">
+            <h2 class="font-serif text-primary text-center mb-12" style="font-size: 3rem;">달빛 아래 빚어낸 안전한 소재</h2>
+            <div class="grid md:grid-cols-3 gap-12">
+                <div class="card p-12 surface-container flex flex-col gap-6">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <span class="material-symbols-outlined" style="font-size: 2.5rem; color: var(--primary);">verified</span>
+                        <h3 class="font-serif text-primary" style="font-size: 1.5rem;">Material Safety</h3>
+                    </div>
+                    <p style="color: var(--on-surface-variant); line-height: 1.8; font-size: 1rem;">
+                        오가닉 코튼 인증을 완료한 최상급 소재만을 사용합니다. 아기 피부에 닿아도 안전하도록 형광증백제를 전혀 사용하지 않았습니다.
+                    </p>
+                </div>
+                <div class="card p-12 surface-container flex flex-col items-center justify-center text-center gap-6" style="background: var(--primary-container);">
+                    <span class="material-symbols-outlined fill" style="font-size: 4rem; color: var(--on-primary-container);">verified</span>
+                    <div class="font-serif" style="font-size: 1.5rem; font-weight: 700; color: var(--on-primary-container);">Organic Certified</div>
+                    <p style="font-size: 0.9rem; color: var(--on-primary-container); opacity: 0.8;">GOTS / OCS 국제 오가닉 섬유 인증 획득</p>
+                </div>
+                <div class="card p-12 surface-container flex flex-col items-center justify-center text-center gap-6" style="background: var(--secondary-container);">
+                    <span class="material-symbols-outlined fill" style="font-size: 4rem; color: var(--on-secondary-container);">eco</span>
+                    <div class="font-serif" style="font-size: 1.5rem; font-weight: 700; color: var(--on-secondary-container);">100% Sustainable</div>
+                    <p style="font-size: 0.9rem; color: var(--on-secondary-container); opacity: 0.8;">미래 세대를 위한 지속 가능한 생산 공정</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Brand Standards -->
+    <section class="py-32">
+        <div class="container text-center">
+            <h2 class="font-serif text-primary mb-16" style="font-size: 3rem;">우리의 기준은 타협하지 않습니다</h2>
+            <div class="grid md:grid-cols-3 gap-16">
+                <div class="card p-12 surface-container-low text-left">
+                    <span style="color: var(--primary); font-weight: 700; letter-spacing: 0.15em; font-size: 0.85rem; margin-bottom: 1.5rem; display: block;">STANDARD 01</span>
+                    <h3 class="font-serif mb-4" style="font-size: 1.75rem;">엄격한 소재 선별</h3>
+                    <p style="color: var(--on-surface-variant); line-height: 1.7;">전 세계 생산량의 1% 미만인 최상급 긴스테이플 면사만을 고집합니다.</p>
+                </div>
+                <div class="card p-12 surface-container-low text-left">
+                    <span style="color: var(--primary); font-weight: 700; letter-spacing: 0.15em; font-size: 0.85rem; margin-bottom: 1.5rem; display: block;">STANDARD 02</span>
+                    <h3 class="font-serif mb-4" style="font-size: 1.75rem;">지속 가능한 생산</h3>
+                    <p style="color: var(--on-surface-variant); line-height: 1.7;">환경과 인간 모두를 생각하는 에코-프렌들리 공정을 준수합니다.</p>
+                </div>
+                <div class="card p-12 surface-container-low text-left">
+                    <span style="color: var(--primary); font-weight: 700; letter-spacing: 0.15em; font-size: 0.85rem; margin-bottom: 1.5rem; display: block;">STANDARD 03</span>
+                    <h3 class="font-serif mb-4" style="font-size: 1.75rem;">직접 검수 원칙</h3>
+                    <p style="color: var(--on-surface-variant); line-height: 1.7;">모든 제품은 출고 전 3단계의 수작업 검수를 통해 완성됩니다.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Signature Section -->
+    <section class="py-24">
+        <div class="container">
+            <div class="card" style="height: 600px; position: relative;">
+                <img src="assets/images/signature.jpg" alt="Signature Shot" style="width: 100%; height: 100%; object-fit: cover;">
+                <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center;">
+                    <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(8px); padding: 3rem 6rem; border-radius: 9999px; border: 1px solid rgba(255,255,255,0.2);">
+                        <p class="font-serif" style="color: white; font-size: 2rem; font-style: italic; text-align: center;">"The Luminous Sanctuary for Every Mother"</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container grid md:grid-cols-2 gap-12">
+            <div>
+                <div class="logo font-serif mb-4" style="color: var(--primary);">Moonpiece</div>
+                <p style="max-width: 320px; color: var(--on-surface-variant); line-height: 1.8;">
+                    소중한 엄마와 아기를 위한 달빛의 조각, 문피스. 10년의 진심을 담아 가장 편안한 휴식을 설계합니다.
+                </p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div>
+                    <h4 style="font-weight: 800; margin-bottom: 1.5rem;">Company</h4>
+                    <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.75rem; color: var(--on-surface-variant);">
+                        <li><a href="brand.html" class="active">회사소개</a></li>
+                        <li><a href="#">이용약관</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="font-weight: 800; margin-bottom: 1.5rem;">Support</h4>
+                    <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.75rem; color: var(--on-surface-variant);">
+                        <li><a href="#">개인정보처리방침</a></li>
+                        <li><a href="#">네이버 스마트스토어</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="font-weight: 800; margin-bottom: 1.5rem;">Social</h4>
+                    <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.75rem; color: var(--on-surface-variant);">
+                        <li><a href="#">Instagram</a></li>
+                        <li><a href="#">YouTube</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="container" style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--outline-variant); text-align: center; color: var(--on-surface-variant); font-size: 0.85rem;">
+            © 2024 Moonpiece. All rights reserved.
+        </div>
+    </footer>
+    <!-- Script -->
+    <script>
+        const menuToggle = document.getElementById('menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const overlay = document.getElementById('overlay');
+
+        menuToggle.addEventListener('click', () => {
+            const isActive = mobileMenu.classList.toggle('active');
+            menuToggle.classList.toggle('active');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = isActive ? 'hidden' : 'auto';
+        });
+
+        overlay.addEventListener('click', () => {
+            mobileMenu.classList.remove('active');
+            menuToggle.classList.remove('active');
+            overlay.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        });
+    </script>
+</body>
+</html>

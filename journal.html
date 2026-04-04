@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>임산부 저널 | Moonpiece Pregnancy Lab</title>
+    <meta name="description" content="임산부의 건강한 숙면을 위한 11년의 연구 데이터. 수면 자세, 통증 완화, 심리 케어까지 문피스 수면연구소의 정밀 저널을 만나보세요.">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="nav-bar">
+        <div class="nav-container">
+            <a href="index.html" class="logo font-serif">Moonpiece</a>
+            <div class="nav-links">
+                <a href="brand.html" class="nav-link">문피스의 약속</a>
+                <a href="why.html" class="nav-link">편안함의 비밀</a>
+                <a href="review.html" class="nav-link">엄마들의 이야기</a>
+                <a href="journal.html" class="nav-link active">임산부 저널</a>
+                <a href="keywords.html" class="nav-link">키워드 분석</a>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" class="btn-primary mobile-hidden">구매하기</a>
+                <button class="hamburger-btn" id="menu-toggle">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Navigation Overlay -->
+    <div class="nav-overlay" id="overlay"></div>
+    <div class="mobile-nav" id="mobile-menu">
+        <a href="brand.html" class="nav-link">문피스의 약속</a>
+        <a href="why.html" class="nav-link">편안함의 비밀</a>
+        <a href="review.html" class="nav-link">엄마들의 이야기</a>
+        <a href="journal.html" class="nav-link active">임산부 저널</a>
+        <a href="keywords.html" class="nav-link">키워드 분석</a>
+        <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" class="btn-primary text-center mt-8">구매하기</a>
+    </div>
+
+    <!-- Hero Section -->
+    <header class="py-24 surface-container-low">
+        <div class="container text-center">
+            <h1 class="font-serif mb-6" style="font-size: 3.5rem; color: var(--primary);">임산부 저널</h1>
+            <p style="font-size: 1.2rem; color: var(--on-surface-variant); max-width: 600px; margin: 0 auto;">
+                엄마와 아기가 가장 편안한 밤을 보낼 수 있도록,<br>문피스 수면연구소가 전하는 과학적인 휴식 가이드입니다.
+            </p>
+        </div>
+    </header>
+
+    <!-- Filter Section -->
+    <section class="py-12 border-b border-outline-variant sticky top-16 surface-bright z-10">
+        <div class="container flex flex-wrap justify-center gap-4">
+            <button class="filter-btn active" data-filter="all">전체</button>
+            <button class="filter-btn" data-filter="sleep">수면 자세</button>
+            <button class="filter-btn" data-filter="pain">통증 완화</button>
+            <button class="filter-btn" data-filter="health">건강 관리</button>
+            <button class="filter-btn" data-filter="psychology">심리 & 지식</button>
+        </div>
+    </section>
+
+    <!-- Journal Grid -->
+    <section class="py-24">
+        <div class="container">
+            <div id="journal-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+                <!-- Posts will be injected here -->
+            </div>
+            
+            <!-- Pagination (Placeholder) -->
+            <div class="mt-20 flex justify-center gap-2" id="pagination">
+                <button class="p-2 rounded-full surface-container-high hover:bg-primary-container transition">
+                    <span class="material-symbols-outlined">chevron_left</span>
+                </button>
+                <button class="w-10 h-10 rounded-full bg-primary text-on-primary font-bold">1</button>
+                <button class="p-2 rounded-full surface-container-high hover:bg-primary-container transition">
+                    <span class="material-symbols-outlined">chevron_right</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="background: var(--surface-container-low); padding: 8rem 0 4rem;">
+        <div class="container grid md:grid-cols-2 gap-16">
+            <div>
+                <div class="logo font-serif mb-6" style="color: var(--primary); font-size: 2rem;">Moonpiece</div>
+                <p style="max-width: 400px; color: var(--on-surface-variant); line-height: 2; font-size: 1.1rem;">
+                    임산부의 척추와 마음을 이해하는 11년의 진심. 문피스는 가장 따뜻한 빛으로 당신의 잠자리를 지킵니다.
+                </p>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-2 gap-12">
+                <div>
+                    <h4 style="font-weight: 900; margin-bottom: 2rem; color: var(--on-surface);">Company</h4>
+                    <ul style="list-style: none; display: flex; flex-direction: column; gap: 1rem; color: var(--on-surface-variant);">
+                        <li><a href="brand.html" style="text-decoration: none; color: inherit;">회사소개</a></li>
+                        <li><a href="#" style="text-decoration: none; color: inherit;">이용약관</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="font-weight: 900; margin-bottom: 2rem; color: var(--on-surface);">Customer</h4>
+                    <ul style="list-style: none; display: flex; flex-direction: column; gap: 1rem; color: var(--on-surface-variant);">
+                        <li><a href="#" style="text-decoration: none; color: inherit;">개인정보처리방침</a></li>
+                        <li><a href="https://smartstore.naver.com/moonwalk00/products/2416019050" style="text-decoration: none; color: inherit;">네이버 스마트스토어</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="container" style="margin-top: 6rem; padding-top: 3rem; border-top: 1px solid var(--outline-variant); text-align: center; color: var(--outline); font-size: 0.95rem;">
+            © 2024 Moonpiece Pregnancy Research Lab. All rights reserved.
+        </div>
+    </footer>
+
+    <!-- Script Area -->
+    <script>
+        // Journal Data Rebuilt from existing files
+        const journalPosts = [
+            {
+                title: "[임신 16주 잠이 안와요] 불면증의 원인과 꿀잠을 위한 완벽 수면 환경",
+                category: "심리 & 수면",
+                categoryKey: "psychology",
+                image: "https://images.unsplash.com/photo-1517855018151-50eef530e719?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+                date: "2024.04.04",
+                desc: "임신 중기부터 시작되는 불면증의 원인과 쾌적한 수면 환경 조성법을 알아봅니다.",
+                url: "journal/pregnancy-week-16-insomnia.html"
+            },
+            {
+                title: "[환도선다 완화방법] 임산부 골반 통증의 원인과 24시간 케어 솔루션",
+                category: "통증 완화",
+                categoryKey: "pain",
+                image: "https://images.unsplash.com/photo-1566898124021-3e4796328328?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+                date: "2024.04.04",
+                desc: "삶의 질을 떨어뜨리는 환도선다 통증의 원인을 분석하고 즉각적인 완화법을 제안합니다.",
+                url: "journal/hwando-pelvic-pain-relief.html"
+            },
+            {
+                title: "[임신 중 허리 통증 줄이는 법] 밤마다 끊어질 듯한 요통의 원인과 수면 솔루션",
+                category: "건강 관리",
+                categoryKey: "health",
+                image: "https://images.unsplash.com/photo-1609220136736-443140cffec6?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+                date: "2024.04.04",
+                desc: "임산부 요통의 근본 원인을 분석하고 척추 부담을 덜어주는 수면 전략을 공개합니다.",
+                url: "journal/pregnancy-back-pain-relief.html"
+            },
+            {
+                title: "[임산부 수면 자세] 2000자 완벽 가이드: 환도선다부터 숙면 비법까지",
+                category: "수면 자세",
+                categoryKey: "sleep",
+                image: "https://images.unsplash.com/photo-1519821817448-f68285517fbd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+                date: "2024.04.04",
+                desc: "의학적 근거를 바탕으로 한 최적의 임산부 수면 자세와 바디필로우 활용법 가이드.",
+                url: "journal/pregnancy-sleep-positions.html"
+            },
+            {
+                title: "[임산부 옆으로 자는 이유] 산부인과 전문의가 '왼쪽 눕기'를 강조하는 의학적 근거",
+                category: "의학 & 지식",
+                categoryKey: "psychology",
+                image: "https://images.unsplash.com/photo-1522818987309-8d7d91ebd400?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+                date: "2024.04.04",
+                desc: "혈류 개선과 태아 건강을 위한 '왼쪽 눕기'의 비밀과 의학적 근거를 심층 분석합니다.",
+                url: "journal/why-pregnant-women-sleep-on-side.html"
+            }
+        ];
+
+        const grid = document.getElementById('journal-grid');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+
+        function renderJournal(filter = 'all') {
+            grid.innerHTML = '';
+            const filteredPosts = filter === 'all' 
+                ? journalPosts 
+                : journalPosts.filter(post => post.categoryKey === filter);
+
+            filteredPosts.forEach(post => {
+                const article = document.createElement('article');
+                article.className = 'flex flex-col gap-6 cursor-pointer group';
+                article.onclick = () => window.location.href = post.url;
+                
+                article.innerHTML = `
+                    <div class="card overflow-hidden shadow-sm transition hover:shadow-xl group-hover:-translate-y-1" style="aspect-ratio: 4/3;">
+                        <img src="${post.image}" alt="${post.title}" class="w-full h-full object-cover transition duration-700 group-hover:scale-105">
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="px-3 py-1 rounded-full surface-container-high text-primary font-bold" style="font-size: 0.8rem;">${post.category}</span>
+                            <span style="font-size: 0.85rem; color: var(--outline);">${post.date}</span>
+                        </div>
+                        <h3 class="font-serif mb-4 group-hover:text-primary transition" style="font-size: 1.5rem; line-height: 1.4; word-break: keep-all;">${post.title}</h3>
+                        <p style="color: var(--on-surface-variant); font-size: 0.95rem; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                            ${post.desc}
+                        </p>
+                    </div>
+                `;
+                grid.appendChild(article);
+            });
+        }
+
+        // Filter Logic
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                renderJournal(btn.dataset.filter);
+            });
+        });
+
+        // Initialize grid
+        renderJournal();
+
+        // Nav Logic
+        const menuToggle = document.getElementById('menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const overlay = document.getElementById('overlay');
+
+        menuToggle.addEventListener('click', () => {
+            const isActive = mobileMenu.classList.toggle('active');
+            menuToggle.classList.toggle('active');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = isActive ? 'hidden' : 'auto';
+        });
+
+        overlay.addEventListener('click', () => {
+            mobileMenu.classList.remove('active');
+            menuToggle.classList.remove('active');
+            overlay.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        });
+    </script>
+
+    <style>
+        .filter-btn {
+            background: var(--surface-container-high);
+            border: none;
+            padding: 0.75rem 1.75rem;
+            border-radius: 9999px;
+            font-weight: 700;
+            color: var(--on-surface-variant);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .filter-btn:hover {
+            background: var(--primary-container);
+            color: var(--on-primary-container);
+        }
+        .filter-btn.active {
+            background: var(--primary);
+            color: var(--on-primary);
+        }
+        .sticky {
+            position: sticky;
+            top: 4.5rem;
+        }
+        
+        /* Ensuring active state in navigation */
+        .nav-link.active {
+            color: var(--primary);
+            font-weight: 900;
+            border-bottom: 2px solid var(--primary);
+        }
+    </style>
+</body>
+</html>

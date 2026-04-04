@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>전체 저널 목록 | 문피스</title>
+    <style>
+        body { font-family: 'Noto Serif KR', serif; background: #fcf9f4; padding: 4rem 2rem; color: #4a3c31; }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 { font-size: 3rem; margin-bottom: 3rem; text-align: center; }
+        ul { list-style: none; padding: 0; }
+        li { background: white; margin-bottom: 1rem; border-radius: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: transform 0.2s; }
+        li:hover { transform: translateX(10px); }
+        a { display: block; padding: 1.5rem 2rem; text-decoration: none; color: inherit; font-size: 1.2rem; font-weight: bold; }
+        .empty { text-align: center; opacity: 0.5; padding: 4rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>문피스 임산부 저널</h1>
+        <ul id="journalList">
+            <div class="empty">목록을 불러오는 중...</div>
+        </ul>
+    </div>
+
+    <script>
+        async function loadJournals() {
+            const listEl = document.getElementById('journalList');
+            try {
+                const res = await fetch('/functions/list-journals');
+                const keys = await res.json();
+
+                if (keys.length === 0) {
+                    listEl.innerHTML = '<div class="empty">발행된 저널이 없습니다.</div>';
+                    return;
+                }
+
+                listEl.innerHTML = '';
+                keys.forEach(key => {
+                    const li = document.createElement('li');
+                    const name = key.replace('journal/', '').replace('.html', '').replace(/-/g, ' ');
+                    li.innerHTML = `<a href="/${key}">${name.toUpperCase()}</a>`;
+                    listEl.appendChild(li);
+                });
+            } catch (e) {
+                listEl.innerHTML = '<div class="empty">목록을 불러오지 못했습니다.</div>';
+            }
+        }
+        loadJournals();
+    </script>
+</body>
+</html>
