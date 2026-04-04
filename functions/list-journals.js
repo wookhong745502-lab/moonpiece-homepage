@@ -1,11 +1,17 @@
 export async function onRequestGet(context) {
   const { env } = context;
+  const listFile = "journals.json";
 
   try {
-    const list = await env.JOURNAL_BUCKET.list({ prefix: "journal/" });
-    const keys = list.objects.map(obj => obj.key);
+    const existing = await env.JOURNAL_BUCKET.get(listFile);
+    if (!existing) {
+      return new Response(JSON.stringify([]), {
+        headers: { "Content-Type": "application/json" }
+      });
+    }
 
-    return new Response(JSON.stringify(keys), {
+    const journals = await existing.json();
+    return new Response(JSON.stringify(journals), {
       headers: { "Content-Type": "application/json" }
     });
   } catch (e) {

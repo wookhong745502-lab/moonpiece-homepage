@@ -15,23 +15,27 @@ export async function onRequestPost(context) {
   const filePath = `journal/${slug}.html`;
 
   const masterPrompt = `You are a maternity sleep expert, SEO strategist, and helpful content writer for the Moonpiece brand.
-Write a long Korean HTML article for pregnant women.
+Write a long Korean HTML article for pregnant women and provide metadata for the list view.
 Keyword: ${keyword}
 
-Rules:
-- 2500+ chars
-- <h1>, <h2>, <p>, <ul>, <li>, <img>
-- FAQ section
+[OUTPUT FORMAT — JSON ONLY]
+Return ONLY a valid JSON object with the following structure:
+{
+  "title": "Article Title",
+  "category": "Category Name (e.g., 수면 자세, 통증 완화, 건강 관리, 심리 & 지식)",
+  "categoryKey": "Category Key (e.g., sleep, pain, health, psychology)",
+  "image": "IMAGE_URL (Use high-quality Unsplash image relevant to keyword)",
+  "desc": "Short 2-line description for the list card",
+  "html": "Full HTML article content (Use <h1>, <h2>, <p>, <ul>, <li>, <img> tags, 2500+ chars)"
+}
+
+Rules for HTML:
+- FAQ section included
 - Internal links to /why /buy /journal
-- Include phrases:
-  "많은 임산부들이 실제로 이렇게 말합니다"
-  "상담을 하다 보면 이런 경우가 많습니다"
+- Include phrases: "많은 임산부들이 실제로 이렇게 말합니다", "상담을 하다 보면 이런 경우가 많습니다"
+- Insert 3~5 images with alt tags.
 
-Insert 3~5 images:
-<img src="IMAGE_URL" alt="description" />
-And HTML comment IMAGE_PROMPT above each.
-
-Return HTML only.`;
+Return JSON only. No markdown formatting blocks like \`\`\`json.`;
 
   const geminiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${env.GEMINI_API_KEY}`;
   
@@ -45,15 +49,23 @@ Return HTML only.`;
 
   if (!geminiRes.ok) return new Response(JSON.stringify({ error: "Gemini API failure" }), { status: 500 });
 
-  const data = await geminiRes.json();
-  let articleHtml = data.candidates[0].content.parts[0].text.replace(/```html|```/g, "").trim();
+  const geminiData = await geminiRes.json();
+  let aiContent;
+  try {
+    const rawText = geminiData.candidates[0].content.parts[0].text.replace(/```json|```/g, "").trim();
+    aiContent = JSON.parse(rawText);
+  } catch (e) {
+    return new Response(JSON.stringify({ error: "Failed to parse AI JSON response", detail: geminiData.candidates[0].content.parts[0].text }), { status: 500 });
+  }
+
+  const { title, category, categoryKey, image, desc, html } = aiContent;
 
   const fullHtml = `<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>${keyword} | 문피스 임산부 저널</title>
-<meta name="description" content="${keyword}에 관한 임산부 건강 및 수면 전문가 가이드입니다.">
+<title>${title} | 문피스 임산부 저널</title>
+<meta name="description" content="${desc}">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body { font-family: 'Noto Serif KR', serif; line-height: 1.8; color: #444; max-width: 800px; margin: 0 auto; padding: 3rem 1.5rem; }
@@ -68,7 +80,7 @@ li { margin-bottom: 1rem; font-size: 1.1rem; }
 </style>
 </head>
 <body>
-${articleHtml}
+${html}
 <div class="footer-links">
 <a href="/why">편안함의 비밀</a>
 <a href="/buy">구매하기</a>
@@ -77,8 +89,36 @@ ${articleHtml}
 </body>
 </html>`;
 
+  // 1. 개별 HTML 기사 저장
   await env.JOURNAL_BUCKET.put(filePath, fullHtml, {
-    httpMetadata: { contentType: "text/html" }
+    httpMetadata: { contentType: "text/html; charset=UTF-8" }
+  });
+
+  // 2. journals.json 메타데이터 목록 업데이트
+  const listFile = "journals.json";
+  let journals = [];
+  try {
+    const existing = await env.JOURNAL_BUCKET.get(listFile);
+    if (existing) {
+      journals = await existing.json();
+    }
+  } catch (e) { journals = []; }
+
+  const newItem = {
+    title,
+    category,
+    categoryKey,
+    image,
+    date: new Date().toLocaleDateString('ko-KR').replace(/ /g, ''),
+    desc,
+    url: filePath
+  };
+
+  // 신규 항목을 맨 앞으로 추가 (최신순)
+  journals.unshift(newItem);
+
+  await env.JOURNAL_BUCKET.put(listFile, JSON.stringify(journals), {
+    httpMetadata: { contentType: "application/json; charset=UTF-8" }
   });
 
   return new Response(JSON.stringify({ success: true, slug, path: `/${filePath}` }), { 

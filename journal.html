@@ -107,10 +107,11 @@
     <!-- Script Area -->
     <script>
         // Journal Data Rebuilt from existing files
-        const journalPosts = [
+        // Journal Data (Initially empty, will be loaded from server)
+        let journalPosts = [
             {
                 title: "[임신 16주 잠이 안와요] 불면증의 원인과 꿀잠을 위한 완벽 수면 환경",
-                category: "심리 & 수면",
+                category: "심리 & 지식",
                 categoryKey: "psychology",
                 image: "https://images.unsplash.com/photo-1517855018151-50eef530e719?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
                 date: "2024.04.04",
@@ -152,52 +153,6 @@
                 date: "2024.04.04",
                 desc: "혈류 개선과 태아 건강을 위한 '왼쪽 눕기'의 비밀과 의학적 근거를 심층 분석합니다.",
                 url: "journal/why-pregnant-women-sleep-on-side.html"
-            },
-            // Sample data for pagination testing (총 10개)
-            {
-                title: "[임신 중기 식단] 속쓰림 완화와 숙면을 돕는 추천 음식 Top 5",
-                category: "건강 관리",
-                categoryKey: "health",
-                image: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-                date: "2024.04.05",
-                desc: "소화 불량으로 잠 못 드는 밤을 해결하는 최적의 임산부 식단표 공개.",
-                url: "#"
-            },
-            {
-                title: "[태교음악 가이드] 엄마도 아기도 편안하게 잠드는 클래식 플레이리스트",
-                category: "심리 & 지식",
-                categoryKey: "psychology",
-                image: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-                date: "2024.04.05",
-                desc: "청각 발달은 물론 산모의 스트레스 수치를 낮춰주는 최적의 태교 수면 음악.",
-                url: "#"
-            },
-            {
-                title: "[임신 후기 허리통증] 32주 이후 만삭 산모를 위한 고탄성 지지 필로우 활용법",
-                category: "통증 완화",
-                categoryKey: "pain",
-                image: "https://images.unsplash.com/photo-1519451241315-74149053359d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-                date: "2024.04.05",
-                desc: "만삭의 하중을 0에 가깝게 분산시키는 중력 분산 수면 자세의 비밀.",
-                url: "#"
-            },
-            {
-                title: "[산후조리원 준비물] 선배 엄마들이 꼽은 수면 질을 바꾸는 의외의 필수템",
-                category: "건강 관리",
-                categoryKey: "health",
-                image: "https://images.unsplash.com/photo-1550133730-695473e544be?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-                date: "2024.04.05",
-                desc: "출산 직후 회복을 좌우하는 것은 숙면입니다. 준비물 리스트를 체크하세요.",
-                url: "#"
-            },
-            {
-                title: "[임산부 부종 케어] 밤마다 붓는 다리, 수면 중 림프 순환을 돕는 베개 배치법",
-                category: "통증 완화",
-                categoryKey: "pain",
-                image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-                date: "2024.04.05",
-                desc: "다리 부종을 80% 이상 줄여주는 올바른 다리 높이와 바디필로우 사용법.",
-                url: "#"
             }
         ];
 
@@ -208,6 +163,22 @@
         let currentPage = 1;
         const itemsPerPage = 9;
         let currentFilter = 'all';
+
+        // Load Dynamic Journals from Server
+        async function loadServerJournals() {
+            try {
+                const res = await fetch('/list-journals');
+                const serverData = await res.json();
+                if (serverData && Array.isArray(serverData) && serverData.length > 0) {
+                    // 서버 데이터가 있으면 기존 샘플 데이터와 합치거나 대체
+                    // 여기서는 최신 AI 저널이 먼저 나오도록 서버 데이터를 앞에 배치
+                    journalPosts = [...serverData, ...journalPosts];
+                }
+            } catch (e) {
+                console.warn("Server journals could not be loaded:", e);
+            }
+            renderJournal();
+        }
 
         function renderJournal(filter = 'all', page = 1) {
             currentFilter = filter;
@@ -276,7 +247,7 @@
         });
 
         // Initialize grid
-        renderJournal();
+        loadServerJournals();
 
         // Nav Logic
         const menuToggle = document.getElementById('menu-toggle');
