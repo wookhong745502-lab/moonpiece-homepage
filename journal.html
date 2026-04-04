@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>임산부 저널 | Moonpiece Pregnancy Lab</title>
     <meta name="description" content="임산부의 건강한 숙면을 위한 11년의 연구 데이터. 수면 자세, 통증 완화, 심리 케어까지 문피스 수면연구소의 정밀 저널을 만나보세요.">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=1.1">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 </head>
 <body>
@@ -61,7 +61,7 @@
 
     <!-- Journal Grid -->
     <section class="py-24">
-        <div class="container">
+        <div class="container" style="min-height: 60vh;">
             <div id="journal-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
                 <!-- Posts will be injected here -->
             </div>
@@ -167,7 +167,8 @@
         // Load Dynamic Journals from Server
         async function loadServerJournals() {
             try {
-                const res = await fetch('/list-journals');
+                // 캐시 방지를 위해 타임스탬프 추가
+                const res = await fetch(`/list-journals?t=${Date.now()}`);
                 const serverData = await res.json();
                 if (serverData && Array.isArray(serverData) && serverData.length > 0) {
                     // 서버 데이터가 있으면 기존 샘플 데이터와 합치거나 대체
