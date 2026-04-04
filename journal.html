@@ -39,8 +39,8 @@
     </div>
 
     <!-- Hero Section (Spacing Refined) -->
-    <header class="py-24 surface-container-low" style="margin-top: 4.5rem;">
-        <div class="container text-center pt-12">
+    <header class="py-24 surface-container-low" style="margin-top: 4.5rem; padding-top: 8rem; padding-bottom: 8rem; position: relative; z-index: 10;">
+        <div class="container text-center">
             <h1 class="font-serif mb-6" style="font-size: 3.5rem; color: var(--primary);">임산부 저널</h1>
             <p style="font-size: 1.2rem; color: var(--on-surface-variant); max-width: 600px; margin: 0 auto;">
                 엄마와 아기가 가장 편안한 밤을 보낼 수 있도록,<br>문피스 수면연구소가 전하는 과학적인 휴식 가이드입니다.
@@ -289,16 +289,16 @@
             background: var(--primary);
             color: var(--on-primary);
         }
-        .sticky {
+        .nav-bar {
             position: sticky;
-            top: 4.5rem;
-        }
-        
-        /* Ensuring active state in navigation */
-        .nav-link.active {
-            color: var(--primary);
-            font-weight: 900;
-            border-bottom: 2px solid var(--primary);
+            top: 0;
+            width: 100%;
+            z-index: 9999;
+            height: 4.5rem;
+            display: flex;
+            align-items: center;
+            background: #fcf9f4; /* 완전 불투명 */
+            border-bottom: 2px solid var(--outline-variant);
         }
     </style>
 </body>
