@@ -2,10 +2,10 @@ name = "moonpiece-homepage"
 main = "index.js"
 compatibility_date = "2024-04-03"
 
-# R2 Bucket Binding (대시보드 설정과 일치해야 함)
+[site]
+bucket = "./"
+exclude = ["node_modules", ".git", "functions"]
+
 [[r2_buckets]]
 binding = "JOURNAL_BUCKET"
 bucket_name = "moonpiece-journal"
-
-[site]
-bucket = "./"

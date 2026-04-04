@@ -1,0 +1,8 @@
+{
+  "name": "moonpiece-homepage",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@cloudflare/kv-asset-handler": "^0.3.0"
+  }
+}
