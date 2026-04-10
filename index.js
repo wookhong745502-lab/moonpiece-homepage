@@ -359,7 +359,85 @@ Return ONLY a valid JSON object:
   }
 }
 
-// Handler: Reviews & Instagram (Kept for Phase 8 compatibility)
-async function syncNaverReviewsHandler(request, env) { /* ... same as before ... */ }
-async function syncInstagramHandler(request, env) { /* ... same as before ... */ }
+// Handler: Naver Blog Review Sync (with AI Summary)
+async function syncNaverReviewsHandler(request, env) {
+  try {
+    const { keyword = "문피스 후기" } = await request.json();
+    const clientId = env.NAVER_CLIENT_ID;
+    const clientSecret = env.NAVER_CLIENT_SECRET;
+
+    if (!clientId || !clientSecret) return new Response(JSON.stringify({ error: "네이버 API 키가 설정되지 않았습니다." }), { status: 400 });
+
+    const naverUrl = `https://openapi.naver.com/v1/search/blog.json?query=${encodeURIComponent(keyword)}&display=10&sort=sim`;
+    const response = await fetch(naverUrl, {
+      headers: { "X-Naver-Client-Id": clientId, "X-Naver-Client-Secret": clientSecret }
+    });
+    const data = await response.json();
+    
+    if (!data.items) return new Response(JSON.stringify({ error: "네이버 검색 결과가 없습니다." }), { status: 404 });
+
+    // AI Summarization of results
+    const summarizePrompt = `You are a professional brand reviewer for Moonpiece.
+We found these Naver Blog posts about us:
+${JSON.stringify(data.items.map(i => ({ title: i.title, desc: i.description })))}
+
+Summarize these into 5 premium user reviews.
+Each review must have:
+- Title (Max 20 chars)
+- Content (Max 150 chars, emotional and warm)
+- Author (Anonymous names like '민지 맘', '단비 엄마')
+- Rating (4.5 to 5.0)
+
+Return ONLY a valid JSON array of objects: 
+[{"title": "...", "content": "...", "author": "...", "rating": 5.0}, ...]`;
+
+    const aiRes = await fetch("https://api.deepseek.com/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${env.DEEPSEEK_API_KEY}` },
+      body: JSON.stringify({
+        model: "deepseek-chat",
+        messages: [{ role: "user", content: summarizePrompt }],
+        temperature: 0.7
+      })
+    });
+    const aiData = await aiRes.json();
+    const reviews = JSON.parse(aiData.choices[0].message.content.replace(/```json|```/g, "").trim());
+
+    await env.JOURNAL_BUCKET.put("reviews.json", JSON.stringify(reviews), { httpMetadata: { contentType: "application/json" } });
+    return new Response(JSON.stringify({ success: true, count: reviews.length }));
+  } catch (e) {
+    return new Response(JSON.stringify({ error: e.message }), { status: 500 });
+  }
+}
+
+// Handler: Instagram Feed Sync
+async function syncInstagramHandler(request, env) {
+  try {
+    const accessToken = env.INSTAGRAM_ACCESS_TOKEN;
+    const userId = env.INSTAGRAM_USER_ID;
+
+    if (!accessToken || !userId) return new Response(JSON.stringify({ error: "인스타그램 API 설정이 누락되었습니다." }), { status: 400 });
+
+    // For hashtag search, we'd need hashtag ID first. 
+    // Assuming official account feed sync for stability.
+    const instaUrl = `https://graph.facebook.com/v22.0/${userId}/media?fields=id,caption,media_url,permalink,timestamp&access_token=${accessToken}&limit=12`;
+    const response = await fetch(instaUrl);
+    const data = await response.json();
+
+    if (!data.data) return new Response(JSON.stringify({ error: "인스타그램 데이터를 가져오지 못했습니다." }), { status: 404 });
+
+    const feeds = data.data.map(item => ({
+      id: item.id,
+      image: item.media_url,
+      link: item.permalink,
+      caption: item.caption,
+      date: new Date(item.timestamp).toLocaleDateString('ko-KR')
+    }));
+
+    await env.JOURNAL_BUCKET.put("instagram.json", JSON.stringify(feeds), { httpMetadata: { contentType: "application/json" } });
+    return new Response(JSON.stringify({ success: true, count: feeds.length }));
+  } catch (e) {
+    return new Response(JSON.stringify({ error: e.message }), { status: 500 });
+  }
+}
 
