@@ -90,6 +90,9 @@ export default {
         })
       });
       const data = await res.json();
+      if (!data.choices || !data.choices[0]) {
+        return new Response(JSON.stringify({ error: "AI Suggestion Failed", detail: data }), { status: 500 });
+      }
       const resultText = data.choices[0].message.content.trim();
       return new Response(JSON.stringify({ result: resultText }), { headers: { "Content-Type": "application/json" } });
     }
@@ -241,7 +244,16 @@ Return ONLY a valid JSON object:
       })
     });
     const deepseekResult = await aiRes.json();
-    const aiContent = JSON.parse(deepseekResult.choices[0].message.content.replace(/```json|```/g, "").trim());
+    if (!deepseekResult.choices || !deepseekResult.choices[0]) {
+      return new Response(JSON.stringify({ error: "DeepSeek API returned invalid result", detail: deepseekResult }), { status: 500 });
+    }
+    const rawContent = deepseekResult.choices[0].message.content.replace(/```json|```/g, "").trim();
+    let aiContent;
+    try {
+      aiContent = JSON.parse(rawContent);
+    } catch (e) {
+      return new Response(JSON.stringify({ error: "AI JSON Parse Error", raw: rawContent }), { status: 500 });
+    }
 
     // --- Template Injection ---
     const template = `<!DOCTYPE html>
