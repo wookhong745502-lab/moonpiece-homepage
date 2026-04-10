@@ -78,7 +78,7 @@ export default {
       const { type, keyword } = await request.json();
       const prompt = type === "title" 
         ? `Keyword: ${keyword}. Suggest one powerful, professional, and SEO-optimized Korean blog title for a maternity brand 'Moonpiece'. Return ONLY the title string.`
-        : `Keyword: ${keyword}. Convert this into a clean, lower-case, hyphenated URL slug in English. Return ONLY the slug string.`;
+        : `Keyword: ${keyword}. Convert this into a 3-word English URL slug (exactly 3 words if possible), lowercase, separated by hyphens. Return ONLY the slug string. Example: 'pregnancy sleep position'.`;
       
       const res = await fetch("https://api.deepseek.com/chat/completions", {
         method: "POST",
@@ -93,7 +93,7 @@ export default {
       if (!data.choices || !data.choices[0]) {
         return new Response(JSON.stringify({ error: "AI Suggestion Failed", detail: data }), { status: 500 });
       }
-      const resultText = data.choices[0].message.content.trim();
+      const resultText = data.choices[0].message.content.trim().replace(/\s+/g, '-').toLowerCase();
       return new Response(JSON.stringify({ result: resultText }), { headers: { "Content-Type": "application/json" } });
     }
 
@@ -255,6 +255,16 @@ Return ONLY a valid JSON object:
       return new Response(JSON.stringify({ error: "AI JSON Parse Error", raw: rawContent }), { status: 500 });
     }
 
+    // 5. Generate AI Image using Workers AI
+    console.log("Generating AI Image...");
+    const imagePrompt = `High quality professional photography, maternity photography, ${aiContent.title}, soft lighting, pastel colors, cozy atmosphere, minimalist style, 8k resolution`;
+    const imageResponse = await env.AI.run("@cf/bytedance/stable-diffusion-xl-lightning", {
+      prompt: imagePrompt
+    });
+    const imageKey = `assets/${dir}/${finalSlug}_hero.png`;
+    await env.JOURNAL_BUCKET.put(imageKey, imageResponse, { httpMetadata: { contentType: "image/png" } });
+    aiContent.image = `/${imageKey}`;
+
     // --- Template Injection ---
     const template = `<!DOCTYPE html>
 <html lang="${locale}">
@@ -291,7 +301,7 @@ Return ONLY a valid JSON object:
                 <a href="/knowledge.html" class="nav-link">임산부 지식인</a>
             </div>
             <div class="flex items-center gap-4">
-                <a href="https://smartstore.naver.com/moonpiece" target="_blank" class="btn-primary mobile-hidden">구매하기</a>
+                <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" class="btn-primary mobile-hidden">구매하기</a>
                 <button class="hamburger-btn" id="menu-toggle"><span></span><span></span><span></span></button>
             </div>
         </div>
@@ -303,7 +313,7 @@ Return ONLY a valid JSON object:
         <a href="/review.html" class="nav-link">엄마들의 이야기</a>
         <a href="/journal.html" class="nav-link">임산부 저널</a>
         <a href="/knowledge.html" class="nav-link">임산부 지식인</a>
-        <a href="https://smartstore.naver.com/moonpiece" target="_blank" class="btn-primary text-center mt-8">구매하기</a>
+        <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" class="btn-primary text-center mt-8">구매하기</a>
     </div>
     <header class="py-24" style="background: linear-gradient(180deg, var(--surface-container-low) 0%, white 100%);">
         <div class="container" style="max-width: 800px;">
@@ -330,7 +340,7 @@ Return ONLY a valid JSON object:
             </div>
             <div class="grid grid-cols-2 md:grid-cols-3 gap-8">
                 <div><h4 style="font-weight: 800; margin-bottom: 1.5rem;">Company</h4><ul style="list-style: none; display: flex; flex-direction: column; gap: 0.8rem; color: var(--on-surface-variant);"><li><a href="/about.html">회사소개</a></li><li><a href="/terms.html">이용약관</a></li></ul></div>
-                <div><h4 style="font-weight: 800; margin-bottom: 1.5rem;">Support</h4><ul style="list-style: none; display: flex; flex-direction: column; gap: 0.8rem; color: var(--on-surface-variant);"><li><a href="/privacy.html">개인정보처리방침</a></li><li><a href="https://smartstore.naver.com/moonpiece" target="_blank">스마트스토어</a></li></ul></div>
+                <div><h4 style="font-weight: 800; margin-bottom: 1.5rem;">Support</h4><ul style="list-style: none; display: flex; flex-direction: column; gap: 0.8rem; color: var(--on-surface-variant);"><li><a href="/privacy.html">개인정보처리방침</a></li><li><a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank">스마트스토어</a></li></ul></div>
                 <div><h4 style="font-weight: 800; margin-bottom: 1.5rem;">Social</h4><ul style="list-style: none; display: flex; flex-direction: column; gap: 0.8rem; color: var(--on-surface-variant);"><li><a href="#">Instagram</a></li><li><a href="#">YouTube</a></li></ul></div>
             </div>
         </div>

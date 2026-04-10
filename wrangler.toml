@@ -9,3 +9,6 @@ exclude = ["node_modules", ".git", "functions"]
 [[r2_buckets]]
 binding = "JOURNAL_BUCKET"
 bucket_name = "moonpiece-journal"
+
+[ai]
+binding = "AI"
