@@ -21,8 +21,8 @@ export default {
         const cookies = parseCookies(request);
         // Simple secure cookie validation check
         if (cookies['admin_session'] !== 'wookhong_verified') {
-          // Requirement: Redirect unauthenticated to homepage
-          return Response.redirect(`${url.origin}/`, 302);
+          // Requirement: Redirect unauthenticated to login page instead of homepage
+          return Response.redirect(`${url.origin}/admin/login.html`, 302);
         }
       }
     }
@@ -295,7 +295,6 @@ Return ONLY a valid JSON object:
             <a href="/index.html" class="logo font-serif">Moonpiece</a>
             <div class="nav-links">
                 <a href="/brand.html" class="nav-link">문피스의 약속</a>
-                <a href="/why.html" class="nav-link">편안함의 비밀</a>
                 <a href="/review.html" class="nav-link">엄마들의 이야기</a>
                 <a href="/journal.html" class="nav-link">임산부 저널</a>
                 <a href="/knowledge.html" class="nav-link">임산부 지식인</a>
@@ -309,7 +308,6 @@ Return ONLY a valid JSON object:
     <div class="nav-overlay" id="overlay"></div>
     <div class="mobile-nav" id="mobile-menu">
         <a href="/brand.html" class="nav-link">문피스의 약속</a>
-        <a href="/why.html" class="nav-link">편안함의 비밀</a>
         <a href="/review.html" class="nav-link">엄마들의 이야기</a>
         <a href="/journal.html" class="nav-link">임산부 저널</a>
         <a href="/knowledge.html" class="nav-link">임산부 지식인</a>
