@@ -29,8 +29,8 @@ export default {
     // 2. AI 저널 생성 및 발행 (POST /generate-journal)
     if (url.pathname === "/generate-journal" && request.method === "POST") {
       try {
-        if (!env.GEMINI_API_KEY) {
-          return new Response(JSON.stringify({ error: "GEMINI_API_KEY가 설정되지 않았습니다." }), { status: 400 });
+        if (!env.DEEPSEEK_API_KEY) {
+          return new Response(JSON.stringify({ error: "DEEPSEEK_API_KEY가 설정되지 않았습니다." }), { status: 400 });
         }
         if (!env.JOURNAL_BUCKET) {
           return new Response(JSON.stringify({ error: "JOURNAL_BUCKET이 바인딩되지 않았습니다." }), { status: 400 });
@@ -53,22 +53,34 @@ Return ONLY a valid JSON object:
   "html": "<h1>...</h1><p>...</p> full HTML content"
 }`;
 
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${env.GEMINI_API_KEY}`;
-        const response = await fetch(geminiUrl, {
+        // DeepSeek API 호출 (OpenAI 호환 형식)
+        const deepseekUrl = "https://api.deepseek.com/chat/completions";
+        const response = await fetch(deepseekUrl, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ contents: [{ parts: [{ text: masterPrompt }] }] })
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${env.DEEPSEEK_API_KEY}`
+          },
+          body: JSON.stringify({
+            model: "deepseek-chat",
+            messages: [
+              { role: "system", content: "You are a helpful assistant that returns only valid JSON." },
+              { role: "user", content: masterPrompt }
+            ],
+            temperature: 0.7,
+            max_tokens: 4096
+          })
         });
 
-        const geminiData = await response.json();
+        const deepseekData = await response.json();
         
-        // Gemini API 응답 검증
-        if (!geminiData.candidates || !geminiData.candidates[0]) {
-          const errMsg = geminiData.error ? geminiData.error.message : JSON.stringify(geminiData);
-          return new Response(JSON.stringify({ error: "Gemini API 오류: " + errMsg }), { status: 500 });
+        // DeepSeek API 응답 검증
+        if (!deepseekData.choices || !deepseekData.choices[0]) {
+          const errMsg = deepseekData.error ? deepseekData.error.message : JSON.stringify(deepseekData);
+          return new Response(JSON.stringify({ error: "DeepSeek API 오류: " + errMsg }), { status: 500 });
         }
         
-        const rawText = geminiData.candidates[0].content.parts[0].text.replace(/```json|```/g, "").trim();
+        const rawText = deepseekData.choices[0].message.content.replace(/```json|```/g, "").trim();
         const aiContent = JSON.parse(rawText);
 
         const fullHtml = `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>${aiContent.title} | 문피스</title><link rel="stylesheet" href="/styles.css"><style>body{max-width:800px;margin:50px auto;line-height:1.8;padding:20px;}img{width:100%;border-radius:1rem;margin:1.5rem 0;}</style></head><body>${aiContent.html}</body></html>`;
