@@ -93,8 +93,9 @@ export default {
       if (!data.choices || !data.choices[0]) {
         return new Response(JSON.stringify({ error: "AI Suggestion Failed", detail: data }), { status: 500 });
       }
-      const resultText = data.choices[0].message.content.trim().replace(/\s+/g, '-').toLowerCase();
-      return new Response(JSON.stringify({ result: resultText }), { headers: { "Content-Type": "application/json" } });
+      const resultText = data.choices[0].message.content.trim();
+      const finalResult = type === "slug" ? resultText.replace(/\s+/g, '-').toLowerCase() : resultText;
+      return new Response(JSON.stringify({ result: finalResult }), { headers: { "Content-Type": "application/json" } });
     }
 
     // --- 4. DeepSeek Content Generation APIs ---
@@ -123,10 +124,9 @@ export default {
     }
 
     if (url.pathname === "/list-knowledge") {
-      try {
-        const existing = await env.JOURNAL_BUCKET.get("knowledge.json");
-        return new Response(existing ? await existing.json() : "[]", { headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
-      } catch (e) { return new Response("[]"); }
+      const data = await env.JOURNAL_BUCKET.get("knowledge/list.json");
+      if (!data) return new Response("[]", { headers: { "Content-Type": "application/json" } });
+      return new Response(data.body, { headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
     }
 
     if (url.pathname === "/api/reviews") {
@@ -139,8 +139,8 @@ export default {
       return new Response(data ? data.body : "[]", { headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
     }
 
-    // --- 6. R2 Content Serving (Journal/Knowledge) ---
-    if (url.pathname.startsWith("/journal/") || url.pathname.startsWith("/knowledge/")) {
+    // --- 6. R2 Content Serving (Journal/Knowledge/Assets) ---
+    if (url.pathname.startsWith("/journal/") || url.pathname.startsWith("/knowledge/") || url.pathname.startsWith("/assets/")) {
       try {
         const key = url.pathname.slice(1);
         const object = await env.JOURNAL_BUCKET.get(key);
@@ -361,7 +361,15 @@ Return ONLY a valid JSON object:
 
     // Update index list
     const existing = await env.JOURNAL_BUCKET.get(listFile);
-    let posts = existing ? await existing.json() : [];
+    let posts = [];
+    if (existing) {
+      try {
+        posts = await new Response(existing.body).json();
+      } catch (e) {
+        console.error("Failed to parse list.json", e);
+        posts = [];
+      }
+    }
     posts.unshift({
       title: aiContent.title,
       category: catMap[category] || aiContent.category,
