@@ -150,6 +150,15 @@
                         <textarea id="aeo-kw" rows="3" placeholder="예: 임산부가 엎드려 자면 태아에게 어떤 영향을 미치나요?"></textarea>
                     </div>
 
+                    <div class="input-group">
+                        <label>URL 슬러그 (AI 제안 가능)</label>
+                        <input type="text" id="aeo-slug" placeholder="e.g. pregnant-sleeping-on-stomach">
+                        <button class="ai-help-btn" onclick="suggest('slug', 'aeo')">
+                            <span class="material-symbols-outlined" style="font-size: 1.1rem;">translate</span>
+                            슬러그 자동 생성
+                        </button>
+                    </div>
+
                     <div class="grid grid-cols-2 gap-4">
                         <div class="input-group">
                             <label>답변 톤</label>
@@ -324,6 +333,7 @@
             } else {
                 payload = {
                     keyword: document.getElementById('aeo-kw').value,
+                    slug: document.getElementById('aeo-slug').value,
                     tone: document.getElementById('aeo-tone').value,
                     faq: document.getElementById('aeo-faq').querySelector('.active').dataset.value,
                     category: document.getElementById('aeo-category').value

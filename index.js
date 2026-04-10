@@ -117,12 +117,10 @@ export default {
 
     // --- 5. Public Listing & Content APIs ---
     if (url.pathname === "/list-journals") {
-      try {
-        const existing = await env.JOURNAL_BUCKET.get("journals.json");
-        return new Response(existing ? await existing.json() : "[]", { headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
-      } catch (e) { return new Response("[]"); }
+      const data = await env.JOURNAL_BUCKET.get("journal/list.json");
+      if (!data) return new Response("[]", { headers: { "Content-Type": "application/json" } });
+      return new Response(data.body, { headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
     }
-
     if (url.pathname === "/list-knowledge") {
       const data = await env.JOURNAL_BUCKET.get("knowledge/list.json");
       if (!data) return new Response("[]", { headers: { "Content-Type": "application/json" } });
@@ -175,9 +173,9 @@ async function generateContentHandler(request, env, type) {
     
     const isSEO = type === "seo";
     const dir = isSEO ? "journal" : "knowledge";
-    const finalSlug = slug || encodeURIComponent(keyword.replace(/\s+/g, '-'));
+    const finalSlug = (slug || keyword.replace(/\s+/g, '-')).toLowerCase().replace(/[^a-z0-9-]/g, '');
     const filePath = `${dir}/${finalSlug}.html`;
-    const listFile = isSEO ? "journals.json" : "knowledge.json";
+    const listFile = `${dir}/list.json`;
 
     const catMap = { "sleep": "수면 자세", "pain": "통증 완화", "health": "건강 관리", "psychology": "심리 & 지식" };
 
