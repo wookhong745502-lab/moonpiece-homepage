@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{TITLE}} | Moonpiece</title>
+    <meta name="description" content="{{DESC}}">
+    <link rel="stylesheet" href="/styles.css">
+    {{JSON_LD}}
+    <style>
+        :root { --glass-bg: rgba(255, 255, 255, 0.7); --glass-border: rgba(255, 255, 255, 0.3); }
+        body { background: var(--surface-low); }
+        .post-content { line-height: 2; color: var(--on-surface); font-size: 1.15rem; background: var(--surface-bright); padding: 4rem; border-radius: 3rem; box-shadow: var(--shadow-sm); }
+        .post-content h2 { margin-top: 4rem; margin-bottom: 2rem; font-family: var(--font-serif); color: var(--primary); font-size: 2.25rem; border-left: 6px solid var(--primary); padding-left: 1.5rem; }
+        .post-content p { margin-bottom: 2rem; color: var(--on-surface-variant); }
+        .post-content img { width: 100%; border-radius: 2.5rem; margin: 3rem 0; shadow: var(--shadow-lg); transition: transform 0.5s; }
+        .post-content img:hover { transform: scale(1.02); }
+        .category-badge { display: inline-block; padding: 0.6rem 1.5rem; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border-radius: 9999px; font-weight: 800; font-size: 0.9rem; margin-bottom: 2.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        
+        /* AEO Specific Styling */
+        .aeo-box { background: linear-gradient(to bottom right, var(--surface-container-lowest), var(--surface-container-low)); padding: 4rem; border-radius: 3rem; border: 1px solid var(--glass-border); margin-top: 3rem; position: relative; overflow: hidden; }
+        .aeo-box::before { content: "Q&A"; position: absolute; top: -10px; right: 20px; font-size: 5rem; font-weight: 900; opacity: 0.03; color: var(--primary); }
+        .aeo-q { font-weight: 900; color: var(--primary); font-size: 1.75rem; margin-bottom: 2rem; position: relative; }
+        .aeo-a { color: var(--on-surface); font-size: 1.25rem; line-height: 1.8; }
+        .back-link { display: inline-flex; align-items: center; gap: 0.75rem; color: var(--primary); text-decoration: none; font-weight: 800; margin-bottom: 4rem; transition: transform 0.3s; }
+        .back-link:hover { transform: translateX(-10px); }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="nav-bar">
+        <div class="nav-container">
+            <a href="/index.html" class="logo font-serif">Moonpiece</a>
+            <div class="nav-links">
+                <a href="/brand.html" class="nav-link">문피스의 약속</a>
+                <a href="/why.html" class="nav-link">편안함의 비밀</a>
+                <a href="/review.html" class="nav-link">엄마들의 이야기</a>
+                <a href="/journal.html" class="nav-link">임산부 저널</a>
+                <a href="/knowledge.html" class="nav-link">임산부 지식인</a>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" class="btn-primary mobile-hidden">구매하기</a>
+                <button class="hamburger-btn" id="menu-toggle">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Nav -->
+    <div class="nav-overlay" id="overlay"></div>
+    <div class="mobile-nav" id="mobile-menu">
+        <a href="/brand.html" class="nav-link">문피스의 약속</a>
+        <a href="/why.html" class="nav-link">편안함의 비밀</a>
+        <a href="/review.html" class="nav-link">엄마들의 이야기</a>
+        <a href="/journal.html" class="nav-link">임산부 저널</a>
+        <a href="/knowledge.html" class="nav-link">임산부 지식인</a>
+        <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" class="btn-primary text-center mt-8">구매하기</a>
+    </div>
+
+    <!-- Article Header -->
+    <header class="py-24 surface-container-low">
+        <div class="container" style="max-width: 800px;">
+            <div class="category-badge">{{CATEGORY}}</div>
+            <h1 class="font-serif mb-6" style="font-size: 3.5rem; line-height: 1.2; word-break: keep-all;">{{TITLE}}</h1>
+            <div class="flex items-center gap-4 text-outline font-bold" style="font-size: 0.9rem;">
+                <span>By Moonpiece Lab</span>
+                <span>•</span>
+                <span>{{DATE}}</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Article Body -->
+    <main class="py-24">
+        <article class="container post-content" style="max-width: 800px;">
+            {{CONTENT}}
+        </article>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-24">
+        <div class="container grid md:grid-cols-2 gap-12">
+            <div>
+                <div class="logo font-serif mb-4" style="color: var(--primary);">Moonpiece</div>
+                <p style="max-width: 320px; color: var(--on-surface-variant); line-height: 1.8;">
+                    소중한 엄마와 아기를 위한 달빛의 조각, 문피스. 10년의 진심을 담아 가장 편안한 휴식을 설계합니다.
+                </p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div>
+                    <h4 style="font-weight: 800; margin-bottom: 1.5rem;">Company</h4>
+                    <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.75rem; color: var(--on-surface-variant);">
+                        <li><a href="/about.html">회사소개</a></li>
+                        <li><a href="/terms.html">이용약관</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="font-weight: 800; margin-bottom: 1.5rem;">Support</h4>
+                    <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.75rem; color: var(--on-surface-variant);">
+                        <li><a href="/privacy.html">개인정보처리방침</a></li>
+                        <li><a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank">네이버 스마트스토어</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="font-weight: 800; margin-bottom: 1.5rem;">Social</h4>
+                    <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.75rem; color: var(--on-surface-variant);">
+                        <li><a href="#">Instagram</a></li>
+                        <li><a href="#">YouTube</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="container" style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--outline-variant); text-align: center; color: var(--on-surface-variant); font-size: 0.85rem;">
+            © 2024 Moonpiece. All rights reserved.
+        </div>
+    </footer>
+
+    <script>
+        const menuToggle = document.getElementById('menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const overlay = document.getElementById('overlay');
+        menuToggle.addEventListener('click', () => { const a = mobileMenu.classList.toggle('active'); menuToggle.classList.toggle('active'); overlay.classList.toggle('active'); document.body.style.overflow = a ? 'hidden' : 'auto'; });
+        overlay.addEventListener('click', () => { mobileMenu.classList.remove('active'); menuToggle.classList.remove('active'); overlay.classList.remove('active'); document.body.style.overflow = 'auto'; });
+    </script>
+</body>
+</html>

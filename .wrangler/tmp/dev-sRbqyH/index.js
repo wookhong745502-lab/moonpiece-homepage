@@ -510,7 +510,7 @@ var index_default = {
         const googleRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${token}`);
         if (!googleRes.ok) throw new Error("Invalid token");
         const data = await googleRes.json();
-        const allowedEmails = ["wookhong745502@gmail.com", "wookhong7455@gmail.com"];
+        const allowedEmails = ["wookhong745502@gmail.com"];
         if (allowedEmails.includes(data.email) && (data.email_verified === "true" || data.email_verified === true)) {
           return new Response(JSON.stringify({ success: true }), {
             headers: {
@@ -519,10 +519,10 @@ var index_default = {
             }
           });
         } else {
-          return new Response(JSON.stringify({ error: "Unauthorized email account" }), { status: 403 });
+          return new Response(JSON.stringify({ error: "\uC811\uADFC \uAD8C\uD55C\uC774 \uC5C6\uB294 \uACC4\uC815\uC785\uB2C8\uB2E4." }), { status: 403 });
         }
       } catch (e) {
-        return new Response(JSON.stringify({ error: "Token verification failed" }), { status: 403 });
+        return new Response(JSON.stringify({ error: "\uD1A0\uD070 \uAC80\uC99D \uC2E4\uD328" }), { status: 403 });
       }
     }
     if (url.pathname === "/admin/api/auth/logout" && request.method === "POST") {
@@ -533,31 +533,57 @@ var index_default = {
         }
       });
     }
-    if (url.pathname === "/list-journals") {
-      try {
-        if (!env.JOURNAL_BUCKET) throw new Error();
-        const existing = await env.JOURNAL_BUCKET.get("journals.json");
-        const data = existing ? await existing.json() : [];
-        return new Response(JSON.stringify(data), { headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
-      } catch (e) {
-        return new Response(JSON.stringify([]), { headers: { "Content-Type": "application/json" } });
-      }
-    }
-    if (url.pathname === "/list-knowledge") {
-      try {
-        if (!env.JOURNAL_BUCKET) throw new Error();
-        const existing = await env.JOURNAL_BUCKET.get("knowledge.json");
-        const data = existing ? await existing.json() : [];
-        return new Response(JSON.stringify(data), { headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
-      } catch (e) {
-        return new Response(JSON.stringify([]), { headers: { "Content-Type": "application/json" } });
-      }
+    if (url.pathname === "/admin/api/suggest" && request.method === "POST") {
+      const { type, keyword } = await request.json();
+      const prompt = type === "title" ? `Keyword: ${keyword}. Suggest one powerful, professional, and SEO-optimized Korean blog title for a maternity brand 'Moonpiece'. Return ONLY the title string.` : `Keyword: ${keyword}. Convert this into a clean, lower-case, hyphenated URL slug in English. Return ONLY the slug string.`;
+      const res = await fetch("https://api.deepseek.com/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${env.DEEPSEEK_API_KEY}` },
+        body: JSON.stringify({
+          model: "deepseek-chat",
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0.6
+        })
+      });
+      const data = await res.json();
+      const resultText = data.choices[0].message.content.trim();
+      return new Response(JSON.stringify({ result: resultText }), { headers: { "Content-Type": "application/json" } });
     }
     if (url.pathname === "/admin/api/generate-journal" && request.method === "POST") {
       return await generateContentHandler(request, env, "seo");
     }
     if (url.pathname === "/admin/api/generate-knowledge" && request.method === "POST") {
       return await generateContentHandler(request, env, "aeo");
+    }
+    if (url.pathname === "/admin/api/sync-naver-reviews" && request.method === "POST") {
+      return await syncNaverReviewsHandler(request, env);
+    }
+    if (url.pathname === "/admin/api/sync-instagram" && request.method === "POST") {
+      return await syncInstagramHandler(request, env);
+    }
+    if (url.pathname === "/list-journals") {
+      try {
+        const existing = await env.JOURNAL_BUCKET.get("journals.json");
+        return new Response(existing ? await existing.json() : "[]", { headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
+      } catch (e) {
+        return new Response("[]");
+      }
+    }
+    if (url.pathname === "/list-knowledge") {
+      try {
+        const existing = await env.JOURNAL_BUCKET.get("knowledge.json");
+        return new Response(existing ? await existing.json() : "[]", { headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
+      } catch (e) {
+        return new Response("[]");
+      }
+    }
+    if (url.pathname === "/api/reviews") {
+      const data = await env.JOURNAL_BUCKET.get("reviews.json");
+      return new Response(data ? data.body : "[]", { headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
+    }
+    if (url.pathname === "/api/instagram") {
+      const data = await env.JOURNAL_BUCKET.get("instagram.json");
+      return new Response(data ? data.body : "[]", { headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
     }
     if (url.pathname.startsWith("/journal/") || url.pathname.startsWith("/knowledge/")) {
       try {
@@ -579,109 +605,184 @@ var index_default = {
         { ASSET_NAMESPACE: env.__STATIC_CONTENT, ASSET_MANIFEST: assetManifest }
       );
     } catch (e) {
-      if (url.pathname.startsWith("/admin/")) {
-        return Response.redirect(`${url.origin}/`, 302);
-      }
+      if (url.pathname.startsWith("/admin/")) return Response.redirect(`${url.origin}/`, 302);
       return new Response("Not Found", { status: 404 });
     }
   }
 };
 async function generateContentHandler(request, env, type) {
   try {
-    if (!env.DEEPSEEK_API_KEY) return new Response(JSON.stringify({ error: "DEEPSEEK_API_KEY\uAC00 \uC124\uC815\uB418\uC9C0 \uC54A\uC558\uC2B5\uB2C8\uB2E4." }), { status: 400 });
-    if (!env.JOURNAL_BUCKET) return new Response(JSON.stringify({ error: "JOURNAL_BUCKET\uC774 \uBC14\uC778\uB529\uB418\uC9C0 \uC54A\uC558\uC2B5\uB2C8\uB2E4." }), { status: 400 });
-    const { keyword } = await request.json();
-    const slug = encodeURIComponent(keyword.trim().replace(/\s+/g, "-"));
+    const payload = await request.json();
+    const { keyword, title, slug, subKeywords, sourceName, sourceUrl, category, tone, faq, locale = "ko" } = payload;
     const isSEO = type === "seo";
     const dir = isSEO ? "journal" : "knowledge";
-    const filePath = `${dir}/${slug}.html`;
+    const finalSlug = slug || encodeURIComponent(keyword.replace(/\s+/g, "-"));
+    const filePath = `${dir}/${finalSlug}.html`;
     const listFile = isSEO ? "journals.json" : "knowledge.json";
+    const catMap = { "sleep": "\uC218\uBA74 \uC790\uC138", "pain": "\uD1B5\uC99D \uC644\uD654", "health": "\uAC74\uAC15 \uAD00\uB9AC", "psychology": "\uC2EC\uB9AC & \uC9C0\uC2DD" };
     let masterPrompt = "";
     if (isSEO) {
-      masterPrompt = `You are a maternity sleep expert and strict SEO writer for Moonpiece brand.
-Write a long Korean HTML article (2500+ chars) for pregnant women about: ${keyword}
-Use semantic HTML5 tags (<main>, <article>, <section>, etc).
+      masterPrompt = `Role: Senior Maternity SEO Architect for 'Moonpiece'.
+Main Keyword: ${keyword}
+Target Title: ${title}
+Sub-Keywords: ${subKeywords}
+Source: ${sourceName} (${sourceUrl})
+Language: ${locale === "ko" ? "Korean" : "English"}
+
+Task: Generate a 3000+ characters long-form professional blog post.
+Instruction:
+1. Use Semantic HTML5 (H2, H3, P, UL, Strong).
+2. The tone must be expert, empathetic, and trustworthy.
+3. Integrate health/medical insights naturally.
+4. Periodically insert <img src='https://source.unsplash.com/800x600/?pregnancy,sleep...'> tags with relevant alternative text.
+5. If a source is provided, cite it professionally at the end.
 
 Return ONLY a valid JSON object:
 {
-  "title": "Korean article title",
-  "category": "\uC218\uBA74 \uC790\uC138, \uD1B5\uC99D \uC644\uD654, \uAC74\uAC15 \uAD00\uB9AC, \uC2EC\uB9AC & \uC9C0\uC2DD \uC911 \uD558\uB098",
-  "categoryKey": "sleep or pain or health or psychology",
-  "image": "https://images.unsplash.com/photo-1519824145371-296894a0daa9?w=800&q=80",
-  "desc": "2\uC904 \uC694\uC57D \uC124\uBA85",
-  "html": "<main><article><section><h2>...</h2><p>...</p></section></article></main> (full HTML content)"
+  "title": "${title}",
+  "desc": "SEO description (max 160 chars)",
+  "html": "Full article HTML content starting with H2...",
+  "image": "https://source.unsplash.com/800x600/?maternity,sleep",
+  "category": "${catMap[category]}"
 }`;
     } else {
-      masterPrompt = `You are a maternity expert generating AEO (Answer Engine Optimized) content for the Moonpiece brand.
-Topic: ${keyword}
-Output must be concise, Q&A structured, formatted visually exactly like a blog post but highly direct.
-Must include a JSON-LD FAQ schema.
+      masterPrompt = `Role: AEO (Answer Engine) Specialist for 'Moonpiece'.
+Question: ${keyword}
+Tone: ${tone}
+FAQ Enabled: ${faq}
+Language: ${locale === "ko" ? "Korean" : "English"}
+
+Task: Generate an Answer Engine Optimized page.
+Instruction:
+1. Start with a Direct Answer (Featured Snippet style summary).
+2. Follow with a structured Q&A using <div class='aeo-box'>.
+3. Provide multi-dimensional insights using expert bullet points.
+4. Generate a full FAQ section if enabled.
+5. Generate a comprehensive JSON-LD (FAQPage) schema.
 
 Return ONLY a valid JSON object:
 {
-  "title": "Direct Answer for: ${keyword}",
-  "category": "AEO \uD575\uC2EC \uB2F5\uBCC0",
-  "categoryKey": "knowledge",
-  "image": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&q=80",
-  "desc": "1\uC904 \uBA85\uD655\uD55C \uD575\uC2EC \uB2F5\uBCC0",
-  "html": "<div class='aeo-content'><h2>Q: ...</h2><p>A: ...</p></div>",
-  "json_ld": "{\\"@context\\": \\"https://schema.org\\", \\"@type\\": \\"FAQPage\\", \\"mainEntity\\": [...]}"
+  "title": "Direct Answer: ${keyword}",
+  "desc": "Search snippets summary",
+  "html": "HTML content including <div class='aeo-box'>...",
+  "json_ld": "JSON-LD string",
+  "image": "https://source.unsplash.com/800x600/?healthcare,pregnancy"
 }`;
     }
-    const deepseekUrl = "https://api.deepseek.com/chat/completions";
-    const response = await fetch(deepseekUrl, {
+    const aiRes = await fetch("https://api.deepseek.com/chat/completions", {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": `Bearer ${env.DEEPSEEK_API_KEY}` },
       body: JSON.stringify({
         model: "deepseek-chat",
         messages: [
-          { role: "system", content: "You are a helpful assistant that returns only valid JSON." },
+          { role: "system", content: "You are a professional content architect. Always return only valid JSON." },
           { role: "user", content: masterPrompt }
         ],
-        temperature: 0.7,
-        max_tokens: 4096
+        temperature: 0.7
       })
     });
-    const deepseekData = await response.json();
-    if (!deepseekData.choices || !deepseekData.choices[0]) {
-      const errMsg = deepseekData.error ? deepseekData.error.message : JSON.stringify(deepseekData);
-      return new Response(JSON.stringify({ error: "DeepSeek API \uC624\uB958: " + errMsg }), { status: 500 });
-    }
-    const rawText = deepseekData.choices[0].message.content.replace(/```json|```/g, "").trim();
-    const aiContent = JSON.parse(rawText);
-    const fullHtml = `<!DOCTYPE html>
-<html lang="ko">
+    const deepseekResult = await aiRes.json();
+    const aiContent = JSON.parse(deepseekResult.choices[0].message.content.replace(/```json|```/g, "").trim());
+    const template = `<!DOCTYPE html>
+<html lang="${locale}">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <title>${aiContent.title} | \uBB38\uD53C\uC2A4 ${isSEO ? "\uC800\uB110" : "\uC9C0\uC2DD\uC778"}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${aiContent.title} | Moonpiece Lab</title>
+    <meta name="description" content="${aiContent.desc}">
     <link rel="stylesheet" href="/styles.css">
-    ${aiContent.json_ld ? `<script type="application/ld+json">${aiContent.json_ld}<\/script>` : ""}
+    ${aiContent.json_ld ? `<script type="application/ld+json">${JSON.stringify(aiContent.json_ld)}<\/script>` : ""}
     <style>
-        body { max-width: 800px; margin: 50px auto; padding: 20px; line-height: 1.8; color: var(--on-surface); }
-        h1, h2 { color: var(--primary); font-family: var(--font-serif); }
-        img { width: 100%; border-radius: 1rem; margin: 1.5rem 0; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .back-link { display: inline-block; margin-bottom: 2rem; color: var(--outline); font-weight: 700; text-decoration: none; }
+        .post-content { line-height: 2; color: var(--on-surface); font-size: 1.15rem; }
+        .post-content h2 { margin-top: 3.5rem; margin-bottom: 1.5rem; font-family: var(--font-serif); color: var(--primary); font-size: 2.2rem; }
+        .post-content h3 { margin-top: 2.5rem; margin-bottom: 1.25rem; font-family: var(--font-serif); color: var(--secondary); font-size: 1.6rem; }
+        .post-content p { margin-bottom: 1.8rem; }
+        .post-content img { width: 100%; border-radius: 2rem; margin: 3rem 0; box-shadow: var(--shadow-lg); }
+        .category-badge { display: inline-block; padding: 0.6rem 1.5rem; background: var(--primary-container); color: var(--on-primary-container); border-radius: 9999px; font-weight: 800; font-size: 0.95rem; margin-bottom: 2rem; }
+        .aeo-box { background: var(--surface-container-low); padding: 3rem; border-radius: 2.5rem; border: 1px solid var(--outline-variant); margin: 3rem 0; box-shadow: var(--shadow-sm); }
+        .aeo-q { font-weight: 900; color: var(--primary); font-size: 1.8rem; margin-bottom: 1.5rem; line-height: 1.3; }
+        .aeo-a { color: var(--on-surface-variant); font-size: 1.15rem; line-height: 1.8; }
+        .back-link { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--primary); text-decoration: none; font-weight: 800; margin-bottom: 3.5rem; transition: transform 0.2s; }
+        .back-link:hover { transform: translateX(-5px); }
     </style>
 </head>
-<body class="surface-container-lowest">
-    <a href="/${isSEO ? "journal" : "knowledge"}.html" class="back-link">\u2190 \uBAA9\uB85D\uC73C\uB85C \uB3CC\uC544\uAC00\uAE30</a>
-    <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">${aiContent.title}</h1>
-    <div style="font-size: 0.9rem; color: var(--outline); margin-bottom: 3rem;">\uCE74\uD14C\uACE0\uB9AC: ${aiContent.category}</div>
-    ${aiContent.html}
+<body>
+    <nav class="nav-bar">
+        <div class="nav-container">
+            <a href="/index.html" class="logo font-serif">Moonpiece</a>
+            <div class="nav-links">
+                <a href="/brand.html" class="nav-link">\uBB38\uD53C\uC2A4\uC758 \uC57D\uC18D</a>
+                <a href="/why.html" class="nav-link">\uD3B8\uC548\uD568\uC758 \uBE44\uBC00</a>
+                <a href="/review.html" class="nav-link">\uC5C4\uB9C8\uB4E4\uC758 \uC774\uC57C\uAE30</a>
+                <a href="/journal.html" class="nav-link">\uC784\uC0B0\uBD80 \uC800\uB110</a>
+                <a href="/knowledge.html" class="nav-link">\uC784\uC0B0\uBD80 \uC9C0\uC2DD\uC778</a>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="https://smartstore.naver.com/moonpiece" target="_blank" class="btn-primary mobile-hidden">\uAD6C\uB9E4\uD558\uAE30</a>
+                <button class="hamburger-btn" id="menu-toggle"><span></span><span></span><span></span></button>
+            </div>
+        </div>
+    </nav>
+    <div class="nav-overlay" id="overlay"></div>
+    <div class="mobile-nav" id="mobile-menu">
+        <a href="/brand.html" class="nav-link">\uBB38\uD53C\uC2A4\uC758 \uC57D\uC18D</a>
+        <a href="/why.html" class="nav-link">\uD3B8\uC548\uD568\uC758 \uBE44\uBC00</a>
+        <a href="/review.html" class="nav-link">\uC5C4\uB9C8\uB4E4\uC758 \uC774\uC57C\uAE30</a>
+        <a href="/journal.html" class="nav-link">\uC784\uC0B0\uBD80 \uC800\uB110</a>
+        <a href="/knowledge.html" class="nav-link">\uC784\uC0B0\uBD80 \uC9C0\uC2DD\uC778</a>
+        <a href="https://smartstore.naver.com/moonpiece" target="_blank" class="btn-primary text-center mt-8">\uAD6C\uB9E4\uD558\uAE30</a>
+    </div>
+    <header class="py-24" style="background: linear-gradient(180deg, var(--surface-container-low) 0%, white 100%);">
+        <div class="container" style="max-width: 800px;">
+            <a href="${isSEO ? "/journal.html" : "/knowledge.html"}" class="back-link">\u2190 \uBAA9\uB85D\uC73C\uB85C \uB3CC\uC544\uAC00\uAE30</a>
+            <div class="category-badge">${catMap[category] || "Special Column"}</div>
+            <h1 class="font-serif mb-8" style="font-size: 3.8rem; line-height: 1.1; letter-spacing: -0.02em; word-break: keep-all;">${aiContent.title}</h1>
+            <div class="flex items-center gap-4 text-outline font-bold" style="font-size: 0.95rem;">
+                <div style="width: 2.5rem; height: 2.5rem; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; color: white;">M</div>
+                <div>
+                    <div style="color: var(--on-surface);">Moonpiece Lab</div>
+                    <div style="font-weight: 500; font-size: 0.85rem;">${(/* @__PURE__ */ new Date()).toLocaleDateString("ko-KR")} \u2022 ${isSEO ? "SEO Journal" : "AEO Insight"}</div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <main class="py-24">
+        <article class="container post-content" style="max-width: 800px;">${aiContent.html}</article>
+    </main>
+    <footer class="py-24 surface-container-lowest">
+        <div class="container grid md:grid-cols-2 gap-12">
+            <div>
+                <div class="logo font-serif mb-6" style="color: var(--primary); font-size: 1.8rem;">Moonpiece</div>
+                <p style="max-width: 360px; color: var(--on-surface-variant); line-height: 1.8;">\uC18C\uC911\uD55C \uC5C4\uB9C8\uC640 \uC544\uAE30\uB97C \uC704\uD55C \uB2EC\uBE5B\uC758 \uC870\uAC01, \uBB38\uD53C\uC2A4. 10\uB144\uC758 \uC9C4\uC2EC\uC744 \uB2F4\uC544 \uAC00\uC7A5 \uD3B8\uC548\uD55C \uD734\uC2DD\uC744 \uC124\uACC4\uD569\uB2C8\uB2E4.</p>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-8">
+                <div><h4 style="font-weight: 800; margin-bottom: 1.5rem;">Company</h4><ul style="list-style: none; display: flex; flex-direction: column; gap: 0.8rem; color: var(--on-surface-variant);"><li><a href="/about.html">\uD68C\uC0AC\uC18C\uAC1C</a></li><li><a href="/terms.html">\uC774\uC6A9\uC57D\uAD00</a></li></ul></div>
+                <div><h4 style="font-weight: 800; margin-bottom: 1.5rem;">Support</h4><ul style="list-style: none; display: flex; flex-direction: column; gap: 0.8rem; color: var(--on-surface-variant);"><li><a href="/privacy.html">\uAC1C\uC778\uC815\uBCF4\uCC98\uB9AC\uBC29\uCE68</a></li><li><a href="https://smartstore.naver.com/moonpiece" target="_blank">\uC2A4\uB9C8\uD2B8\uC2A4\uD1A0\uC5B4</a></li></ul></div>
+                <div><h4 style="font-weight: 800; margin-bottom: 1.5rem;">Social</h4><ul style="list-style: none; display: flex; flex-direction: column; gap: 0.8rem; color: var(--on-surface-variant);"><li><a href="#">Instagram</a></li><li><a href="#">YouTube</a></li></ul></div>
+            </div>
+        </div>
+        <div class="container" style="margin-top: 5rem; padding-top: 2rem; border-top: 1px solid var(--outline-variant); text-align: center; color: var(--on-surface-variant); font-size: 0.85rem;">\xA9 2024 Moonpiece. All rights reserved.</div>
+    </footer>
+    <script>
+        const menuToggle = document.getElementById('menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const overlay = document.getElementById('overlay');
+        menuToggle.addEventListener('click', () => { const a = mobileMenu.classList.toggle('active'); menuToggle.classList.toggle('active'); overlay.classList.toggle('active'); document.body.style.overflow = a ? 'hidden' : 'auto'; });
+        overlay.addEventListener('click', () => { mobileMenu.classList.remove('active'); menuToggle.classList.remove('active'); overlay.classList.remove('active'); document.body.style.overflow = 'auto'; });
+    <\/script>
 </body>
 </html>`;
-    await env.JOURNAL_BUCKET.put(filePath, fullHtml, { httpMetadata: { contentType: "text/html; charset=UTF-8" } });
-    const existingList = await env.JOURNAL_BUCKET.get(listFile);
-    let posts = existingList ? await existingList.json() : [];
+    await env.JOURNAL_BUCKET.put(filePath, template, { httpMetadata: { contentType: "text/html; charset=UTF-8" } });
+    const existing = await env.JOURNAL_BUCKET.get(listFile);
+    let posts = existing ? await existing.json() : [];
     posts.unshift({
       title: aiContent.title,
-      category: aiContent.category,
-      categoryKey: aiContent.categoryKey,
-      image: aiContent.image || "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&q=80",
+      category: catMap[category] || aiContent.category,
+      categoryKey: category,
+      image: aiContent.image || "https://source.unsplash.com/800x600/?maternity",
       desc: aiContent.desc,
       date: (/* @__PURE__ */ new Date()).toLocaleDateString("ko-KR"),
-      url: filePath
+      url: `/${filePath}`
     });
     await env.JOURNAL_BUCKET.put(listFile, JSON.stringify(posts), { httpMetadata: { contentType: "application/json" } });
     return new Response(JSON.stringify({ success: true, path: `/${filePath}` }), {
@@ -692,6 +793,12 @@ Return ONLY a valid JSON object:
   }
 }
 __name(generateContentHandler, "generateContentHandler");
+async function syncNaverReviewsHandler(request, env) {
+}
+__name(syncNaverReviewsHandler, "syncNaverReviewsHandler");
+async function syncInstagramHandler(request, env) {
+}
+__name(syncInstagramHandler, "syncInstagramHandler");
 
 // ../Users/VIEW/AppData/Local/npm-cache/_npx/32026684e21afda6/node_modules/wrangler/templates/middleware/middleware-ensure-req-body-drained.ts
 init_checked_fetch();
