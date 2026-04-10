@@ -3,66 +3,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>문피스 저널 어드민</title>
+    <title>문피스 콘텐츠 어드민 | Moonpiece Labs</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
     <style>
-        body { font-family: sans-serif; padding: 2rem; max-width: 600px; margin: 0 auto; line-height: 1.6; }
-        .card { border: 1px solid #ddd; padding: 2rem; border-radius: 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        input { width: 100%; padding: 0.75rem; margin-bottom: 1rem; border: 1px solid #ccc; border-radius: 0.5rem; box-sizing: border-box; }
-        button { width: 100%; padding: 1rem; background: #4a3c31; color: white; border: none; border-radius: 0.5rem; cursor: pointer; font-weight: bold; }
-        button:disabled { background: #ccc; }
-        #status { margin-top: 1rem; padding: 1rem; border-radius: 0.5rem; display: none; }
-        .success { background: #e6fffa; color: #234e52; border: 1px solid #b2f5ea; }
-        .error { background: #fff5f5; color: #c53030; border: 1px solid #feb2b2; }
+        .tab-btn { padding: 1rem 2rem; font-weight: 700; color: var(--on-surface-variant); border-bottom: 3px solid transparent; transition: all 0.2s; }
+        .tab-btn.active { color: var(--primary); border-bottom: 3px solid var(--primary); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .input-group { margin-bottom: 1.5rem; }
+        .input-group label { display: block; font-weight: 700; margin-bottom: 0.5rem; color: var(--on-surface); }
+        .input-group input { width: 100%; padding: 1rem; border: 1px solid var(--outline-variant); border-radius: 0.75rem; font-family: inherit; font-size: 1rem; background: var(--surface-container-lowest); transition: border 0.3s; }
+        .input-group input:focus { outline: none; border-color: var(--primary); }
+        
+        .status-box { margin-top: 1.5rem; padding: 1.5rem; border-radius: 1rem; display: none; }
+        .status-box.success { background: #e6fffa; color: #234e52; border: 1px solid #b2f5ea; }
+        .status-box.error { background: #fff5f5; color: #c53030; border: 1px solid #feb2b2; }
     </style>
 </head>
-<body>
-    <div class="card">
-        <h2>AI 저널 자동 생성</h2>
-        <p>키워드를 입력하면 DeepSeek AI가 SEO에 최적화된 기사를 작성하고 문피스 저널에 자동 발행합니다.</p>
-        <input type="text" id="keyword" placeholder="예: 임산부 수면 자세, 환도선다 완화">
-        <button id="generateBtn">저널 생성 및 발행</button>
-        <div id="status"></div>
+<body style="background: var(--surface-low); min-height: 100vh;">
+    <!-- Top Nav Mini -->
+    <nav class="surface-container-lowest border-b border-outline-variant py-4 px-8 flex justify-between items-center mb-12">
+        <div class="logo font-serif text-primary" style="font-size: 1.5rem;">Moonpiece Admin</div>
+        <div class="flex items-center gap-6">
+            <span style="font-weight: 700; font-size: 0.9rem; color: var(--on-surface-variant);">wookhong745502</span>
+            <button onclick="logout()" style="color: var(--outline); font-size: 0.9rem; font-weight: 700; text-decoration: underline;">로그아웃</button>
+        </div>
+    </nav>
+
+    <div class="container" style="max-width: 800px;">
+        <h1 class="font-serif mb-4" style="font-size: 2.5rem; color: var(--primary);">자동화 콘텐츠 발행기</h1>
+        <p style="color: var(--on-surface-variant); margin-bottom: 3rem; font-size: 1.1rem;">
+            DeepSeek 언어모델을 기반으로 SEO 특화 저널과 AEO 특화 지식인 문서를 실시간으로 발행합니다.
+        </p>
+
+        <!-- Tabs -->
+        <div class="flex gap-4 border-b border-outline-variant mb-8">
+            <button class="tab-btn active" onclick="switchTab('seo')">SEO 저널 (임산부 저널)</button>
+            <button class="tab-btn" onclick="switchTab('aeo')">AEO 지식인 (임산부 지식인)</button>
+        </div>
+
+        <div class="card p-12 shadow-sm">
+            <!-- SEO Tab -->
+            <div id="seo-tab" class="tab-content active">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="material-symbols-outlined text-primary" style="font-size: 2rem;">article</span>
+                    <h2 style="font-size: 1.5rem; font-weight: 800;">SEO 저널 생성기</h2>
+                </div>
+                <p style="color: var(--on-surface-variant); margin-bottom: 2rem; font-size: 0.95rem;">
+                    검색 엔진 상위 노출을 목적으로 하는 시맨틱 HTML5 구조의 긴 글(Long-form) 전문 저널을 <code>/journal/</code> 경로에 발행합니다.
+                </p>
+                <div class="input-group">
+                    <label>메인 키워드</label>
+                    <input type="text" id="seo-kw" placeholder="예: 임산부 환도선다 테이핑 방법, 임신 초기 불면증 완화">
+                </div>
+                <button id="seo-btn" class="btn-primary w-full" style="width: 100%; border-radius: 0.75rem; padding: 1.25rem;">저널 자동 발행 (약 30초 소요)</button>
+                <div id="seo-status" class="status-box"></div>
+            </div>
+
+            <!-- AEO Tab -->
+            <div id="aeo-tab" class="tab-content">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="material-symbols-outlined" style="font-size: 2rem; color: #10b981;">psychology</span>
+                    <h2 style="font-size: 1.5rem; font-weight: 800; color: #10b981;">AEO 지식인 생성기</h2>
+                </div>
+                <p style="color: var(--on-surface-variant); margin-bottom: 2rem; font-size: 0.95rem;">
+                    ChatGPT, 네이버 Cue:, Google Search Generative Experience 등 AI 엔진이 즉각적으로 긁어갈 수 있도록 Q&A 구조와 JSON-LD 스키마가 결합된 답변서를 <code>/knowledge/</code> 경로에 발행합니다.
+                </p>
+                <div class="input-group">
+                    <label>질문 형태의 키워드</label>
+                    <input type="text" id="aeo-kw" placeholder="예: 임산부 엎드려 자면 태아에게 위험한가요?, 임신부 파스가 안좋은 이유">
+                </div>
+                <button id="aeo-btn" style="background: #10b981; color: white; width: 100%; border-radius: 0.75rem; padding: 1.25rem; font-weight: 700; transition: all 0.2s;" onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'">AEO 지식인 발행 (약 30초 소요)</button>
+                <div id="aeo-status" class="status-box"></div>
+            </div>
+        </div>
     </div>
 
     <script>
-        const btn = document.getElementById('generateBtn');
-        const input = document.getElementById('keyword');
-        const status = document.getElementById('status');
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            if (tab === 'seo') {
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                document.getElementById('seo-tab').classList.add('active');
+            } else {
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                document.getElementById('aeo-tab').classList.add('active');
+            }
+        }
 
-        btn.onclick = async () => {
+        async function logout() {
+            await fetch('/admin/api/auth/logout', { method: 'POST' });
+            window.location.href = '/';
+        }
+
+        async function generate(type) {
+            const btnTag = type === 'seo' ? 'seo-btn' : 'aeo-btn';
+            const kwTag = type === 'seo' ? 'seo-kw' : 'aeo-kw';
+            const statusTag = type === 'seo' ? 'seo-status' : 'aeo-status';
+            const apiPath = type === 'seo' ? '/admin/api/generate-journal' : '/admin/api/generate-knowledge';
+
+            const btn = document.getElementById(btnTag);
+            const input = document.getElementById(kwTag);
+            const status = document.getElementById(statusTag);
+
             const kw = input.value.trim();
-            if (!kw) return alert('키워드를 입력하세요.');
+            if (!kw) return alert('키워드를 입력해주세요!');
 
             btn.disabled = true;
-            btn.textContent = '생성 중... (약 20~30초 소요)';
+            const originalText = btn.textContent;
+            btn.textContent = 'AI가 콘텐츠를 작성 및 배포 중입니다...';
             status.style.display = 'none';
 
             try {
-                const res = await fetch('/generate-journal', {
+                const res = await fetch(apiPath, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ keyword: kw })
                 });
 
-                const data = await res.json();
+                // Nếu bạn chưa đăng nhập hoặc cookie hết hạn (403/401 Redirect)
+                if (res.redirected) {
+                    window.location.href = res.url;
+                    return;
+                }
 
+                const data = await res.json();
                 if (data.success) {
-                    status.className = 'success';
-                    status.innerHTML = `성능 최적화 저널 발행 성공!<br><a href="${data.path}" target="_blank">기사 보기: ${data.slug}.html</a>`;
+                    status.className = 'status-box success';
+                    status.innerHTML = `<span style="font-weight: 800; font-size:1.1rem; display:block; margin-bottom: 0.5rem;">✅ 발행이 완료되었습니다!</span>
+                                        <a href="${data.path}" target="_blank" style="text-decoration: underline; color: #319795; font-weight: 700;">방금 발행된 문서 확인하기 ↗</a>`;
                     status.style.display = 'block';
                     input.value = '';
                 } else {
                     throw new Error(data.error || '알 수 없는 오류');
                 }
             } catch (e) {
-                status.className = 'error';
-                status.textContent = '실패: ' + e.message;
+                status.className = 'status-box error';
+                status.innerHTML = `<span style="font-weight: 800;">❌ 발행 실패:</span> ${e.message}`;
                 status.style.display = 'block';
             } finally {
                 btn.disabled = false;
-                btn.textContent = '저널 생성 및 발행';
+                btn.textContent = originalText;
             }
-        };
+        }
+
+        document.getElementById('seo-btn').onclick = () => generate('seo');
+        document.getElementById('aeo-btn').onclick = () => generate('aeo');
     </script>
 </body>
 </html>
