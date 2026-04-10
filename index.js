@@ -326,6 +326,9 @@ Return ONLY a valid JSON object:
         </div>
     </header>
     <main class="py-24">
+        <div class="container" style="max-width: 800px;">
+            <img src="${aiContent.image}" alt="${aiContent.title}" style="width: 100%; border-radius: 2rem; margin-bottom: 4rem; box-shadow: var(--shadow-lg); object-fit: cover; aspect-ratio: 16/9;">
+        </div>
         <article class="container post-content" style="max-width: 800px;">${aiContent.html}</article>
     </main>
     <footer class="py-24 surface-container-lowest">
