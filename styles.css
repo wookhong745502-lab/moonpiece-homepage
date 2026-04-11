@@ -440,3 +440,66 @@ footer {
     color: var(--outline);
     font-size: 0.9rem;
 }
+
+/* Article Content Styles */
+.article-content {
+    color: var(--on-surface);
+    line-height: 1.8;
+    font-size: 1.15rem;
+}
+.article-content h1, 
+.article-content h2, 
+.article-content h3 {
+    margin-top: 3.5rem;
+    margin-bottom: 1.5rem;
+    font-family: var(--font-serif);
+    line-height: 1.3;
+}
+.article-content h2 { font-size: 2.25rem; color: var(--primary); font-weight: 800; }
+.article-content h3 { font-size: 1.75rem; color: var(--secondary); font-weight: 700; }
+.article-content p {
+    margin-bottom: 2.5rem;
+    word-break: keep-all;
+}
+.article-content ul, 
+.article-content ol {
+    margin-bottom: 3rem;
+    padding-left: 1.5rem;
+}
+.article-content li {
+    margin-bottom: 1rem;
+}
+.article-content strong {
+    color: var(--primary);
+}
+
+/* AEO Specific Box */
+.aeo-summary-box {
+    background: #fdfce8; /* Soft yellow tint */
+    color: var(--on-surface);
+    padding: 2.5rem;
+    border-radius: 2rem;
+    margin-bottom: 4rem;
+    border: 1px solid var(--outline-variant);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+}
+.aeo-summary-box ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.aeo-summary-box li {
+    position: relative;
+    padding-left: 1.5rem;
+    margin-bottom: 1.25rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+.aeo-summary-box li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: var(--primary);
+    font-size: 1.5rem;
+    line-height: 1;
+}

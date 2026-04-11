@@ -56,6 +56,7 @@
             <button class="filter-btn" data-filter="pain">통증 완화</button>
             <button class="filter-btn" data-filter="health">건강 관리</button>
             <button class="filter-btn" data-filter="psychology">심리 & 지식</button>
+            <button class="filter-btn" data-filter="others">기타</button>
         </div>
     </section>
 
@@ -67,7 +68,7 @@
             </div>
             
             <!-- Pagination Container -->
-            <div class="mt-20 flex justify-center gap-4" id="pagination-container">
+            <div class="mt-32 flex justify-center gap-4" id="pagination-container">
                 <!-- Buttons will be injected here -->
             </div>
         </div>
@@ -116,135 +117,32 @@
     <script>
         // Journal Data Rebuilt from existing files
         // Journal Data (Initially empty, will be loaded from server)
-        let journalPosts = [
-            {
-                title: "[임산부 부종 관리] 밤마다 붓는 다리, 원인과 즉각적인 완화법",
-                category: "건강 관리",
-                categoryKey: "health",
-                image: "https://images.unsplash.com/photo-1512678080530-7760d81faba6?w=800&q=80",
-                date: "2024.04.11",
-                desc: "임신 중기부터 심해지는 부종의 원인을 분석하고, 혈액순환을 돕는 자세와 바디필로우 활용법을 알아봅니다.",
-                url: "journal/pregnancy-edema-care.html"
-            },
-            {
-                title: "[임신기 영양 가이드] 엄마와 아기를 위한 시기별 필수 영양소 총정리",
-                category: "건강 관리",
-                categoryKey: "health",
-                image: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&q=80",
-                date: "2024.04.11",
-                desc: "임신 초기부터 후기까지, 뱃속 아기의 성장에 맞춰 엄마가 꼭 챙겨야 할 식단과 영양제를 완벽 가이드합니다.",
-                url: "journal/maternity-nutrition-guide.html"
-            },
-            {
-                title: "[임산부 튼살 관리] 붉은 선이 생기기 전, 매끈한 피부를 위한 골든타임",
-                category: "건강 관리",
-                categoryKey: "health",
-                image: "https://images.unsplash.com/photo-1556227702-d1e4e7b5c232?w=800&q=80",
-                date: "2024.04.11",
-                desc: "임신 중 급격한 체형 변화로 생기는 튼살의 원인을 알아보고, 효과적인 보습 관리법을 제안합니다.",
-                url: "journal/stretch-marks-prevention.html"
-            },
-            {
-                title: "[임산부 케겔 운동] 순산과 빠른 회복의 열쇠, 골반저근 강화법",
-                category: "건강 관리",
-                categoryKey: "health",
-                image: "https://images.unsplash.com/photo-1518611012118-2969c73a4468?w=800&q=80",
-                date: "2024.04.11",
-                desc: "순산을 돕고 산후 요실금을 예방하는 골반저근 강화 운동(케겔 운동)의 올바른 방법을 알아봅니다.",
-                url: "journal/pelvic-floor-exercises.html"
-            },
-            {
-                title: "[임산부 심리 케어] 호르몬 탓일까요? 임신 중 우울감과 불안을 다스리는 법",
-                category: "심리 & 지식",
-                categoryKey: "psychology",
-                image: "https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=800&q=80",
-                date: "2024.04.11",
-                desc: "임신 중 겪는 급격한 감정 변화의 원인을 이해하고, 엄마의 마음 건강을 지키기 위한 팁을 공유합니다.",
-                url: "journal/maternity-mental-health.html"
-            },
-            {
-                title: "[분만 계획서] 두렵지 않은 출산, 나만의 벌스플랜 작성 가이드",
-                category: "심리 & 지식",
-                categoryKey: "psychology",
-                image: "https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?w=800&q=80",
-                date: "2024.04.11",
-                desc: "출산의 순간을 주체적으로 맞이하기 위한 분만 계획서(Birth Plan) 작성법과 소통 팁을 정리합니다.",
-                url: "journal/birth-plan-preparation.html"
-            },
-            {
-                title: "[산후 회복] 출산 직후 6주, 평생 건강을 결정짓는 산후조리 핵심 가이드",
-                category: "건강 관리",
-                categoryKey: "health",
-                image: "https://images.unsplash.com/photo-1556227702-d1e4e7b5c232?w=800&q=80",
-                date: "2024.04.11",
-                desc: "출산 후 지치고 변화된 몸을 건강하게 되돌리기 위한 시기별 회복 팁과 생활 수칙을 알아봅니다.",
-                url: "journal/postpartum-recovery-tips.html"
-            },
-            {
-                title: "[임신 16주 잠이 안와요] 불면증의 원인과 꿀잠을 위한 완벽 수면 환경",
-                category: "심리 & 지식",
-                categoryKey: "psychology",
-                image: "https://images.unsplash.com/photo-1586105251261-72a756497a11?w=800&h=600&fit=crop&q=80",
-                date: "2024.04.04",
-                desc: "임신 중기부터 시작되는 불면증의 원인과 쾌적한 수면 환경 조성법을 알아봅니다.",
-                url: "journal/pregnancy-week-16-insomnia.html"
-            },
-            {
-                title: "[환도선다 완화방법] 임산부 골반 통증의 원인과 24시간 케어 솔루션",
-                category: "통증 완화",
-                categoryKey: "pain",
-                image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&h=600&fit=crop&q=80",
-                date: "2024.04.04",
-                desc: "삶의 질을 떨어뜨리는 환도선다 통증의 원인을 분석하고 즉각적인 완화법을 제안합니다.",
-                url: "journal/hwando-pelvic-pain-relief.html"
-            },
-            {
-                title: "[임신 중 허리 통증 줄이는 법] 밤마다 끊어질 듯한 요통의 원인과 수면 솔루션",
-                category: "건강 관리",
-                categoryKey: "health",
-                image: "https://images.unsplash.com/photo-1609220136736-443140cffec6?w=800&h=600&fit=crop&q=80",
-                date: "2024.04.04",
-                desc: "임산부 요통의 근본 원인을 분석하고 척추 부담을 덜어주는 수면 전략을 공개합니다.",
-                url: "journal/pregnancy-back-pain-relief.html"
-            },
-            {
-                title: "[임산부 수면 자세] 2000자 완벽 가이드: 환도선다부터 숙면 비법까지",
-                category: "수면 자세",
-                categoryKey: "sleep",
-                image: "https://images.unsplash.com/photo-1519824145371-296894a0daa9?w=800&h=600&fit=crop&q=80",
-                date: "2024.04.04",
-                desc: "의학적 근거를 바탕으로 한 최적의 임산부 수면 자세와 바디필로우 활용법 가이드.",
-                url: "journal/pregnancy-sleep-positions.html"
-            },
-            {
-                title: "[임산부 옆으로 자는 이유] 산부인과 전문위가 '왼쪽 눕기'를 강조하는 의학적 근거",
-                category: "의학 & 지식",
-                categoryKey: "psychology",
-                image: "https://images.unsplash.com/photo-1504439468489-c8920d796a29?w=800&h=600&fit=crop&q=80",
-                date: "2024.04.04",
-                desc: "혈류 개선과 태아 건강을 위한 '왼쪽 눕기'의 비밀과 의학적 근거를 심층 분석합니다.",
-                url: "journal/why-pregnant-women-sleep-on-side.html"
-            }
-        ];
+        let journalPosts = [];
 
         const grid = document.getElementById('journal-grid');
         const filterBtns = document.querySelectorAll('.filter-btn');
         const paginationContainer = document.getElementById('pagination-container');
 
         let currentPage = 1;
-        const itemsPerPage = 12;
+        const itemsPerPage = 9;
         let currentFilter = 'all';
 
-        // Load Dynamic Journals from Server
         async function loadServerJournals() {
             try {
                 // 캐시 방지를 위해 타임스탬프 추가
                 const res = await fetch(`/list-journals?t=${Date.now()}`);
                 const serverData = await res.json();
                 if (serverData && Array.isArray(serverData) && serverData.length > 0) {
-                    // 서버 데이터가 있으면 기존 샘플 데이터와 합치거나 대체
-                    // 여기서는 최신 AI 저널이 먼저 나오도록 서버 데이터를 앞에 배치
-                    journalPosts = [...serverData, ...journalPosts];
+                    const mapped = serverData.map(p => {
+                        const nameMap = { 'sleep': '수면 자세', 'pain': '통증 완화', 'health': '건강 관리', 'psychology': '심리 & 지식', 'others': '기타' };
+                        return {
+                            ...p,
+                            categoryKey: p.category, 
+                            category: nameMap[p.category] || p.category,
+                            desc: p.desc || p.title
+                        };
+                    });
+                    journalPosts = [...mapped, ...journalPosts];
                 }
             } catch (e) {
                 console.warn("Server journals could not be loaded:", e);
@@ -281,8 +179,8 @@
                             <span style="font-size: 0.85rem; color: var(--outline);">${post.date}</span>
                         </div>
                         <h3 class="font-serif mb-4 group-hover:text-primary transition" style="font-size: 1.5rem; line-height: 1.4; word-break: keep-all;">${post.title}</h3>
-                        <p style="color: var(--on-surface-variant); font-size: 0.95rem; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-                            ${post.desc}
+                        <p style="color: var(--on-surface-variant); font-size: 0.95rem; line-height: 1.7; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; word-break: keep-all;">
+                            ${post.desc || ''}
                         </p>
                     </div>
                 `;
