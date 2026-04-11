@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -9,13 +9,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 </head>
 <body>
-    <!-- Top Navigation -->
-    <nav class="nav-bar">
+        <!-- Top Navigation -->
+        <nav class="nav-bar">
         <div class="nav-container">
             <a href="index.html" class="logo font-serif">Moonpiece</a>
             <div class="nav-links">
                 <a href="brand.html" class="nav-link">문피스의 약속</a>
-                <a href="why.html" class="nav-link">편안함의 비밀</a>
                 <a href="review.html" class="nav-link">엄마들의 이야기</a>
                 <a href="journal.html" class="nav-link">임산부 저널</a>
                 <a href="knowledge.html" class="nav-link active">임산부 지식인</a>
@@ -29,11 +28,10 @@
         </div>
     </nav>
 
-    <!-- Mobile Navigation Overlay -->
-    <div class="nav-overlay" id="overlay"></div>
+        <!-- Mobile Navigation Overlay -->
+        <div class="nav-overlay" id="overlay"></div>
     <div class="mobile-nav" id="mobile-menu">
         <a href="brand.html" class="nav-link">문피스의 약속</a>
-        <a href="why.html" class="nav-link">편안함의 비밀</a>
         <a href="review.html" class="nav-link">엄마들의 이야기</a>
         <a href="journal.html" class="nav-link">임산부 저널</a>
         <a href="knowledge.html" class="nav-link active">임산부 지식인</a>
@@ -75,7 +73,9 @@
         </div>
     </section>
 
-    <footer>
+    <!-- Footer -->
+        <!-- Footer -->
+        <footer>
         <div class="container grid md:grid-cols-2 gap-12">
             <div>
                 <div class="logo font-serif mb-4" style="color: var(--primary);">Moonpiece</div>
@@ -114,8 +114,6 @@
 
     <!-- Script Area -->
     <script>
-        // Journal Data Rebuilt from existing files
-        // Journal Data (Initially empty, will be loaded from server)
         let knowledgePosts = [];
 
         const grid = document.getElementById('journal-grid');
@@ -123,22 +121,18 @@
         const paginationContainer = document.getElementById('pagination-container');
 
         let currentPage = 1;
-        const itemsPerPage = 9;
+        const itemsPerPage = 12;
         let currentFilter = 'all';
 
-        // Load Dynamic Journals from Server
         async function loadServerJournals() {
             try {
-                // 캐시 방지를 위해 타임스탬프 추가
-                const res = await fetch(`/list-knowledge?t=${Date.now()}`);
+                const res = await fetch(\/list-knowledge?t=\\);
                 const serverData = await res.json();
                 if (serverData && Array.isArray(serverData) && serverData.length > 0) {
-                    // 서버 데이터가 있으면 기존 샘플 데이터와 합치거나 대체
-                    // 여기서는 최신 AI 저널이 먼저 나오도록 서버 데이터를 앞에 배치
                     knowledgePosts = [...serverData, ...knowledgePosts];
                 }
             } catch (e) {
-                console.warn("Server journals could not be loaded:", e);
+                console.warn("Server knowledge posts could not be loaded:", e);
             }
             renderJournal();
         }
@@ -162,21 +156,21 @@
                 article.className = 'flex flex-col gap-6 cursor-pointer group';
                 article.onclick = () => window.location.href = post.url;
                 
-                article.innerHTML = `
+                article.innerHTML = \
                     <div class="card overflow-hidden shadow-sm transition hover:shadow-xl group-hover:-translate-y-1" style="aspect-ratio: 4/3;">
-                        <img src="${post.image}" alt="${post.title}" class="w-full h-full object-cover transition duration-700 group-hover:scale-105">
+                        <img src="\" alt="\" class="w-full h-full object-cover transition duration-700 group-hover:scale-105">
                     </div>
                     <div>
                         <div class="flex items-center gap-3 mb-4">
-                            <span class="px-3 py-1 rounded-full surface-container-high text-primary font-bold" style="font-size: 0.8rem;">${post.category}</span>
-                            <span style="font-size: 0.85rem; color: var(--outline);">${post.date}</span>
+                            <span class="px-3 py-1 rounded-full surface-container-high text-primary font-bold" style="font-size: 0.8rem;">\</span>
+                            <span style="font-size: 0.85rem; color: var(--outline);">\</span>
                         </div>
-                        <h3 class="font-serif mb-4 group-hover:text-primary transition" style="font-size: 1.5rem; line-height: 1.4; word-break: keep-all;">${post.title}</h3>
+                        <h3 class="font-serif mb-4 group-hover:text-primary transition" style="font-size: 1.5rem; line-height: 1.4; word-break: keep-all;">\</h3>
                         <p style="color: var(--on-surface-variant); font-size: 0.95rem; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-                            ${post.desc}
+                            \
                         </p>
                     </div>
-                `;
+                \;
                 grid.appendChild(article);
             });
 
@@ -191,7 +185,7 @@
             for (let i = 1; i <= totalPages; i++) {
                 const btn = document.createElement('button');
                 btn.innerText = i;
-                btn.className = `w-12 h-12 rounded-full font-bold transition ${i === currentPage ? 'bg-primary text-on-primary' : 'surface-container-high hover:bg-primary-container'}`;
+                btn.className = \w-12 h-12 rounded-full font-bold transition \\;
                 btn.onclick = () => {
                     renderJournal(currentFilter, i);
                     window.scrollTo({ top: grid.offsetTop - 200, behavior: 'smooth' });
@@ -200,7 +194,6 @@
             }
         }
 
-        // Filter Logic
         filterBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 filterBtns.forEach(b => b.classList.remove('active'));
@@ -209,10 +202,8 @@
             });
         });
 
-        // Initialize grid
         loadServerJournals();
 
-        // Nav Logic
         const menuToggle = document.getElementById('menu-toggle');
         const mobileMenu = document.getElementById('mobile-menu');
         const overlay = document.getElementById('overlay');

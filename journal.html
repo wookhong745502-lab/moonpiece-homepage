@@ -9,13 +9,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 </head>
 <body>
-    <!-- Top Navigation -->
-    <nav class="nav-bar">
+        <!-- Top Navigation -->
+        <nav class="nav-bar">
         <div class="nav-container">
             <a href="index.html" class="logo font-serif">Moonpiece</a>
             <div class="nav-links">
                 <a href="brand.html" class="nav-link">문피스의 약속</a>
-                <a href="why.html" class="nav-link">편안함의 비밀</a>
                 <a href="review.html" class="nav-link">엄마들의 이야기</a>
                 <a href="journal.html" class="nav-link active">임산부 저널</a>
                 <a href="knowledge.html" class="nav-link">임산부 지식인</a>
@@ -29,11 +28,10 @@
         </div>
     </nav>
 
-    <!-- Mobile Navigation Overlay -->
-    <div class="nav-overlay" id="overlay"></div>
+        <!-- Mobile Navigation Overlay -->
+        <div class="nav-overlay" id="overlay"></div>
     <div class="mobile-nav" id="mobile-menu">
         <a href="brand.html" class="nav-link">문피스의 약속</a>
-        <a href="why.html" class="nav-link">편안함의 비밀</a>
         <a href="review.html" class="nav-link">엄마들의 이야기</a>
         <a href="journal.html" class="nav-link active">임산부 저널</a>
         <a href="knowledge.html" class="nav-link">임산부 지식인</a>
@@ -75,7 +73,9 @@
         </div>
     </section>
 
-    <footer>
+    <!-- Footer -->
+        <!-- Footer -->
+        <footer>
         <div class="container grid md:grid-cols-2 gap-12">
             <div>
                 <div class="logo font-serif mb-4" style="color: var(--primary);">Moonpiece</div>
@@ -117,6 +117,69 @@
         // Journal Data Rebuilt from existing files
         // Journal Data (Initially empty, will be loaded from server)
         let journalPosts = [
+            {
+                title: "[임산부 부종 관리] 밤마다 붓는 다리, 원인과 즉각적인 완화법",
+                category: "건강 관리",
+                categoryKey: "health",
+                image: "https://images.unsplash.com/photo-1512678080530-7760d81faba6?w=800&q=80",
+                date: "2024.04.11",
+                desc: "임신 중기부터 심해지는 부종의 원인을 분석하고, 혈액순환을 돕는 자세와 바디필로우 활용법을 알아봅니다.",
+                url: "journal/pregnancy-edema-care.html"
+            },
+            {
+                title: "[임신기 영양 가이드] 엄마와 아기를 위한 시기별 필수 영양소 총정리",
+                category: "건강 관리",
+                categoryKey: "health",
+                image: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&q=80",
+                date: "2024.04.11",
+                desc: "임신 초기부터 후기까지, 뱃속 아기의 성장에 맞춰 엄마가 꼭 챙겨야 할 식단과 영양제를 완벽 가이드합니다.",
+                url: "journal/maternity-nutrition-guide.html"
+            },
+            {
+                title: "[임산부 튼살 관리] 붉은 선이 생기기 전, 매끈한 피부를 위한 골든타임",
+                category: "건강 관리",
+                categoryKey: "health",
+                image: "https://images.unsplash.com/photo-1556227702-d1e4e7b5c232?w=800&q=80",
+                date: "2024.04.11",
+                desc: "임신 중 급격한 체형 변화로 생기는 튼살의 원인을 알아보고, 효과적인 보습 관리법을 제안합니다.",
+                url: "journal/stretch-marks-prevention.html"
+            },
+            {
+                title: "[임산부 케겔 운동] 순산과 빠른 회복의 열쇠, 골반저근 강화법",
+                category: "건강 관리",
+                categoryKey: "health",
+                image: "https://images.unsplash.com/photo-1518611012118-2969c73a4468?w=800&q=80",
+                date: "2024.04.11",
+                desc: "순산을 돕고 산후 요실금을 예방하는 골반저근 강화 운동(케겔 운동)의 올바른 방법을 알아봅니다.",
+                url: "journal/pelvic-floor-exercises.html"
+            },
+            {
+                title: "[임산부 심리 케어] 호르몬 탓일까요? 임신 중 우울감과 불안을 다스리는 법",
+                category: "심리 & 지식",
+                categoryKey: "psychology",
+                image: "https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=800&q=80",
+                date: "2024.04.11",
+                desc: "임신 중 겪는 급격한 감정 변화의 원인을 이해하고, 엄마의 마음 건강을 지키기 위한 팁을 공유합니다.",
+                url: "journal/maternity-mental-health.html"
+            },
+            {
+                title: "[분만 계획서] 두렵지 않은 출산, 나만의 벌스플랜 작성 가이드",
+                category: "심리 & 지식",
+                categoryKey: "psychology",
+                image: "https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?w=800&q=80",
+                date: "2024.04.11",
+                desc: "출산의 순간을 주체적으로 맞이하기 위한 분만 계획서(Birth Plan) 작성법과 소통 팁을 정리합니다.",
+                url: "journal/birth-plan-preparation.html"
+            },
+            {
+                title: "[산후 회복] 출산 직후 6주, 평생 건강을 결정짓는 산후조리 핵심 가이드",
+                category: "건강 관리",
+                categoryKey: "health",
+                image: "https://images.unsplash.com/photo-1556227702-d1e4e7b5c232?w=800&q=80",
+                date: "2024.04.11",
+                desc: "출산 후 지치고 변화된 몸을 건강하게 되돌리기 위한 시기별 회복 팁과 생활 수칙을 알아봅니다.",
+                url: "journal/postpartum-recovery-tips.html"
+            },
             {
                 title: "[임신 16주 잠이 안와요] 불면증의 원인과 꿀잠을 위한 완벽 수면 환경",
                 category: "심리 & 지식",
@@ -169,7 +232,7 @@
         const paginationContainer = document.getElementById('pagination-container');
 
         let currentPage = 1;
-        const itemsPerPage = 9;
+        const itemsPerPage = 12;
         let currentFilter = 'all';
 
         // Load Dynamic Journals from Server

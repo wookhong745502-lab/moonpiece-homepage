@@ -24,38 +24,46 @@ Return ONLY a valid JSON object with the following structure:
   "title": "Article Title",
   "category": "Category Name (e.g., 수면 자세, 통증 완화, 건강 관리, 심리 & 지식)",
   "categoryKey": "Category Key (e.g., sleep, pain, health, psychology)",
-  "image": "IMAGE_URL (Use high-quality Unsplash image relevant to keyword)",
+  "image": "IMAGE_URL (Use high-quality Unsplash image relevant to keyword. Format: https://images.unsplash.com/photo-XXX?w=800&q=80)",
   "desc": "Short 2-line description for the list card",
-  "html": "Full HTML article content (Use <h1>, <h2>, <p>, <ul>, <li>, <img> tags, 2500+ chars)"
+  "html": "Full HTML article content (Use <h2>, <h3>, <p>, <ul>, <li>, <img> tags, 2500+ chars. Do NOT include <h1> or <html> tags here.)"
 }
 
 Rules for HTML:
-- FAQ section included
-- Internal links to /why /buy /journal
+- FAQ section included at the end
+- Internal links to brand.html, journal.html
 - Include phrases: "많은 임산부들이 실제로 이렇게 말합니다", "상담을 하다 보면 이런 경우가 많습니다"
-- Insert 3~5 images with alt tags.
+- Insert 3~5 images with alt tags using keyword.
 
-Return JSON only. No markdown formatting blocks like \`\`\`json.`;
+Return JSON only. No markdown formatting blocks.`;
 
-  const geminiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${env.GEMINI_API_KEY}`;
+  const deepseekUrl = "https://api.deepseek.com/chat/completions";
   
-  const geminiRes = await fetch(geminiUrl, {
+  const aiRes = await fetch(deepseekUrl, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${env.DEEPSEEK_API_KEY}`
+    },
     body: JSON.stringify({
-      contents: [{ parts: [{ text: masterPrompt }] }]
+      model: "deepseek-chat",
+      messages: [
+        { role: "system", content: "You are a helpful assistant that outputs JSON only." },
+        { role: "user", content: masterPrompt }
+      ],
+      response_format: { type: "json_object" }
     })
   });
 
-  if (!geminiRes.ok) return new Response(JSON.stringify({ error: "Gemini API failure" }), { status: 500 });
+  if (!aiRes.ok) return new Response(JSON.stringify({ error: "DeepSeek API failure" }), { status: 500 });
 
-  const geminiData = await geminiRes.json();
+  const aiData = await aiRes.json();
   let aiContent;
   try {
-    const rawText = geminiData.candidates[0].content.parts[0].text.replace(/```json|```/g, "").trim();
+    const rawText = aiData.choices[0].message.content.replace(/```json|```/g, "").trim();
     aiContent = JSON.parse(rawText);
   } catch (e) {
-    return new Response(JSON.stringify({ error: "Failed to parse AI JSON response", detail: geminiData.candidates[0].content.parts[0].text }), { status: 500 });
+    return new Response(JSON.stringify({ error: "Failed to parse AI JSON response", detail: aiData.choices[0].message.content }), { status: 500 });
   }
 
   const { title, category, categoryKey, image, desc, html } = aiContent;
@@ -63,29 +71,60 @@ Return JSON only. No markdown formatting blocks like \`\`\`json.`;
   const fullHtml = `<!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<title>${title} | 문피스 임산부 저널</title>
-<meta name="description" content="${desc}">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-body { font-family: 'Noto Serif KR', serif; line-height: 1.8; color: #444; max-width: 800px; margin: 0 auto; padding: 3rem 1.5rem; }
-h1 { font-size: 2.8rem; color: #4a3c31; margin-bottom: 2rem; border-bottom: 2px solid #f2e9e1; padding-bottom: 1rem; }
-h2 { font-size: 2rem; color: #4a3c31; margin-top: 4rem; }
-p { margin-bottom: 1.5rem; font-size: 1.15rem; }
-img { width: 100%; border-radius: 2rem; margin: 3rem 0; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-ul { background: #fdfaf7; padding: 2.5rem; border-radius: 1.5rem; list-style-position: inside; }
-li { margin-bottom: 1rem; font-size: 1.1rem; }
-.footer-links { text-align: center; margin-top: 5rem; padding-top: 2rem; border-top: 1px solid #eee; display: flex; gap: 2rem; justify-content: center; }
-.footer-links a { text-decoration: none; color: #8c7361; font-weight: bold; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${title} | 문피스 임산부 저널</title>
+    <meta name="description" content="${desc}">
+    <link rel="stylesheet" href="../styles.css?v=1.3">
+    <style>
+        .article-content { max-width: 800px; margin: 0 auto; padding: 6rem 1.5rem; line-height: 2; color: var(--on-surface-variant); }
+        .article-content h1 { font-size: 3rem; color: var(--primary); margin-bottom: 2rem; font-family: 'Noto Serif KR', serif; }
+        .article-content h2 { font-size: 2rem; color: var(--primary); margin-top: 4rem; margin-bottom: 1.5rem; font-family: 'Noto Serif KR', serif; }
+        .article-content h3 { font-size: 1.5rem; color: var(--on-surface); margin-top: 3rem; margin-bottom: 1rem; }
+        .article-content p { margin-bottom: 2rem; font-size: 1.1rem; }
+        .article-content img { width: 100%; border-radius: 2rem; margin: 3rem 0; box-shadow: var(--shadow-xl); }
+        .article-content ul, .article-content ol { background: var(--surface-container-low); padding: 3rem; border-radius: 2rem; list-style-position: inside; margin: 2rem 0; }
+        .article-content li { margin-bottom: 1rem; }
+        .cta-box { background: var(--primary-container); color: var(--on-primary-container); padding: 4rem; border-radius: 2.5rem; text-align: center; margin-top: 6rem; }
+    </style>
 </head>
 <body>
-${html}
-<div class="footer-links">
-<a href="/why">편안함의 비밀</a>
-<a href="/buy">구매하기</a>
-<a href="/journal">임산부 저널</a>
-</div>
+    <nav class="nav-bar">
+        <div class="nav-container">
+            <a href="../index.html" class="logo font-serif">Moonpiece</a>
+            <div class="nav-links">
+                <a href="../brand.html" class="nav-link">문피스의 약속</a>
+                <a href="../review.html" class="nav-link">엄마들의 이야기</a>
+                <a href="../journal.html" class="nav-link active">임산부 저널</a>
+                <a href="../knowledge.html" class="nav-link">임산부 지식인</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="article-content">
+        <div style="margin-bottom: 4rem;">
+            <span class="px-4 py-2 rounded-full surface-container-high text-primary font-bold" style="font-size: 0.9rem;">${category}</span>
+            <h1 style="margin-top: 1.5rem;">${title}</h1>
+            <p style="color: var(--outline); font-size: 0.9rem;">문피스 수면연구소 · ${new Date().toLocaleDateString('ko-KR')}</p>
+        </div>
+        
+        <img src="${image}" alt="${title}" style="margin-top:0;">
+
+        ${html}
+
+        <div class="cta-box">
+            <h2 style="margin-top:0; color: inherit;">당신의 밤에 달빛 한 조각을 선물하세요</h2>
+            <p>문피스 바디필로우는 임산부의 체형 변화를 연구하여 탄생했습니다.</p>
+            <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" class="btn-primary" style="display: inline-block; margin-top: 1rem;">스마트스토어에서 제품 보기</a>
+        </div>
+    </main>
+
+    <footer style="margin-top: 10rem;">
+        <div class="container" style="text-align: center; color: var(--on-surface-variant); font-size: 0.85rem; padding: 4rem 0; border-top: 1px solid var(--outline-variant);">
+            <div class="logo font-serif mb-4" style="color: var(--primary);">Moonpiece</div>
+            <p>© 2024 Moonpiece. All rights reserved.</p>
+        </div>
+    </footer>
 </body>
 </html>`;
 

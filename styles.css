@@ -292,11 +292,40 @@ button {
 .sticky.top-16 {
     position: sticky;
     top: 4.5rem;
-    z-index: 8000; /* 네비게이션 보다는 낮지만 일반 콘텐츠보다 높음 */
-    background: #fcf9f4; /* 완전 불투명 배경 */
+    z-index: 8000;
+    background: #fcf9f4;
     border-bottom: 1px solid var(--outline-variant);
-    padding: 2rem 0; /* 여백 확보 */
 }
+
+/* Post Content Styles */
+.post-content { line-height: 2; color: var(--on-surface); font-size: 1.15rem; }
+.post-content h2 { margin-top: 4rem; margin-bottom: 1.5rem; font-family: var(--font-serif); color: var(--primary); font-size: 2.5rem; }
+.post-content h3 { margin-top: 3rem; margin-bottom: 1.25rem; font-family: var(--font-serif); color: var(--secondary); font-size: 1.8rem; }
+.post-content p { margin-bottom: 2rem; }
+.post-content ul, .post-content ol { margin-bottom: 2.5rem; padding-left: 1.5rem; }
+.post-content li { margin-bottom: 0.75rem; }
+.post-content strong { color: var(--primary); font-weight: 800; }
+.post-content img { width: 100%; border-radius: 2rem; margin: 4rem 0; box-shadow: var(--shadow-lg); }
+
+/* FAQ Accordion */
+.faq-card { background: white; border-radius: 1.5rem; border: 1px solid var(--outline-variant); margin-bottom: 1rem; overflow: hidden; transition: all 0.3s ease; }
+.faq-card summary { padding: 1.5rem; font-weight: 800; cursor: pointer; display: flex; justify-content: space-between; align-items: center; list-style: none; }
+.faq-card summary::-webkit-details-marker { display: none; }
+.faq-card summary::after { content: 'add'; font-family: 'Material Symbols Outlined'; font-size: 1.5rem; transition: transform 0.3s; }
+.faq-card[open] summary::after { content: 'remove'; transform: rotate(180deg); }
+.faq-card p { padding: 0 1.5rem 1.5rem; color: var(--on-surface-variant); line-height: 1.8; border-top: 1px solid var(--outline-variant); margin: 0; padding-top: 1.5rem; }
+
+/* Related Content */
+.related-grid { display: grid; gap: 2rem; margin-top: 3rem; }
+@media (min-width: 768px) { .related-grid { grid-template-columns: repeat(3, 1fr); } }
+.related-card { background: white; border-radius: 1.5rem; border: 1px solid var(--outline-variant); overflow: hidden; transition: transform 0.3s ease; }
+.related-card:hover { transform: translateY(-8px); }
+.related-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; }
+.related-card .info { padding: 1.5rem; }
+.related-card .info h5 { font-family: var(--font-serif); font-size: 1.1rem; line-height: 1.4; color: var(--on-surface); }
+
+/* Category Badge */
+.category-badge { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.4rem; background: var(--primary-container); color: var(--on-primary-container); border-radius: 9999px; font-weight: 800; font-size: 0.9rem; letter-spacing: -0.01em; }
 
 .btn-primary {
     background-color: var(--primary-container);

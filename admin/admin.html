@@ -7,287 +7,230 @@
     <link rel="stylesheet" href="../styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
     <style>
-        .tab-btn { padding: 1rem 2rem; font-weight: 700; color: var(--on-surface-variant); border-bottom: 3px solid transparent; transition: all 0.2s; cursor: pointer; }
-        .tab-btn.active { color: var(--primary); border-bottom: 3px solid var(--primary); }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+        :root {
+            --sidebar-width: 280px;
+        }
+        body { background: var(--surface-low); display: flex; min-height: 100vh; overflow: hidden; margin: 0; }
+        
+        /* Sidebar Styles */
+        .sidebar { width: var(--sidebar-width); background: white; border-right: 1px solid var(--outline-variant); display: flex; flex-direction: column; padding: 2rem 1rem; position: fixed; height: 100vh; z-index: 100; box-sizing: border-box; }
+        .sidebar-logo { font-size: 1.5rem; color: var(--primary); font-family: var(--font-serif); margin-bottom: 3rem; padding: 0 1rem; }
+        .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 1rem; border-radius: 0.75rem; color: var(--on-surface-variant); text-decoration: none; font-weight: 700; margin-bottom: 0.5rem; cursor: pointer; transition: all 0.2s; }
+        .nav-item:hover { background: var(--surface-container-high); color: var(--primary); }
+        .nav-item.active { background: var(--primary-container); color: var(--on-primary-container); }
+        .nav-item .material-symbols-outlined { font-size: 1.4rem; }
+
+        /* Main Content */
+        .main-content { margin-left: var(--sidebar-width); flex: 1; padding: 3rem; height: 100vh; overflow-y: auto; box-sizing: border-box; }
+        .page-content { display: none; max-width: 1000px; margin: 0 auto; animation: fadeIn 0.3s ease; }
+        .page-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Form Styles */
+        .card { background: white; padding: 2.5rem; border-radius: 1.5rem; border: 1px solid var(--outline-variant); margin-bottom: 2rem; box-shadow: var(--shadow-sm); }
+        .input-group { margin-bottom: 2rem; position: relative; }
+        .input-group label { display: block; font-weight: 800; margin-bottom: 0.75rem; color: var(--on-surface); font-size: 0.95rem; }
+        .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 1.1rem; border: 1.5px solid var(--outline-variant); border-radius: 1rem; font-family: inherit; font-size: 1rem; background: var(--surface-container-lowest); transition: all 0.2s; box-sizing: border-box; }
+        .input-group input:focus, .input-group textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-container); outline: none; }
         
-        .input-group { margin-bottom: 1.5rem; position: relative; }
-        .input-group label { display: block; font-weight: 800; margin-bottom: 0.6rem; color: var(--on-surface); font-size: 0.9rem; }
-        .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 1rem; border: 1.5px solid var(--outline-variant); border-radius: 0.75rem; font-family: inherit; font-size: 1rem; background: var(--surface-container-lowest); transition: all 0.2s; }
-        .input-group input:focus, .input-group select:focus, .input-group textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-container); }
+        .ai-badge { background: var(--secondary-container); color: var(--on-secondary-container); padding: 0.25rem 0.6rem; border-radius: 0.4rem; font-size: 0.75rem; font-weight: 900; vertical-align: middle; margin-left: 0.5rem; }
+        .btn-ai { position: absolute; right: 0.6rem; bottom: 0.6rem; padding: 0.5rem 1rem; background: var(--primary); color: white; border: none; border-radius: 0.6rem; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 0.4rem; transition: all 0.2s; cursor: pointer; }
+        .btn-ai:hover { transform: scale(1.05); background: var(--primary); }
+        .btn-ai:active { transform: scale(0.95); }
+
+        /* Score Gauge */
+        .score-box { background: var(--primary-container); color: var(--on-primary-container); padding: 2rem; border-radius: 1.5rem; display: flex; align-items: center; gap: 2rem; margin-bottom: 2rem; }
+        .score-circle { width: 80px; height: 80px; border-radius: 50%; border: 6px solid white; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: 900; }
+
+        /* Draft Editor */
+        #draft-editor, #aeo-editor { background: #fdfdfd; padding: 2rem; border: 1px dashed var(--primary); border-radius: 1.5rem; margin: 2rem 0; min-height: 400px; outline: none; line-height: 1.6; }
+
+        /* Table Styles */
+        table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        th { padding: 1rem; text-align: left; border-bottom: 2px solid var(--outline-variant); color: var(--on-surface-variant); font-size: 0.9rem; }
+        td { padding: 1.25rem 1rem; border-bottom: 1px solid var(--outline-variant); }
         
-        .ai-help-btn { position: absolute; right: 0.5rem; bottom: 0.5rem; padding: 0.4rem 0.8rem; font-size: 0.8rem; font-weight: 700; background: var(--secondary-container); color: var(--on-secondary-container); border-radius: 0.5rem; transition: all 0.2s; display: flex; align-items: center; gap: 0.3rem; }
-        .ai-help-btn:hover { background: var(--primary); color: white; }
-
-        .status-box { margin-top: 1.5rem; padding: 1.5rem; border-radius: 1rem; display: none; }
-        .status-box.success { background: #e6fffa; color: #234e52; border: 1px solid #b2f5ea; }
-        .status-box.error { background: #fff5f5; color: #c53030; border: 1px solid #feb2b2; }
-
-        .checklist-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: var(--on-surface-variant); margin-bottom: 0.5rem; }
-        .checklist-item.pass { color: #059669; }
-        .checklist-item.pass .material-symbols-outlined { font-variation-settings: 'FILL' 1; }
-
-        .toggle-group { display: flex; gap: 0.5rem; background: var(--surface-container-high); padding: 0.3rem; border-radius: 0.6rem; width: fit-content; }
-        .toggle-btn { padding: 0.5rem 1rem; border-radius: 0.4rem; font-size: 0.85rem; font-weight: 700; color: var(--on-surface-variant); cursor: pointer; transition: all 0.2s; }
-        .toggle-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .text-error { color: #dc2626; border: none; background: none; cursor: pointer; }
     </style>
 </head>
-<body style="background: var(--surface-low); min-height: 100vh;">
-    <!-- Top Nav Mini -->
-    <nav class="surface-container-lowest border-b border-outline-variant py-4 px-8 flex justify-between items-center mb-12">
-        <div class="logo font-serif text-primary" style="font-size: 1.5rem;">Moonpiece Admin</div>
-        <div class="flex items-center gap-6">
-            <span style="font-weight: 700; font-size: 0.9rem; color: var(--on-surface-variant);">wookhong745502</span>
-            <button onclick="logout()" style="color: var(--outline); font-size: 0.9rem; font-weight: 700; text-decoration: underline;">로그아웃</button>
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-logo">Moonpiece Admin</div>
+        <nav>
+            <div class="nav-item active" onclick="switchPage('dashboard')">
+                <span class="material-symbols-outlined">dashboard</span> 대시보드
+            </div>
+            <div class="nav-item" onclick="switchPage('seo')">
+                <span class="material-symbols-outlined">article</span> 임산부 저널 발행
+            </div>
+            <div class="nav-item" onclick="switchPage('aeo')">
+                <span class="material-symbols-outlined">psychology</span> 임산부 지식인 발행
+            </div>
+            <div class="nav-item" onclick="switchPage('manage')">
+                <span class="material-symbols-outlined">list_alt</span> 포스트 관리
+            </div>
+        </nav>
+        <div style="margin-top: auto; padding: 1rem;">
+            <button onclick="logout()" style="color: var(--outline); font-weight: 700; background: none; border: none; cursor: pointer; text-decoration: underline;">로그아웃</button>
         </div>
-    </nav>
+    </aside>
 
-    <div class="container" style="max-width: 800px;">
-        <h1 class="font-serif mb-4" style="font-size: 2.5rem; color: var(--primary);">자동화 콘텐츠 발행기</h1>
-        <p style="color: var(--on-surface-variant); margin-bottom: 3rem; font-size: 1.1rem;">
-            DeepSeek 언어모델을 기반으로 SEO 특화 저널과 AEO 특화 지식인 문서를 실시간으로 발행합니다.
-        </p>
-
-        <!-- Tabs -->
-        <div class="flex gap-4 border-b border-outline-variant mb-8">
-            <button class="tab-btn active" onclick="switchTab('seo')">SEO 저널 (임산부 저널)</button>
-            <button class="tab-btn" onclick="switchTab('aeo')">AEO 지식인 (임산부 지식인)</button>
+    <main class="main-content">
+        <!-- Dashboard Page -->
+        <div id="page-dashboard" class="page-content active">
+            <h1 class="font-serif mb-8 text-4xl">콘텐츠 상태 현황</h1>
+            <div class="grid grid-cols-3 gap-8 mb-12">
+                <div class="card p-8">
+                    <div style="font-size: 0.9rem; color: var(--on-surface-variant);">전체 발행물</div>
+                    <div style="font-size: 3rem; font-weight: 900; color: var(--primary);" id="stat-total">0</div>
+                </div>
+                <div class="card p-8" style="background: var(--primary); color: white; border: none;">
+                    <button onclick="migrateClear()" style="color: white; background: none; border: 1px solid white; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 700; cursor: pointer;">구형 데이터 마이그레이션</button>
+                </div>
+            </div>
         </div>
 
-        <div class="grid md:grid-cols-12 gap-8 items-start">
-            <div class="md:col-span-8 card p-12 shadow-sm">
-                <!-- SEO Tab -->
-                <div id="seo-tab" class="tab-content active">
-                    <div class="flex items-center gap-3 mb-6">
-                        <span class="material-symbols-outlined text-primary" style="font-size: 2rem;">article</span>
-                        <h2 style="font-size: 1.5rem; font-weight: 800;">전문 SEO 저널 생성기</h2>
-                    </div>
+        <!-- SEO Journal Page -->
+        <div id="page-seo" class="page-content">
+            <header class="mb-12">
+                <h1 class="font-serif text-4xl mb-4">임산부 저널 발행 <span class="ai-badge">SEO 전문 엔진</span></h1>
+                <p>2,500자 이상의 고품질 SEO 콘텐츠를 순차적으로 생성합니다.</p>
+            </header>
 
-                    <div class="flex justify-between items-center mb-8 pb-4 border-b border-outline-variant">
-                        <div class="input-group" style="margin-bottom:0">
-                            <label>로케일</label>
-                            <div class="toggle-group" id="seo-locale">
-                                <div class="toggle-btn active" data-value="ko">한국어</div>
-                                <div class="toggle-btn" data-value="en">English</div>
-                            </div>
-                        </div>
-                        <div class="input-group" style="margin-bottom:0">
-                            <label>발행 모드</label>
-                            <div class="toggle-group" id="seo-mode">
-                                <div class="toggle-btn active" data-value="direct">즉시 발행</div>
-                                <div class="toggle-btn" data-value="review">생성 후 검수</div>
-                            </div>
-                        </div>
-                    </div>
-
+            <div class="card">
+                <div class="input-group">
+                    <label>메인 키워드 (입력 후 Enter 시 자동 완성)</label>
+                    <input type="text" id="seo-kw" placeholder="예: 임산부 불면증 완화 방법" onkeydown="if(event.key==='Enter') autoFillSEO()">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
                     <div class="input-group">
-                        <label>메인 키워드</label>
-                        <input type="text" id="seo-kw" placeholder="예: 임산부 환도선다 테이핑 방법, 임신 초기 불면증 완화">
+                        <label>문서 제목</label>
+                        <input type="text" id="seo-title">
+                        <button class="btn-ai" onclick="suggest('title', 'seo')"><span class="material-symbols-outlined">magic_button</span> 추천</button>
                     </div>
-
-                    <div class="input-group">
-                        <label>문서 제목 (AI 제안 가능)</label>
-                        <input type="text" id="seo-title" placeholder="키워드를 입력하고 AI 추천을 받아보세요">
-                        <button class="ai-help-btn" onclick="suggest('title', 'seo')">
-                            <span class="material-symbols-outlined" style="font-size: 1.1rem;">magic_button</span>
-                            제목 추천
-                        </button>
-                    </div>
-
                     <div class="input-group">
                         <label>URL 슬러그</label>
-                        <input type="text" id="seo-slug" placeholder="e.g. pregnancy-sleep-guide">
-                        <button class="ai-help-btn" onclick="suggest('slug', 'seo')">
-                            <span class="material-symbols-outlined" style="font-size: 1.1rem;">translate</span>
-                            슬러그 자동 생성
-                        </button>
+                        <input type="text" id="seo-slug">
                     </div>
-
-                    <div class="input-group">
-                        <label>보조 키워드 (쉼표 구분)</label>
-                        <textarea id="seo-sub-kw" rows="2" placeholder="예: 임신 16주Insomnia, 숙면 꿀팁, 태교 음악"></textarea>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="input-group">
-                            <label>참고 사이트명</label>
-                            <input type="text" id="seo-source-name" placeholder="예: 대한산부인과학회">
-                        </div>
-                        <div class="input-group">
-                            <label>참고 URL</label>
-                            <input type="text" id="seo-source-url" placeholder="https://...">
-                        </div>
-                    </div>
-
-                    <div class="input-group">
-                        <label>카테고리</label>
-                        <select id="seo-category">
-                            <option value="sleep">수면 자세</option>
-                            <option value="pain">통증 완화</option>
-                            <option value="health">건강 관리</option>
-                            <option value="psychology">심리 & 지식</option>
-                        </select>
-                    </div>
-
-                    <button id="seo-btn" class="btn-primary w-full" style="width: 100%; border-radius: 0.75rem; padding: 1.25rem; font-size: 1.1rem;">전문 저널 배포 시작</button>
-                    <div id="seo-status" class="status-box"></div>
                 </div>
 
-                <!-- AEO Tab -->
-                <div id="aeo-tab" class="tab-content">
-                    <div class="flex items-center gap-3 mb-6">
-                        <span class="material-symbols-outlined" style="font-size: 2rem; color: #10b981;">psychology</span>
-                        <h2 style="font-size: 1.5rem; font-weight: 800; color: #10b981;">AEO 지식인 답변기</h2>
-                    </div>
-                    <p style="color: var(--on-surface-variant); margin-bottom: 2rem; font-size: 0.95rem;">
-                        검색 엔진 AI가 즉각 응답할 수 있는 구조적 Q&A와 데이터 스키마를 생성합니다.
-                    </p>
-
-                    <div class="input-group">
-                        <label>사용자 질문 (질문 전체를 입력하세요)</label>
-                        <textarea id="aeo-kw" rows="3" placeholder="예: 임산부가 엎드려 자면 태아에게 어떤 영향을 미치나요?"></textarea>
-                    </div>
-
-                    <div class="input-group">
-                        <label>URL 슬러그 (AI 제안 가능)</label>
-                        <input type="text" id="aeo-slug" placeholder="e.g. pregnant-sleeping-on-stomach">
-                        <button class="ai-help-btn" onclick="suggest('slug', 'aeo')">
-                            <span class="material-symbols-outlined" style="font-size: 1.1rem;">translate</span>
-                            슬러그 자동 생성
-                        </button>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="input-group">
-                            <label>답변 톤</label>
-                            <select id="aeo-tone">
-                                <option value="professional">전문적이고 신뢰감 있는</option>
-                                <option value="warm">따뜻하고 공감하는</option>
-                                <option value="concise">핵심만 간결하게</option>
-                            </select>
-                        </div>
-                        <div class="input-group">
-                            <label>FAQ 자동 생성</label>
-                            <div class="toggle-group" id="aeo-faq">
-                                <div class="toggle-btn active" data-value="on">활성화</div>
-                                <div class="toggle-btn" data-value="off">비활성화</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="input-group">
-                        <label>카테고리</label>
-                        <select id="aeo-category">
-                            <option value="sleep">수면 자세</option>
-                            <option value="pain">통증 완화</option>
-                            <option value="health">건강 관리</option>
-                            <option value="psychology" selected>심리 & 지식</option>
-                        </select>
-                    </div>
-
-                    <button id="aeo-btn" style="background: #10b981; color: white; width: 100%; border-radius: 0.75rem; padding: 1.25rem; font-weight: 700; transition: all 0.2s;" onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'">AEO 지식인 배포 시작</button>
-                    <div id="aeo-status" class="status-box"></div>
+                <div class="input-group">
+                    <label>보조 키워드 (10개 연동)</label>
+                    <textarea id="seo-sub-kw" rows="3"></textarea>
+                    <button class="btn-ai" onclick="suggest('keywords', 'seo')"><span class="material-symbols-outlined">auto_awesome</span> 재생성</button>
                 </div>
+
+                <div class="grid grid-cols-2 gap-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <div class="input-group">
+                        <label>신뢰도 출처명</label>
+                        <input type="text" id="seo-source-name">
+                        <button class="btn-ai" onclick="suggest('source', 'seo')"><span class="material-symbols-outlined">find_in_page</span> 다시 찾기</button>
+                    </div>
+                    <div class="input-group">
+                        <label>출처 URL</label>
+                        <input type="text" id="seo-source-url">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>카테고리</label>
+                    <select id="seo-category">
+                        <option value="sleep">수면 자세</option>
+                        <option value="pain">통증 완화</option>
+                        <option value="health">건강 관리</option>
+                        <option value="psychology">심리 & 지식</option>
+                    </select>
+                </div>
+
+                <button id="seo-gen-btn" class="btn-primary w-full p-6 text-xl" style="width: 100%;" onclick="generate('seo')">콘텐츠 생성 시작 (Chain Generation)</button>
             </div>
 
-            <!-- Side Checklist -->
-            <div class="md:col-span-4 flex flex-col gap-6">
-                <div class="card p-8 shadow-sm">
-                    <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 1.5rem;">SEO 실시간 체크리스트</h3>
-                    <div id="checklist">
-                        <div class="checklist-item" id="check-kw">
-                            <span class="material-symbols-outlined">check_circle</span>
-                            메인 키워드 입력됨
-                        </div>
-                        <div class="checklist-item" id="check-title">
-                            <span class="material-symbols-outlined">check_circle</span>
-                            최적의 제목 설정
-                        </div>
-                        <div class="checklist-item" id="check-slug">
-                            <span class="material-symbols-outlined">check_circle</span>
-                            영문 슬러그 생성됨
-                        </div>
-                        <div class="checklist-item" id="check-sub">
-                            <span class="material-symbols-outlined">check_circle</span>
-                            보조 키워드 3개 이상
-                        </div>
-                        <div class="checklist-item" id="check-source">
-                            <span class="material-symbols-outlined">check_circle</span>
-                            신뢰성 있는 출처 연결
-                        </div>
-                    </div>
-                    <div class="mt-6 pt-6 border-t border-outline-variant">
-                        <div style="font-size: 0.8rem; color: var(--on-surface-variant); margin-bottom: 0.5rem;">생성 예상 분량</div>
-                        <div style="font-size: 1.25rem; font-weight: 900; color: var(--primary);">2,000+ 자</div>
+            <div id="seo-draft-zone" style="display: none;">
+                <div class="score-box">
+                    <div class="score-circle" id="seo-score">0</div>
+                    <div>
+                        <h4 class="font-bold text-xl mb-2">SEO 콘텐츠 분석 리포트</h4>
+                        <p id="seo-feedback">분석 중...</p>
                     </div>
                 </div>
-
-                <div class="card p-8 shadow-sm" style="background: var(--primary-container); color: var(--on-primary-container); border: none;">
-                    <div class="flex items-center gap-2 mb-4">
-                        <span class="material-symbols-outlined">info</span>
-                        <h4 style="font-weight: 800;">작성 팁</h4>
-                    </div>
-                    <p style="font-size: 0.85rem; line-height: 1.6;">
-                        문피스의 브랜드 보이스는 <b>'전문적이지만 차갑지 않게'</b>입니다. 임산부의 고충에 공감하면서도 의학적 근거를 바탕으로 답변을 구성하세요.
-                    </p>
-                </div>
+                <h3 class="font-serif text-2xl mb-4">본문 검수 및 수정</h3>
+                <div id="draft-editor" contenteditable="true"></div>
+                <button class="btn-primary w-full p-6" style="width: 100%; background: var(--secondary);" onclick="publish('seo')">전문 저널 배포 완료</button>
             </div>
         </div>
-    </div>
+
+        <!-- AEO Knowledge Page -->
+        <div id="page-aeo" class="page-content">
+            <header class="mb-12">
+                <h1 class="font-serif text-4xl mb-4">임산부 지식인 발행 <span class="ai-badge">AEO 스니펫 엔진</span></h1>
+                <p>검색 엔진 AI가 즉각 응답할 수 있는 시맨틱 답변 문서를 생성합니다.</p>
+            </header>
+            <div class="card">
+                <div class="input-group">
+                    <label>메인 키워드 (입력 후 Enter 시 자동 완성)</label>
+                    <input type="text" id="aeo-kw" placeholder="예: 임산부가 엎드려 자도 되나요?" onkeydown="if(event.key==='Enter') autoFillAEO()">
+                </div>
+                <div class="input-group">
+                    <label>사용자 질문 (질문형 자동 생성)</label>
+                    <textarea id="aeo-question" rows="2"></textarea>
+                </div>
+                <div class="input-group">
+                    <label>URL 슬러그</label>
+                    <input type="text" id="aeo-slug">
+                </div>
+                <div class="input-group">
+                    <label>카테고리</label>
+                    <select id="aeo-category">
+                        <option value="sleep">수면 자세</option>
+                        <option value="pain">통증 완화</option>
+                        <option value="health">건강 관리</option>
+                        <option value="psychology" selected>심리 & 지식</option>
+                    </select>
+                </div>
+                <button id="aeo-gen-btn" class="btn-primary w-full p-6 text-xl" style="width: 100%;" onclick="generate('aeo')">지식인 답변 생성 시작</button>
+            </div>
+
+            <div id="aeo-draft-zone" style="display: none;">
+                <h3 class="font-serif text-2xl mb-4">답변 검수 (AEO 시맨틱 태그 포함)</h3>
+                <div id="aeo-editor" contenteditable="true"></div>
+                <button class="btn-primary w-full p-6" style="width: 100%; background: var(--secondary);" onclick="publish('aeo')">지식인 문서 배포 완료</button>
+            </div>
+        </div>
+
+        <!-- Manage Page -->
+        <div id="page-manage" class="page-content">
+            <h1 class="font-serif text-4xl mb-12">포스트 관리</h1>
+            <div class="card" style="padding: 0; overflow: hidden;">
+                <table id="post-table">
+                    <thead>
+                        <tr>
+                            <th style="padding-left: 2rem;">제목</th>
+                            <th>유형/카테고리</th>
+                            <th>날짜</th>
+                            <th style="padding-right: 2rem; text-align: right;">관리</th>
+                        </tr>
+                    </thead>
+                    <tbody id="post-list"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
 
     <script>
-        // Toggle Buttons Logic
-        document.querySelectorAll('.toggle-btn').forEach(btn => {
-            btn.onclick = function() {
-                const parent = this.parentElement;
-                parent.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-            };
-        });
+        let draftDataGlobal = null;
 
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            
-            if (tab === 'seo') {
-                document.querySelectorAll('.tab-btn')[0].classList.add('active');
-                document.getElementById('seo-tab').classList.add('active');
-            } else {
-                document.querySelectorAll('.tab-btn')[1].classList.add('active');
-                document.getElementById('aeo-tab').classList.add('active');
-            }
+        function switchPage(page) {
+            document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            document.getElementById('page-' + page).classList.add('active');
+            event.currentTarget.classList.add('active');
+            if(page === 'manage') loadPosts();
         }
-
-        // Real-time Checklist Logic
-        function updateChecklist() {
-            const kw = document.getElementById('seo-kw').value.trim();
-            const title = document.getElementById('seo-title').value.trim();
-            const slug = document.getElementById('seo-slug').value.trim();
-            const subKw = document.getElementById('seo-sub-kw').value.trim();
-            const sourceUrl = document.getElementById('seo-source-url').value.trim();
-
-            document.getElementById('check-kw').classList.toggle('pass', kw.length > 0);
-            document.getElementById('check-title').classList.toggle('pass', title.length > 5);
-            document.getElementById('check-slug').classList.toggle('pass', slug.length > 3);
-            document.getElementById('check-sub').classList.toggle('pass', subKw.split(',').length >= 3);
-            document.getElementById('check-source').classList.toggle('pass', sourceUrl.startsWith('http'));
-        }
-
-        document.querySelectorAll('input, textarea').forEach(el => {
-            el.addEventListener('input', updateChecklist);
-        });
 
         async function suggest(type, context) {
-            const kw = document.getElementById(`${context}-kw`).value.trim();
-            if(!kw) return alert('먼저 키워드를 입력해주세요!');
-            
-            const btn = event.currentTarget;
-            const originalText = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerHTML = '<span class="material-symbols-outlined rotate" style="font-size:1.1rem;">sync</span> 추천 중...';
-
+            const kw = document.getElementById(context + '-kw').value;
+            if(!kw) return;
             try {
                 const res = await fetch('/admin/api/suggest', {
                     method: 'POST',
@@ -295,82 +238,144 @@
                     body: JSON.stringify({ type, keyword: kw })
                 });
                 const data = await res.json();
-                if(data.result) {
-                    document.getElementById(`${context}-${type}`).value = data.result;
-                    updateChecklist();
+                if(type === 'source') {
+                    const s = JSON.parse(data.result);
+                    document.getElementById(context + '-source-name').value = s.name;
+                    document.getElementById(context + '-source-url').value = s.url;
+                } else if(type === 'keywords') {
+                    document.getElementById(context + '-sub-kw').value = data.result;
+                } else if(type === 'question') {
+                    document.getElementById(context + '-question').value = data.result;
+                } else {
+                    document.getElementById(context + '-' + type).value = data.result;
                 }
-            } catch (e) { console.error(e); }
-            finally { btn.disabled = false; btn.innerHTML = originalText; }
+            } catch(e) { console.error(e); }
         }
 
-        async function logout() {
-            await fetch('/admin/api/auth/logout', { method: 'POST' });
-            window.location.href = '/';
+        async function autoFillSEO() {
+            await suggest('title', 'seo');
+            await suggest('slug', 'seo');
+            await suggest('keywords', 'seo');
+            await suggest('source', 'seo');
+        }
+
+        async function autoFillAEO() {
+            await suggest('question', 'aeo');
+            await suggest('slug', 'aeo');
         }
 
         async function generate(type) {
-            const btnTag = type === 'seo' ? 'seo-btn' : 'aeo-btn';
-            const statusTag = type === 'seo' ? 'seo-status' : 'aeo-status';
-            const apiPath = type === 'seo' ? '/admin/api/generate-journal' : '/admin/api/generate-knowledge';
-
-            const btn = document.getElementById(btnTag);
-            const status = document.getElementById(statusTag);
-
-            // Collect Payload
-            let payload = {};
-            if (type === 'seo') {
-                payload = {
-                    keyword: document.getElementById('seo-kw').value,
-                    title: document.getElementById('seo-title').value,
-                    slug: document.getElementById('seo-slug').value,
-                    subKeywords: document.getElementById('seo-sub-kw').value,
-                    sourceName: document.getElementById('seo-source-name').value,
-                    sourceUrl: document.getElementById('seo-source-url').value,
-                    category: document.getElementById('seo-category').value,
-                    locale: document.getElementById('seo-locale').querySelector('.active').dataset.value,
-                    mode: document.getElementById('seo-mode').querySelector('.active').dataset.value
-                };
-            } else {
-                payload = {
-                    keyword: document.getElementById('aeo-kw').value,
-                    slug: document.getElementById('aeo-slug').value,
-                    tone: document.getElementById('aeo-tone').value,
-                    faq: document.getElementById('aeo-faq').querySelector('.active').dataset.value,
-                    category: document.getElementById('aeo-category').value
-                };
-            }
-
-            if (!payload.keyword) return alert('키워드를 입력해주세요!');
-
+            const btn = document.getElementById(type + '-gen-btn');
             btn.disabled = true;
-            const originalText = btn.textContent;
-            btn.textContent = 'AI가 전문 콘텐츠를 작성 및 배포 중입니다...';
-            status.style.display = 'none';
+            btn.textContent = 'AI 콘텐츠 생성 및 검증 중 (예상 시간 30초)...';
+            
+            const payload = {
+                type,
+                keyword: document.getElementById(type + '-kw').value,
+                title: type === 'seo' ? document.getElementById('seo-title').value : document.getElementById('aeo-question').value,
+                slug: document.getElementById(type + '-slug').value,
+                subKeywords: type === 'seo' ? document.getElementById('seo-sub-kw').value : '',
+                sourceName: type === 'seo' ? document.getElementById('seo-source-name').value : '',
+                sourceUrl: type === 'seo' ? document.getElementById('seo-source-url').value : '',
+                category: document.getElementById(type + '-category').value,
+                draft: true
+            };
 
             try {
-                const res = await fetch(apiPath, {
+                const res = await fetch('/admin/api/generate-' + (type === 'seo' ? 'journal' : 'knowledge'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                if (res.redirected) { window.location.href = res.url; return; }
-
                 const data = await res.json();
-                if (data.success) {
-                    status.className = 'status-box success';
-                    status.innerHTML = `<span style="font-weight: 800; font-size:1.1rem; display:block; margin-bottom: 0.5rem;">✅ 전문 콘텐츠 발행 완료!</span>
-                                        <a href="${data.path}" target="_blank" style="text-decoration: underline; color: #319795; font-weight: 700;">배포된 페이지 확인하기 ↗</a>`;
-                    status.style.display = 'block';
-                } else { throw new Error(data.error || '발행 중 오류 발생'); }
-            } catch (e) {
-                status.className = 'status-box error';
-                status.innerHTML = `<span style="font-weight: 800;">❌ 발행 실패:</span> ${e.message}`;
-                status.style.display = 'block';
-            } finally { btn.disabled = false; btn.textContent = originalText; }
+                if(data.success) {
+                    draftDataGlobal = data.draft;
+                    document.getElementById(type + '-draft-zone').style.display = 'block';
+                    document.getElementById(type === 'seo' ? 'draft-editor' : 'aeo-editor').innerHTML = data.draft.html;
+                    if(type === 'seo') {
+                        document.getElementById('seo-score').textContent = data.draft.score;
+                        document.getElementById('seo-feedback').innerHTML = data.draft.feedback;
+                    }
+                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                }
+            } catch(e) { alert('생성 중 오류 발생: ' + e.message); }
+            finally { btn.disabled = false; btn.textContent = '콘텐츠 생성 시작 (Chain Generation)'; }
         }
 
-        document.getElementById('seo-btn').onclick = () => generate('seo');
-        document.getElementById('aeo-btn').onclick = () => generate('aeo');
+        async function publish(type) {
+            if(!draftDataGlobal) return;
+            const btn = event.currentTarget;
+            btn.disabled = true;
+            btn.textContent = '최종 배포 중...';
+            
+            const ed = document.getElementById(type === 'seo' ? 'draft-editor' : 'aeo-editor');
+            const payload = {
+                ...draftDataGlobal,
+                type,
+                finalHtml: ed.innerHTML,
+                isFinal: true,
+                category: document.getElementById(type + '-category').value
+            };
+            
+            try {
+                const res = await fetch('/admin/api/generate-' + (type === 'seo' ? 'journal' : 'knowledge'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if(data.success) {
+                    alert('배포 성공! 경로: ' + data.path);
+                    switchPage('manage');
+                }
+            } catch(e) { alert('배포 실패: ' + e.message); }
+            finally { btn.disabled = false; btn.textContent = '전문 배포 완료'; }
+        }
+
+        async function loadPosts() {
+            const res = await fetch('/admin/api/posts');
+            const posts = await res.json();
+            const list = document.getElementById('post-list');
+            list.innerHTML = posts.map(p => `
+                <tr>
+                    <td style="padding-left: 2rem;">
+                        <div class="font-bold">${p.title}</div>
+                        <div style="font-size: 0.75rem; color: var(--outline);">${p.url}</div>
+                    </td>
+                    <td><span class="px-2 py-1 bg-surface-container-high rounded text-xs" style="font-weight: 800; font-size: 0.7rem;">${p.type === 'journal' ? '저널' : '지식인'}</span> ${p.category}</td>
+                    <td>${p.date}</td>
+                    <td style="padding-right: 2rem; text-align: right;">
+                        <button onclick="deletePost('${p.url}', '${p.type}')" class="text-error font-bold">삭제</button>
+                    </td>
+                </tr>
+            `).join('');
+            document.getElementById('stat-total').textContent = posts.length;
+        }
+
+        async function deletePost(url, type) {
+            if(!confirm('정말 삭제하시겠습니까? 관련 파일과 인덱스에서 제거됩니다.')) return;
+            await fetch('/admin/api/posts/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url, type })
+            });
+            loadPosts();
+        }
+
+        async function migrateClear() {
+            if(!confirm('모든 구형 데이터를 DB에서 일괄 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) return;
+            await fetch('/admin/api/migrate/clear-all', { method: 'POST' });
+            alert('초기화 완료');
+            loadPosts();
+        }
+
+        async function logout() {
+            await fetch('/admin/api/auth/logout', { method: 'POST' });
+            window.location.href = '/admin/login.html';
+        }
+
+        // Init
+        loadPosts();
     </script>
 </body>
 </html>
