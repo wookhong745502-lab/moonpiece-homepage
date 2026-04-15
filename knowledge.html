@@ -23,7 +23,7 @@
     </script>
 </head>
 
-<body class="bg-slate-50 text-slate-900 font-sans">
+<body class="bg-slate-50 text-slate-900 font-sans pt-20">
     <!-- Top Navigation -->
     <nav class="nav-bar bg-white/80 backdrop-blur-md border-b border-slate-100">
         <div class="nav-container container">
@@ -33,9 +33,9 @@
                     class="nav-link text-slate-600 hover:text-moon-600 font-semibold transition-colors">문피스의 약속</a>
                 <a href="review.html"
                     class="nav-link text-slate-600 hover:text-moon-600 font-semibold transition-colors">엄마들의 이야기</a>
-                <a href="journal.html" class="nav-link active text-moon-600 font-bold">임산부 저널</a>
-                <a href="knowledge.html"
-                    class="nav-link text-slate-600 hover:text-moon-600 font-semibold transition-colors">임산부 지식인</a>
+                <a href="journal.html"
+                    class="nav-link text-slate-600 hover:text-moon-600 font-semibold transition-colors">임산부 저널</a>
+                <a href="knowledge.html" class="nav-link active text-moon-600 font-bold">임산부 지식인</a>
             </div>
             <div class="flex items-center gap-4">
                 <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank"
@@ -50,14 +50,21 @@
     </nav>
 
     <!-- Mobile Navigation Overlay -->
-    <div class="nav-overlay" id="overlay"></div>
-    <div class="mobile-nav" id="mobile-menu">
-        <a href="brand.html" class="nav-link">문피스의 약속</a>
-        <a href="review.html" class="nav-link">엄마들의 이야기</a>
-        <a href="journal.html" class="nav-link">임산부 저널</a>
-        <a href="knowledge.html" class="nav-link active">임산부 지식인</a>
+    <div class="nav-overlay fixed inset-0 bg-slate-900/50 z-[1040] opacity-0 invisible transition-all duration-300"
+        id="overlay"></div>
+    <div class="mobile-nav fixed top-0 right-[-100%] w-[280px] h-full bg-white z-[1050] shadow-2xl p-10 flex flex-col gap-6 transition-all duration-500 ease-in-out"
+        id="mobile-menu">
+        <div class="flex justify-end mb-4">
+            <button id="close-menu" class="text-slate-400 hover:text-slate-900">
+                <span class="material-symbols-outlined text-3xl">close</span>
+            </button>
+        </div>
+        <a href="brand.html" class="text-lg font-bold text-slate-900">문피스의 약속</a>
+        <a href="review.html" class="text-lg font-bold text-slate-900">엄마들의 이야기</a>
+        <a href="journal.html" class="text-lg font-bold text-slate-900">임산부 저널</a>
+        <a href="knowledge.html" class="text-lg font-bold text-moon-600 underline">임산부 지식인</a>
         <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank"
-            class="btn-primary text-center mt-8">구매하기</a>
+            class="btn-primary mt-6 text-center py-4 rounded-xl bg-moon-600 text-white font-bold">구매하기</a>
     </div>
 
     <!-- Hero Search Section -->
@@ -354,29 +361,50 @@
 
         init();
 
-        // Nav Toggle (Existing logic)
+        // GNB Menu Toggle Logic
         const menuToggle = document.getElementById('menu-toggle');
+        const closeMenu = document.getElementById('close-menu');
         const mobileMenu = document.getElementById('mobile-menu');
         const overlay = document.getElementById('overlay');
 
-        menuToggle.addEventListener('click', () => {
-            mobileMenu.classList.toggle('active');
-            menuToggle.classList.toggle('active');
-            overlay.classList.toggle('active');
-        });
-        overlay.addEventListener('click', () => {
-            mobileMenu.classList.remove('active');
-            menuToggle.classList.remove('active');
-            overlay.classList.remove('active');
-        });
+        const toggleMenu = () => {
+            mobileMenu.classList.toggle('right-[-100%]');
+            mobileMenu.classList.toggle('right-0');
+            overlay.classList.toggle('invisible');
+            overlay.classList.toggle('opacity-0');
+            document.body.classList.toggle('overflow-hidden');
+        };
+
+        menuToggle.addEventListener('click', toggleMenu);
+        closeMenu?.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
     </script>
 
     <style>
-        /* Shared and Nav specific styles preserved */
+        /* Hamburger Menu Color Fix */
         .hamburger-btn span {
-            background-color: #4c1d95;
+            background-color: var(--on-surface, #1e293b);
         }
 
+        .nav-bar {
+            height: 80px;
+            display: flex;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        /* Shared and Nav specific styles preserved */
         .nav-link:hover,
         .nav-link.active {
             color: #7c3aed;
