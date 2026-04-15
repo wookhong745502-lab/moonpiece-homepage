@@ -87,6 +87,10 @@ export default {
       const data = await res.json();
       let result = data.choices[0].message.content.trim();
       
+      if (type === "source") {
+        result = result.replace(/```json|```/gi, "").trim();
+      }
+      
       if (type === "slug") {
         result = result.replace(/[^a-z0-9-]/g, '').toLowerCase();
         const now = new Date();
@@ -178,6 +182,21 @@ export default {
     if (url.pathname === "/list-knowledge") {
       const data = await env.JOURNAL_BUCKET.get("knowledge/list.json");
       return new Response(data ? data.body : "[]", { headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
+    }
+
+    if (url.pathname === "/admin/api/generate-image" && request.method === "POST") {
+      const { prompt, slug } = await request.json();
+      try {
+        const imageResponse = await env.AI.run('@cf/stabilityai/stable-diffusion-xl-base-1.0', {
+          prompt: `High-quality, photorealistic cinematic photography. ${prompt}`,
+          negative_prompt: "text, numbers, watermark, blurry, painting, duplicate"
+        });
+        const imageKey = `assets/custom/${slug}-${Date.now()}.png`;
+        await env.JOURNAL_BUCKET.put(imageKey, imageResponse, { httpMetadata: { contentType: "image/png" } });
+        return new Response(JSON.stringify({ success: true, url: `/${imageKey}` }), { headers: { "Content-Type": "application/json" } });
+      } catch (e) {
+        return new Response(JSON.stringify({ success: false, error: e.message }), { status: 500 });
+      }
     }
 
     if (url.pathname.startsWith("/journal/") || url.pathname.startsWith("/knowledge/") || url.pathname.startsWith("/assets/")) {
@@ -300,6 +319,7 @@ async function generateContentHandler(request, env, type) {
     // 1. Parallel AI Generation to beat timeouts while maintaining massive length
     const bodyPrompt = isSEO 
       ? `Write a highly professional, empathetic, and strictly formatted SEO blog post about "${keyword}". Title: "${title}". Target sub-keywords: ${subKeywords || keyword}. 
+         ${sourceName ? `CRITICAL: Ensure you naturally cite this authoritative source in the text: [${sourceName}](${sourceUrl})` : ''}
          CRITICAL REQUIREMENT: The output MUST exceed 2,000 Korean characters. Explain in profound detail with minimum 5 sections.
          USE EXACTLY 3 PLACEHOLDERS for images naturally within the text. Use exactly this format: {{IMG_1}}, {{IMG_2}}, {{IMG_3}}. Place them between paragraphs where visually appropriate.
          Use exactly <article class="post-content">, <h2>, <h3>, <p>, <ul>, <strong> tags. Do NOT use markdown code blocks, return ONLY raw HTML for the body.`
@@ -381,6 +401,20 @@ async function generateContentHandler(request, env, type) {
         } else {
           html = html.replace(`{{IMG_${i}}}`, `<img src="/assets/images/post_${i}.jpg" style="width:100%; border-radius:1rem; margin:2rem 0; box-shadow:0 4px 6px rgba(0,0,0,0.05);" alt="${keyword} - ${title} 관련 이미지 ${i}">`);
         }
+      }
+      
+      if (sourceName && sourceUrl) {
+        html += `
+        <div class="mt-12 p-8 bg-moon-50 border border-moon-100 rounded-3xl">
+            <h4 class="font-bold text-lg mb-2 text-moon-900 flex items-center gap-2">
+                <span class="material-symbols-outlined">library_books</span>
+                참고 문헌 및 신뢰도 출처
+            </h4>
+            <p class="text-slate-600 mb-4 text-sm leading-relaxed">본 콘텐츠는 임산부와 태아의 건강을 위해 공신력 있는 의학 및 건강 기관의 검증된 자료를 바탕으로 작성되었습니다.</p>
+            <a href="${sourceUrl}" target="_blank" rel="noopener noreferrer" class="text-moon-600 hover:text-moon-900 font-bold underline flex items-center gap-1 text-sm bg-white inline-flex px-4 py-2 rounded-xl shadow-sm border border-moon-100 transition-all hover:shadow-md">
+                ${sourceName} <span class="material-symbols-outlined" style="font-size:16px;">open_in_new</span>
+            </a>
+        </div>`;
       }
     } else {
       // Single AEO image
@@ -481,14 +515,14 @@ async function renderTemplate(data, env, categoryName) {
   const related = list.sort(() => 0.5 - Math.random()).slice(0, Math.min(list.length, 3));
   
   const relatedHtml = related.length > 0 ? `
-        <section class="mt-24 border-t border-outline-variant pt-24">
+        <section class="mt-24 border-t border-slate-200 pt-24">
             <h3 class="font-serif mb-12 text-3xl">관련 콘텐츠</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 ${related.map(p => `
-                <a href="${p.url}" class="card overflow-hidden" style="padding:0; transition: transform 0.3s; display: block;">
-                    <img src="${p.image}" class="aspect-video object-cover" style="width: 100%; height: 200px;">
+                <a href="${p.url}" class="card overflow-hidden rounded-2xl bg-white shadow-sm border border-slate-100 hover:shadow-md transition-all duration-300" style="padding:0;">
+                    <img src="${p.image}" class="aspect-video object-cover w-full h-48">
                     <div class="p-6">
-                        <h5 class="font-bold text-lg mb-2 text-on-surface hover:text-primary transition">${p.title}</h5>
+                        <h5 class="font-bold text-lg mb-2 text-slate-900 hover:text-purple-600 transition">${p.title}</h5>
                     </div>
                 </a>`).join("")}
             </div>
@@ -500,10 +534,34 @@ async function renderTemplate(data, env, categoryName) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${data.title} | Moonpiece</title>
-    <link rel="stylesheet" href="/styles.css">
-    <script type="application/ld+json">${JSON.stringify(data.schema)}</script>
+    <link rel="stylesheet" href="/styles.css?v=1.5">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        moon: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            200: '#ddd6fe',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            900: '#4c1d95',
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['Noto Serif KR', 'serif'],
+                        sans: ['Manrope', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <script type="application/ld+json">${JSON.stringify(data.schema || {})}</script>
 </head>
-<body class="surface-low">
+<body class="bg-slate-50 text-slate-900 font-sans">
     <!-- Top Navigation -->
     <nav class="nav-bar">
         <div class="nav-container">
@@ -533,23 +591,28 @@ async function renderTemplate(data, env, categoryName) {
         <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" class="btn-primary text-center mt-8">구매하기</a>
     </div>
 
-    <main class="py-24 container" style="max-width: 800px; min-height: 80vh;">
+    <main class="py-24 container mx-auto px-4" style="max-width: 900px; min-height: 80vh;">
         <div class="category-badge mb-8">${categoryName}</div>
-        <h1 class="font-serif mb-12" style="font-size: 3.5rem;">${data.title}</h1>
-        <img src="${data.image}" alt="${data.title}" style="width: 100%; border-radius: 2rem; margin-bottom: 4rem;">
+        <h1 class="font-serif mb-12" style="font-size: 3.5rem; line-height: 1.2;">${data.title}</h1>
+        <img src="${data.image}" alt="${data.title}" class="w-full rounded-3xl shadow-xl mb-16 object-cover" style="aspect-ratio: 16/9;">
         
         <!-- Post Body -->
-        <div class="post-body-container article-content">
+        <div class="post-body-container article-content bg-white p-8 md:p-16 rounded-[2.5rem] shadow-sm border border-slate-200">
             ${data.html}
         </div>
         
         <section class="mt-24">
             <h3 class="font-serif mb-8 text-3xl">자주 묻는 질문 (FAQ)</h3>
-            ${(data.faqs || []).map(f => `
-            <details class="faq-card p-6 rounded-2xl surface-container-lowest mb-4 border border-outline-variant">
-                <summary class="font-bold cursor-pointer" style="font-size: 1.1rem;">${f.q}</summary>
-                <p class="mt-4 leading-relaxed" style="color: var(--on-surface-variant);">${f.a}</p>
-            </details>`).join("")}
+            <div class="flex flex-col gap-4">
+                ${(data.faqs || []).map(f => `
+                <details class="faq-card p-6 rounded-2xl bg-white shadow-sm mb-4 border border-slate-200 group">
+                    <summary class="font-bold cursor-pointer text-lg list-none flex justify-between items-center">
+                        ${f.q}
+                        <span class="material-symbols-outlined transition-transform group-open:rotate-180">expand_more</span>
+                    </summary>
+                    <p class="mt-4 leading-relaxed text-slate-600 border-t border-slate-100 pt-4">${f.a}</p>
+                </details>`).join("")}
+            </div>
         </section>
         
         ${relatedHtml}
@@ -557,7 +620,7 @@ async function renderTemplate(data, env, categoryName) {
 
     <!-- Footer -->
     <footer>
-        <div class="container grid md:grid-cols-2 gap-12">
+        <div class="container mx-auto px-4 grid md:grid-cols-2 gap-12">
             <div>
                 <div class="logo font-serif mb-4" style="color: var(--primary);">Moonpiece</div>
                 <p style="max-width: 320px; color: var(--on-surface-variant); line-height: 1.8;">
@@ -566,29 +629,29 @@ async function renderTemplate(data, env, categoryName) {
             </div>
             <div class="grid md:grid-cols-3 gap-8">
                 <div>
-                    <h4 style="font-weight: 800; margin-bottom: 1.5rem;">Company</h4>
-                    <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.75rem; color: var(--on-surface-variant);">
+                    <h4 class="font-bold mb-6">Company</h4>
+                    <ul class="flex flex-col gap-3 text-slate-600">
                         <li><a href="/about.html">회사소개</a></li>
                         <li><a href="/terms.html">이용약관</a></li>
                     </ul>
                 </div>
                 <div>
-                    <h4 style="font-weight: 800; margin-bottom: 1.5rem;">Support</h4>
-                    <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.75rem; color: var(--on-surface-variant);">
+                    <h4 class="font-bold mb-6">Support</h4>
+                    <ul class="flex flex-col gap-3 text-slate-600">
                         <li><a href="/privacy.html">개인정보처리방침</a></li>
                         <li><a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank">네이버 스마트스토어</a></li>
                     </ul>
                 </div>
                 <div>
-                    <h4 style="font-weight: 800; margin-bottom: 1.5rem;">Social</h4>
-                    <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.75rem; color: var(--on-surface-variant);">
+                    <h4 class="font-bold mb-6">Social</h4>
+                    <ul class="flex flex-col gap-3 text-slate-600">
                         <li><a href="#">Instagram</a></li>
                         <li><a href="#">YouTube</a></li>
                     </ul>
                 </div>
             </div>
         </div>
-        <div class="container" style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--outline-variant); text-align: center; color: var(--on-surface-variant); font-size: 0.85rem;">
+        <div class="container mx-auto px-4 mt-16 pt-8 border-t border-slate-200 text-center text-slate-500 text-sm">
             © 2024 Moonpiece. All rights reserved.
         </div>
     </footer>
@@ -604,6 +667,8 @@ async function renderTemplate(data, env, categoryName) {
                 overlay.classList.toggle('active');
                 document.body.style.overflow = isActive ? 'hidden' : 'auto';
             });
+        }
+        if(overlay) {
             overlay.addEventListener('click', () => {
                 mobileMenu.classList.remove('active');
                 menuToggle.classList.remove('active');
