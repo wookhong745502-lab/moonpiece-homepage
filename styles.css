@@ -38,9 +38,16 @@ h1, h2, h3, h4, .font-serif {
 }
 
 .container {
+    width: 80%;
     max-width: var(--container-max-width);
     margin: 0 auto;
-    padding: 0 1.5rem;
+    padding: 0 1rem;
+}
+
+@media (max-width: 768px) {
+    .container {
+        width: 92%;
+    }
 }
 
 /* Nav Bar */
