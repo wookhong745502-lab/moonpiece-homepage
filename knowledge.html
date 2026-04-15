@@ -50,21 +50,26 @@
     </nav>
 
     <!-- Mobile Navigation Overlay -->
-    <div class="nav-overlay fixed inset-0 bg-slate-900/50 z-[1040] opacity-0 invisible transition-all duration-300"
+    <div class="nav-overlay fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[1040] opacity-0 invisible transition-all duration-300"
         id="overlay"></div>
-    <div class="mobile-nav fixed top-0 right-[-100%] w-[280px] h-full bg-white z-[1050] shadow-2xl p-10 flex flex-col gap-6 transition-all duration-500 ease-in-out"
+    <div class="mobile-nav fixed top-0 right-[-100%] w-[85%] max-w-[320px] h-full bg-white z-[1050] shadow-2xl p-8 flex flex-col gap-6 transition-all duration-500 ease-in-out"
         id="mobile-menu">
-        <div class="flex justify-end mb-4">
-            <button id="close-menu" class="text-slate-400 hover:text-slate-900">
+        <div class="flex justify-between items-center mb-8">
+            <span class="text-xl font-bold font-serif text-moon-600">Moonpiece</span>
+            <button id="close-menu" class="p-2 text-slate-400 hover:text-slate-900 transition-colors">
                 <span class="material-symbols-outlined text-3xl">close</span>
             </button>
         </div>
-        <a href="brand.html" class="text-lg font-bold text-slate-900">문피스의 약속</a>
-        <a href="review.html" class="text-lg font-bold text-slate-900">엄마들의 이야기</a>
-        <a href="journal.html" class="text-lg font-bold text-slate-900">임산부 저널</a>
-        <a href="knowledge.html" class="text-lg font-bold text-moon-600 underline">임산부 지식인</a>
-        <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank"
-            class="btn-primary mt-6 text-center py-4 rounded-xl bg-moon-600 text-white font-bold">구매하기</a>
+        <div class="flex flex-col gap-4">
+            <a href="brand.html" class="text-lg font-bold text-slate-600 hover:text-moon-600 px-2 py-1">문피스의 약속</a>
+            <a href="review.html" class="text-lg font-bold text-slate-600 hover:text-moon-600 px-2 py-1">엄마들의 이야기</a>
+            <a href="journal.html" class="text-lg font-bold text-slate-600 hover:text-moon-600 px-2 py-1">임산부 저널</a>
+            <a href="knowledge.html" class="text-lg font-bold text-moon-600 bg-moon-50 px-4 py-3 rounded-2xl">임산부 지식인</a>
+        </div>
+        <div class="mt-auto border-t border-slate-100 pt-8">
+            <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank"
+                class="block w-full text-center py-4 rounded-2xl bg-moon-600 text-white font-bold shadow-lg shadow-moon-200 active:scale-95 transition-all">구매하러 가기</a>
+        </div>
     </div>
 
     <!-- Hero Search Section -->
@@ -381,87 +386,38 @@
     </script>
 
     <style>
-        /* Hamburger Menu Color Fix */
+        /* Premium Hamburger Menu */
         .hamburger-btn span {
-            background-color: var(--on-surface, #1e293b);
+            display: block;
+            width: 24px;
+            height: 2px;
+            background-color: #1e293b;
+            margin-bottom: 5px;
+            transition: all 0.3s ease-in-out;
         }
-
+        .hamburger-btn:last-child { margin-bottom: 0; }
+        
         .nav-bar {
             height: 80px;
-            display: flex;
-            align-items: center;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            z-index: 1000;
+            z-index: 1001;
         }
 
-        .nav-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
+        /* Responsive spacing for Knowledge Page */
+        @media (max-width: 768px) {
+            .section-padding { padding: 4rem 1.5rem; }
+            h1 { font-size: 2.25rem !important; }
         }
 
-        /* Shared and Nav specific styles preserved */
-        .nav-link:hover,
-        .nav-link.active {
-            color: #7c3aed;
+        .masonry-grid {
+            column-count: 1;
+            column-gap: 1.5rem;
         }
-
-        .btn-primary {
-            background: #7c3aed;
-            color: white;
-            padding: 0.6rem 1.5rem;
-            border-radius: 9999px;
-            font-weight: bold;
-        }
-
-        .btn-primary:hover {
-            background: #4c1d95;
-            transform: scale(0.98);
-            transition: 0.2s;
-        }
-
-        /* Mobile Nav Styles */
-        .mobile-nav {
-            position: fixed;
-            top: 0;
-            right: -100%;
-            width: 80%;
-            max-width: 320px;
-            height: 100vh;
-            background: white;
-            z-index: 1000;
-            padding: 6rem 2rem;
-            transition: 0.4s;
-            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-
-        .mobile-nav.active {
-            right: 0;
-        }
-
-        .nav-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.4);
-            z-index: 999;
-            opacity: 0;
-            visibility: hidden;
-            transition: 0.3s;
-        }
-
-        .nav-overlay.active {
-            opacity: 1;
-            visibility: visible;
+        @media (min-width: 640px) { .masonry-grid { column-count: 2; } }
+        @media (min-width: 1024px) { .masonry-grid { column-count: 3; } }
+        
+        .masonry-item {
+            break-inside: avoid;
+            margin-bottom: 1.5rem;
         }
     </style>
 </body>
