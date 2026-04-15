@@ -25,20 +25,25 @@
 
 <body class="bg-slate-50 text-slate-900 font-sans">
     <!-- Top Navigation -->
-    <nav class="nav-bar bg-white border-b border-slate-200">
-        <div class="nav-container">
-            <a href="index.html" class="logo font-serif text-moon-900">Moonpiece</a>
-            <div class="nav-links">
-                <a href="brand.html" class="nav-link">문피스의 약속</a>
-                <a href="review.html" class="nav-link">엄마들의 이야기</a>
-                <a href="journal.html" class="nav-link">임산부 저널</a>
-                <a href="knowledge.html" class="nav-link active font-bold text-moon-600">임산부 지식인</a>
+    <nav class="nav-bar bg-white/80 backdrop-blur-md border-b border-slate-100">
+        <div class="nav-container container">
+            <a href="index.html" class="logo text-2xl font-black text-moon-600 font-serif">Moonpiece</a>
+            <div class="nav-links hidden lg:flex items-center gap-10">
+                <a href="brand.html"
+                    class="nav-link text-slate-600 hover:text-moon-600 font-semibold transition-colors">문피스의 약속</a>
+                <a href="review.html"
+                    class="nav-link text-slate-600 hover:text-moon-600 font-semibold transition-colors">엄마들의 이야기</a>
+                <a href="journal.html" class="nav-link active text-moon-600 font-bold">임산부 저널</a>
+                <a href="knowledge.html"
+                    class="nav-link text-slate-600 hover:text-moon-600 font-semibold transition-colors">임산부 지식인</a>
             </div>
             <div class="flex items-center gap-4">
                 <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank"
-                    class="btn-primary mobile-hidden">구매하기</a>
-                <button class="hamburger-btn" id="menu-toggle">
-                    <span></span><span></span><span></span>
+                    class="btn-primary hidden sm:flex px-6 py-2.5 rounded-full bg-moon-600 text-white font-bold hover:bg-moon-700 transition-all">구매하기</a>
+                <button class="hamburger-btn lg:hidden outline-none" id="menu-toggle">
+                    <span class="block w-6 h-0.5 bg-slate-900 mb-1.5 transition-all"></span>
+                    <span class="block w-6 h-0.5 bg-slate-900 mb-1.5 transition-all"></span>
+                    <span class="block w-6 h-0.5 bg-slate-900 transition-all"></span>
                 </button>
             </div>
         </div>

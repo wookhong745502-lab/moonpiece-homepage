@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,19 +21,24 @@
         }
     </script>
 </head>
+
 <body class="bg-slate-50 text-slate-900 font-sans pt-20">
     <!-- Top Navigation -->
     <nav class="nav-bar bg-white/80 backdrop-blur-md border-b border-slate-100">
         <div class="nav-container container">
             <a href="index.html" class="logo text-2xl font-black text-moon-600 font-serif">Moonpiece</a>
             <div class="nav-links hidden lg:flex items-center gap-10">
-                <a href="brand.html" class="nav-link text-slate-600 hover:text-moon-600 font-semibold transition-colors">문피스의 약속</a>
-                <a href="review.html" class="nav-link text-slate-600 hover:text-moon-600 font-semibold transition-colors">엄마들의 이야기</a>
+                <a href="brand.html"
+                    class="nav-link text-slate-600 hover:text-moon-600 font-semibold transition-colors">문피스의 약속</a>
+                <a href="review.html"
+                    class="nav-link text-slate-600 hover:text-moon-600 font-semibold transition-colors">엄마들의 이야기</a>
                 <a href="journal.html" class="nav-link active text-moon-600 font-bold">임산부 저널</a>
-                <a href="knowledge.html" class="nav-link text-slate-600 hover:text-moon-600 font-semibold transition-colors">임산부 지식인</a>
+                <a href="knowledge.html"
+                    class="nav-link text-slate-600 hover:text-moon-600 font-semibold transition-colors">임산부 지식인</a>
             </div>
             <div class="flex items-center gap-4">
-                <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" class="btn-primary hidden sm:flex px-6 py-2.5 rounded-full bg-moon-600 text-white font-bold hover:bg-moon-700 transition-all">구매하기</a>
+                <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank"
+                    class="btn-primary hidden sm:flex px-6 py-2.5 rounded-full bg-moon-600 text-white font-bold hover:bg-moon-700 transition-all">구매하기</a>
                 <button class="hamburger-btn lg:hidden outline-none" id="menu-toggle">
                     <span class="block w-6 h-0.5 bg-slate-900 mb-1.5 transition-all"></span>
                     <span class="block w-6 h-0.5 bg-slate-900 mb-1.5 transition-all"></span>
@@ -43,8 +49,10 @@
     </nav>
 
     <!-- Mobile Navigation Overlay -->
-    <div class="nav-overlay fixed inset-0 bg-slate-900/50 z-[1040] opacity-0 invisible transition-all duration-300" id="overlay"></div>
-    <div class="mobile-nav fixed top-0 right-[-100%] w-[280px] h-full bg-white z-[1050] shadow-2xl p-10 flex flex-col gap-6 transition-all duration-500 ease-in-out" id="mobile-menu">
+    <div class="nav-overlay fixed inset-0 bg-slate-900/50 z-[1040] opacity-0 invisible transition-all duration-300"
+        id="overlay"></div>
+    <div class="mobile-nav fixed top-0 right-[-100%] w-[280px] h-full bg-white z-[1050] shadow-2xl p-10 flex flex-col gap-6 transition-all duration-500 ease-in-out"
+        id="mobile-menu">
         <div class="flex justify-end mb-4">
             <button id="close-menu" class="text-slate-400 hover:text-slate-900">
                 <span class="material-symbols-outlined text-3xl">close</span>
@@ -54,18 +62,22 @@
         <a href="review.html" class="text-lg font-bold text-slate-900">엄마들의 이야기</a>
         <a href="journal.html" class="text-lg font-bold text-moon-600 underline">임산부 저널</a>
         <a href="knowledge.html" class="text-lg font-bold text-slate-900">임산부 지식인</a>
-        <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" class="btn-primary mt-6 text-center py-4 rounded-xl bg-moon-600 text-white font-bold">구매하기</a>
+        <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank"
+            class="btn-primary mt-6 text-center py-4 rounded-xl bg-moon-600 text-white font-bold">구매하기</a>
     </div>
 
     <!-- Header -->
     <header class="section-padding-lg bg-white border-b border-slate-100">
         <div class="container text-center max-w-3xl">
             <h1 class="text-5xl font-serif text-slate-900 mb-8 font-black">임산부 저널</h1>
-            <p class="text-lg text-slate-500 mb-12 leading-relaxed">임산부의 건강한 숙면을 위한 11년의 연구 데이터. 수면 자세, 통증 완화, 심리 케어까지 문피스 수면연구소의 정밀 저널을 만나보세요.</p>
-            
+            <p class="text-lg text-slate-500 mb-12 leading-relaxed">임산부의 건강한 숙면을 위한 11년의 연구 데이터. 수면 자세, 통증 완화, 심리 케어까지
+                문피스 수면연구소의 정밀 저널을 만나보세요.</p>
+
             <div class="relative max-w-xl mx-auto">
-                <span class="absolute left-6 top-1/2 -translate-y-1/2 material-symbols-outlined text-slate-400">search</span>
-                <input type="text" placeholder="궁금한 증상을 검색해보세요 (예: 불면증, 요통)" class="w-full pl-16 pr-6 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-moon-200 transition-all outline-none text-sm">
+                <span
+                    class="absolute left-6 top-1/2 -translate-y-1/2 material-symbols-outlined text-slate-400">search</span>
+                <input type="text" placeholder="궁금한 증상을 검색해보세요 (예: 불면증, 요통)"
+                    class="w-full pl-16 pr-6 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-moon-200 transition-all outline-none text-sm">
             </div>
         </div>
     </header>
@@ -75,18 +87,30 @@
     <section class="section-padding">
         <div class="container">
             <div class="flex flex-wrap justify-center gap-4 mb-16" id="category-filters">
-                <button onclick="filterCategory('all')" class="filter-btn active px-8 py-3 rounded-full bg-moon-600 text-white font-bold shadow-lg" data-filter="all">전체</button>
-                <button onclick="filterCategory('sleep')" class="filter-btn px-8 py-3 rounded-full bg-white text-slate-600 font-bold border border-slate-100 hover:bg-moon-50 hover:text-moon-600 transition-all" data-filter="sleep">수면자세</button>
-                <button onclick="filterCategory('pain')" class="filter-btn px-8 py-3 rounded-full bg-white text-slate-600 font-bold border border-slate-100 hover:bg-moon-50 hover:text-moon-600 transition-all" data-filter="pain">통증완화</button>
-                <button onclick="filterCategory('health')" class="filter-btn px-8 py-3 rounded-full bg-white text-slate-600 font-bold border border-slate-100 hover:bg-moon-50 hover:text-moon-600 transition-all" data-filter="health">건강관리</button>
-                <button onclick="filterCategory('psychology')" class="filter-btn px-8 py-3 rounded-full bg-white text-slate-600 font-bold border border-slate-100 hover:bg-moon-50 hover:text-moon-600 transition-all" data-filter="psychology">심리케어</button>
-                <button onclick="filterCategory('others')" class="filter-btn px-8 py-3 rounded-full bg-white text-slate-600 font-bold border border-slate-100 hover:bg-moon-50 hover:text-moon-600 transition-all" data-filter="others">기타</button>
+                <button onclick="filterCategory('all')"
+                    class="filter-btn active px-8 py-3 rounded-full bg-moon-600 text-white font-bold shadow-lg"
+                    data-filter="all">전체</button>
+                <button onclick="filterCategory('sleep')"
+                    class="filter-btn px-8 py-3 rounded-full bg-white text-slate-600 font-bold border border-slate-100 hover:bg-moon-50 hover:text-moon-600 transition-all"
+                    data-filter="sleep">수면자세</button>
+                <button onclick="filterCategory('pain')"
+                    class="filter-btn px-8 py-3 rounded-full bg-white text-slate-600 font-bold border border-slate-100 hover:bg-moon-50 hover:text-moon-600 transition-all"
+                    data-filter="pain">통증완화</button>
+                <button onclick="filterCategory('health')"
+                    class="filter-btn px-8 py-3 rounded-full bg-white text-slate-600 font-bold border border-slate-100 hover:bg-moon-50 hover:text-moon-600 transition-all"
+                    data-filter="health">건강관리</button>
+                <button onclick="filterCategory('psychology')"
+                    class="filter-btn px-8 py-3 rounded-full bg-white text-slate-600 font-bold border border-slate-100 hover:bg-moon-50 hover:text-moon-600 transition-all"
+                    data-filter="psychology">심리케어</button>
+                <button onclick="filterCategory('others')"
+                    class="filter-btn px-8 py-3 rounded-full bg-white text-slate-600 font-bold border border-slate-100 hover:bg-moon-50 hover:text-moon-600 transition-all"
+                    data-filter="others">기타</button>
             </div>
 
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-12" id="journal-grid">
                 <!-- Articles will be injected here -->
             </div>
-            
+
             <div id="pagination-container" class="mt-20 flex justify-center gap-2">
                 <!-- Pagination will be injected here -->
             </div>
@@ -98,7 +122,8 @@
         <div class="container grid md:grid-cols-2 lg:grid-cols-4 gap-12">
             <div>
                 <div class="logo font-serif text-2xl text-moon-600 mb-6 font-bold">Moonpiece</div>
-                <p class="text-slate-500 leading-relaxed text-sm">소중한 엄마와 아기를 위한 달빛의 조각, 문피스. 10년의 진심을 담아 가장 편안한 휴식을 설계합니다.</p>
+                <p class="text-slate-500 leading-relaxed text-sm">소중한 엄마와 아기를 위한 달빛의 조각, 문피스. 10년의 진심을 담아 가장 편안한 휴식을
+                    설계합니다.</p>
             </div>
             <div>
                 <h4 class="font-bold text-slate-900 mb-6 uppercase tracking-wider text-xs">Company</h4>
@@ -111,19 +136,22 @@
                 <h4 class="font-bold text-slate-900 mb-6 uppercase tracking-wider text-xs">Support</h4>
                 <ul class="space-y-4 text-sm text-slate-500 list-none p-0">
                     <li><a href="privacy.html" class="hover:text-moon-600 transition-colors">개인정보처리방침</a></li>
-                    <li><a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" class="hover:text-moon-600 transition-colors">네이버 스마트스토어</a></li>
+                    <li><a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank"
+                            class="hover:text-moon-600 transition-colors">네이버 스마트스토어</a></li>
                 </ul>
             </div>
             <div>
                 <h4 class="font-bold text-slate-900 mb-6 uppercase tracking-wider text-xs">Social</h4>
                 <div class="flex gap-4">
-                    <a href="#" class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-moon-500 hover:text-white transition-all">
+                    <a href="#"
+                        class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-moon-500 hover:text-white transition-all">
                         <span class="material-symbols-outlined">share</span>
                     </a>
                 </div>
             </div>
         </div>
-        <div class="container mt-20 pt-10 border-t border-slate-50 text-center text-slate-400 text-xs">© 2024 Moonpiece. All rights reserved.</div>
+        <div class="container mt-20 pt-10 border-t border-slate-50 text-center text-slate-400 text-xs">© 2024 Moonpiece.
+            All rights reserved.</div>
     </footer>
 
     <script>
@@ -137,10 +165,10 @@
         const grid = document.getElementById('journal-grid');
         const paginationContainer = document.getElementById('pagination-container');
         const searchInput = document.querySelector('input[type="text"]');
-        const nameMap = { 
-            'sleep': '수면자세', 
-            'pain': '통증완화', 
-            'health': '건강관리', 
+        const nameMap = {
+            'sleep': '수면자세',
+            'pain': '통증완화',
+            'health': '건강관리',
             'psychology': '심리케어',
             'others': '기타'
         };
@@ -262,4 +290,5 @@
         init();
     </script>
 </body>
+
 </html>
