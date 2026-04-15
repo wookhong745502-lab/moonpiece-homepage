@@ -82,8 +82,12 @@
             <h1 class="font-serif mb-8 text-4xl">콘텐츠 상태 현황</h1>
             <div class="grid grid-cols-2 gap-8 mb-12">
                 <div class="card p-8">
-                    <div style="font-size: 0.9rem; color: var(--on-surface-variant);">전체 발행물</div>
+                    <div style="font-size: 0.9rem; color: var(--on-surface-variant);">발행된 콘텐츠</div>
                     <div style="font-size: 3rem; font-weight: 900; color: var(--primary);" id="stat-total">0</div>
+                </div>
+                <div class="card p-8">
+                    <div style="font-size: 0.9rem; color: var(--on-surface-variant);">예약된 콘텐츠</div>
+                    <div style="font-size: 3rem; font-weight: 900; color: var(--secondary);" id="stat-scheduled">0</div>
                 </div>
             </div>
         </div>
@@ -280,7 +284,8 @@
                         <tr>
                             <th style="padding-left: 2rem;">제목</th>
                             <th>유형/카테고리</th>
-                            <th>날짜</th>
+                            <th>상태</th>
+                            <th>발행(예정)일</th>
                             <th style="padding-right: 2rem; text-align: right;">관리</th>
                         </tr>
                     </thead>
@@ -458,21 +463,33 @@
             const res = await fetch('/admin/api/posts');
             const posts = await res.json();
             const list = document.getElementById('post-list');
-            list.innerHTML = posts.map(p => `
+            const now = new Date().toISOString().split('T')[0];
+            let totalPublished = 0;
+            let totalScheduled = 0;
+
+            list.innerHTML = posts.map(p => {
+                const isScheduled = p.date > now;
+                if(isScheduled) totalScheduled++; else totalPublished++;
+
+                return `
                 <tr>
                     <td style="padding-left: 2rem;">
                         <a href="${p.url}" target="_blank" class="font-bold hover:text-primary transition">${p.title}</a>
                         <div style="font-size: 0.75rem; color: var(--outline);">${p.url}</div>
                     </td>
                     <td><span class="px-2 py-1 bg-surface-container-high rounded text-xs" style="font-weight: 800; font-size: 0.7rem;">${p.type === 'journal' ? '임산부 저널' : '임산부 지식인'}</span> ${p.category}</td>
-                    <td>${p.date}</td>
+                    <td>
+                        ${isScheduled ? '<span class="px-2 py-1 bg-amber-50 text-amber-600 rounded-lg text-xs font-bold border border-amber-100">발행 예약</span>' : '<span class="px-2 py-1 bg-green-50 text-green-600 rounded-lg text-xs font-bold border border-green-100">발행 완료</span>'}
+                    </td>
+                    <td><span class="text-sm ${isScheduled ? 'text-amber-600 font-bold' : 'text-slate-500'}">${p.date}</span></td>
                     <td style="padding-right: 2rem; text-align: right;">
                         <button onclick="openEditModal('${p.url}')" class="text-primary" style="margin-right:1rem;">수정</button>
                         <button onclick="deletePost('${p.url}', '${p.type}')" class="text-error">삭제</button>
                     </td>
                 </tr>
-            `).join('');
-            document.getElementById('stat-total').textContent = posts.length;
+            `}).join('');
+            document.getElementById('stat-total').textContent = totalPublished;
+            document.getElementById('stat-scheduled').textContent = totalScheduled;
         }
 
         async function deletePost(url, type) {

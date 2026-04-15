@@ -182,14 +182,16 @@ export default {
       const data = await env.JOURNAL_BUCKET.get("journal/list.json");
       if (!data) return new Response("[]", { headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
       const list = await data.json();
-      const filtered = list.filter(p => !p.date || new Date(p.date) <= new Date());
+      const kstNow = new Date(new Date().getTime() + 9 * 60 * 60 * 1000).toISOString().split('T')[0];
+      const filtered = list.filter(p => !p.date || p.date <= kstNow);
       return new Response(JSON.stringify(filtered), { headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
     }
     if (url.pathname === "/list-knowledge") {
       const data = await env.JOURNAL_BUCKET.get("knowledge/list.json");
       if (!data) return new Response("[]", { headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
       const list = await data.json();
-      const filtered = list.filter(p => !p.date || new Date(p.date) <= new Date());
+      const kstNow = new Date(new Date().getTime() + 9 * 60 * 60 * 1000).toISOString().split('T')[0];
+      const filtered = list.filter(p => !p.date || p.date <= kstNow);
       return new Response(JSON.stringify(filtered), { headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
     }
 
@@ -225,6 +227,21 @@ export default {
     try {
       return await getAssetFromKV({ request, waitUntil: ctx.waitUntil.bind(ctx) }, { ASSET_NAMESPACE: env.__STATIC_CONTENT, ASSET_MANIFEST: assetManifest });
     } catch (e) { return new Response("Not Found", { status: 404 }); }
+  },
+
+  // --- 6. CRON Trigger for Automatic Publishing (Daily 00:00) ---
+  async scheduled(event, env, ctx) {
+    console.log("CRON Trigger Started: Running Auto Publish...");
+    // Automatically publish one SEO post in a random category
+    const categories = ["sleep", "pain", "health", "psychology"];
+    const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+    
+    // Mock request for autoPublishHandler
+    const mockRequest = {
+      json: async () => ({ category: randomCategory, count: 1, type: "seo" })
+    };
+    
+    ctx.waitUntil(autoPublishHandler(mockRequest, env));
   }
 };
 

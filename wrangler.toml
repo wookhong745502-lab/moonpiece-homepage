@@ -12,3 +12,6 @@ bucket_name = "moonpiece-journal"
 
 [ai]
 binding = "AI"
+
+[triggers]
+crons = ["0 15 * * *"] # Every day at 00:00 KST (15:00 UTC)
