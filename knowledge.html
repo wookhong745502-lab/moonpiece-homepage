@@ -83,6 +83,7 @@
             <!-- Hero Search Bar -->
             <div class="relative max-w-2xl mx-auto mb-6">
                 <input type="text" id="top-search-input" placeholder="키워드로 검색해보세요 (예: 환도선다, 수면자세)"
+                    onfocus="this.placeholder = ''" onblur="this.placeholder = '키워드로 검색해보세요 (예: 환도선다, 수면자세)'"
                     class="w-full pl-14 pr-32 py-5 rounded-full border-2 border-slate-100 bg-slate-50 focus:border-moon-500 focus:bg-white focus:outline-none shadow-sm transition-all text-lg">
                 <span class="material-symbols-outlined absolute left-5 top-5 text-slate-400 text-3xl">search</span>
                 <button onclick="handleSearch('top')"
@@ -144,6 +145,7 @@
             <h3 class="text-xl font-bold text-slate-800 mb-6">원하시는 답변을 찾지 못하셨나요?</h3>
             <div class="relative">
                 <input type="text" id="bottom-search-input" placeholder="다시 검색해보세요"
+                    onfocus="this.placeholder = ''" onblur="this.placeholder = '다시 검색해보세요'"
                     class="w-full pl-12 pr-24 py-4 rounded-xl border border-slate-300 bg-white focus:border-moon-500 focus:outline-none shadow-sm transition-all">
                 <span class="material-symbols-outlined absolute left-4 top-4 text-slate-400">search</span>
                 <button onclick="handleSearch('bottom')"
