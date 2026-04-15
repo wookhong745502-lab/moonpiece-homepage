@@ -73,11 +73,24 @@
             <p class="text-lg text-slate-500 mb-12 leading-relaxed">임산부의 건강한 숙면을 위한 11년의 연구 데이터. 수면 자세, 통증 완화, 심리 케어까지
                 문피스 수면연구소의 정밀 저널을 만나보세요.</p>
 
-            <div class="relative max-w-xl mx-auto">
+            <div class="relative max-w-xl mx-auto mb-6">
                 <span
                     class="absolute left-6 top-1/2 -translate-y-1/2 material-symbols-outlined text-slate-400">search</span>
                 <input type="text" placeholder="궁금한 증상을 검색해보세요 (예: 불면증, 요통)"
+                    onfocus="this.placeholder = ''" onblur="this.placeholder = '궁금한 증상을 검색해보세요 (예: 불면증, 요통)'"
                     class="w-full pl-16 pr-6 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-moon-200 transition-all outline-none text-sm">
+            </div>
+
+            <!-- Hot Hashtags -->
+            <div class="flex flex-wrap justify-center gap-2">
+                <button onclick="tagSearch('수면자세')"
+                    class="px-4 py-1.5 rounded-full bg-slate-50 text-slate-500 text-xs font-medium hover:bg-moon-50 hover:text-moon-600 transition-all border border-transparent hover:border-moon-100">#수면자세</button>
+                <button onclick="tagSearch('환도선다')"
+                    class="px-4 py-1.5 rounded-full bg-slate-50 text-slate-500 text-xs font-medium hover:bg-moon-50 hover:text-moon-600 transition-all border border-transparent hover:border-moon-100">#환도선다</button>
+                <button onclick="tagSearch('튼살크림')"
+                    class="px-4 py-1.5 rounded-full bg-slate-50 text-slate-500 text-xs font-medium hover:bg-moon-50 hover:text-moon-600 transition-all border border-transparent hover:border-moon-100">#튼살크림</button>
+                <button onclick="tagSearch('식단관리')"
+                    class="px-4 py-1.5 rounded-full bg-slate-50 text-slate-500 text-xs font-medium hover:bg-moon-50 hover:text-moon-600 transition-all border border-transparent hover:border-moon-100">#식단관리</button>
             </div>
         </div>
     </header>
@@ -269,6 +282,14 @@
             currentPage = 1;
             applyFilterAndSearch();
         });
+
+        window.tagSearch = (tag) => {
+            searchInput.value = tag;
+            searchQuery = tag;
+            currentPage = 1;
+            applyFilterAndSearch();
+            window.scrollTo({ top: grid.offsetTop - 100, behavior: 'smooth' });
+        };
 
         const menuToggle = document.getElementById('menu-toggle');
         const closeMenu = document.getElementById('close-menu');
