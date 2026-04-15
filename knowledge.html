@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>임산부 지식인 | Moonpiece AI Experts</title>
     <meta name="description" content="임산부가 궁금한 모든 것에 대한 답변. 문피스가 빅데이터와 전문가 지식으로 해결책을 제시해드립니다.">
-    <link rel="stylesheet" href="styles.css?v=1.4">
+    <link rel="stylesheet" href="styles.css?v=1.6">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -13,36 +14,15 @@
             theme: {
                 extend: {
                     colors: {
-                        moon: {
-                            50: '#f5f3ff',
-                            100: '#ede9fe',
-                            200: '#ddd6fe',
-                            500: '#8b5cf6',
-                            600: '#7c3aed',
-                            900: '#4c1d95',
-                        }
+                        moon: { 50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 500: '#8b5cf6', 600: '#7c3aed', 900: '#4c1d95' }
                     },
-                    fontFamily: {
-                        serif: ['Noto Serif KR', 'serif'],
-                        sans: ['Manrope', 'sans-serif'],
-                    }
+                    fontFamily: { serif: ['Noto Serif KR', 'serif'], sans: ['Manrope', 'sans-serif'] }
                 }
             }
         }
     </script>
-    <style>
-        .masonry-grid {
-            column-count: 1;
-            column-gap: 1.5rem;
-        }
-        @media (min-width: 640px) { .masonry-grid { column-count: 2; } }
-        @media (min-width: 1024px) { .masonry-grid { column-count: 3; } }
-        .masonry-item {
-            break-inside: avoid;
-            margin-bottom: 1.5rem;
-        }
-    </style>
 </head>
+
 <body class="bg-slate-50 text-slate-900 font-sans">
     <!-- Top Navigation -->
     <nav class="nav-bar bg-white border-b border-slate-200">
@@ -55,7 +35,8 @@
                 <a href="knowledge.html" class="nav-link active font-bold text-moon-600">임산부 지식인</a>
             </div>
             <div class="flex items-center gap-4">
-                <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" class="btn-primary mobile-hidden">구매하기</a>
+                <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank"
+                    class="btn-primary mobile-hidden">구매하기</a>
                 <button class="hamburger-btn" id="menu-toggle">
                     <span></span><span></span><span></span>
                 </button>
@@ -70,7 +51,8 @@
         <a href="review.html" class="nav-link">엄마들의 이야기</a>
         <a href="journal.html" class="nav-link">임산부 저널</a>
         <a href="knowledge.html" class="nav-link active">임산부 지식인</a>
-        <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" class="btn-primary text-center mt-8">구매하기</a>
+        <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank"
+            class="btn-primary text-center mt-8">구매하기</a>
     </div>
 
     <!-- Hero Search Section -->
@@ -80,21 +62,26 @@
             <p class="text-slate-500 text-lg mb-10 max-w-2xl mx-auto">
                 엄마와 아기가 가장 편안한 밤을 보낼 수 있도록,<br>문피스가 빅데이터와 전문가 지식으로 궁금한 모든 것에 해결책을 제시해드립니다.
             </p>
-            
+
             <!-- Hero Search Bar -->
             <div class="relative max-w-2xl mx-auto mb-6">
-                <input type="text" id="top-search-input" placeholder="키워드로 검색해보세요 (예: 환도선다, 수면자세)" 
-                       class="w-full pl-14 pr-32 py-5 rounded-full border-2 border-slate-100 bg-slate-50 focus:border-moon-500 focus:bg-white focus:outline-none shadow-sm transition-all text-lg">
+                <input type="text" id="top-search-input" placeholder="키워드로 검색해보세요 (예: 환도선다, 수면자세)"
+                    class="w-full pl-14 pr-32 py-5 rounded-full border-2 border-slate-100 bg-slate-50 focus:border-moon-500 focus:bg-white focus:outline-none shadow-sm transition-all text-lg">
                 <span class="material-symbols-outlined absolute left-5 top-5 text-slate-400 text-3xl">search</span>
-                <button onclick="handleSearch('top')" class="absolute right-2 top-2 bottom-2 px-8 bg-moon-600 text-white rounded-full font-bold hover:bg-moon-500 transition-colors">검색</button>
+                <button onclick="handleSearch('top')"
+                    class="absolute right-2 top-2 bottom-2 px-8 bg-moon-600 text-white rounded-full font-bold hover:bg-moon-500 transition-colors">검색</button>
             </div>
 
             <!-- Hot Hashtags -->
             <div class="flex flex-wrap justify-center gap-2">
-                <button onclick="tagSearch('수면자세')" class="px-4 py-1.5 rounded-full bg-slate-100 text-slate-600 text-sm font-medium hover:bg-moon-50 hover:text-moon-600 transition-all border border-transparent hover:border-moon-200">#수면자세</button>
-                <button onclick="tagSearch('환도선다')" class="px-4 py-1.5 rounded-full bg-slate-100 text-slate-600 text-sm font-medium hover:bg-moon-50 hover:text-moon-600 transition-all border border-transparent hover:border-moon-200">#환도선다</button>
-                <button onclick="tagSearch('튼살크림')" class="px-4 py-1.5 rounded-full bg-slate-100 text-slate-600 text-sm font-medium hover:bg-moon-50 hover:text-moon-600 transition-all border border-transparent hover:border-moon-200">#튼살크림</button>
-                <button onclick="tagSearch('식단관리')" class="px-4 py-1.5 rounded-full bg-slate-100 text-slate-600 text-sm font-medium hover:bg-moon-50 hover:text-moon-600 transition-all border border-transparent hover:border-moon-200">#식단관리</button>
+                <button onclick="tagSearch('수면자세')"
+                    class="px-4 py-1.5 rounded-full bg-slate-100 text-slate-600 text-sm font-medium hover:bg-moon-50 hover:text-moon-600 transition-all border border-transparent hover:border-moon-200">#수면자세</button>
+                <button onclick="tagSearch('환도선다')"
+                    class="px-4 py-1.5 rounded-full bg-slate-100 text-slate-600 text-sm font-medium hover:bg-moon-50 hover:text-moon-600 transition-all border border-transparent hover:border-moon-200">#환도선다</button>
+                <button onclick="tagSearch('튼살크림')"
+                    class="px-4 py-1.5 rounded-full bg-slate-100 text-slate-600 text-sm font-medium hover:bg-moon-50 hover:text-moon-600 transition-all border border-transparent hover:border-moon-200">#튼살크림</button>
+                <button onclick="tagSearch('식단관리')"
+                    class="px-4 py-1.5 rounded-full bg-slate-100 text-slate-600 text-sm font-medium hover:bg-moon-50 hover:text-moon-600 transition-all border border-transparent hover:border-moon-200">#식단관리</button>
             </div>
         </div>
     </section>
@@ -103,12 +90,24 @@
     <main class="max-w-7xl mx-auto px-6 py-16">
         <!-- Category Filter -->
         <div class="flex flex-wrap justify-center gap-3 mb-16" id="category-filters">
-            <button onclick="filterCategory('all')" class="filter-btn active px-6 py-2.5 rounded-full font-bold transition-all bg-moon-600 text-white shadow-md" data-filter="all">전체</button>
-            <button onclick="filterCategory('sleep')" class="filter-btn px-6 py-2.5 rounded-full font-bold transition-all bg-white text-slate-600 border border-slate-200 hover:border-moon-500 hover:text-moon-600" data-filter="sleep">수면 자세</button>
-            <button onclick="filterCategory('pain')" class="filter-btn px-6 py-2.5 rounded-full font-bold transition-all bg-white text-slate-600 border border-slate-200 hover:border-moon-500 hover:text-moon-600" data-filter="pain">통증 완화</button>
-            <button onclick="filterCategory('health')" class="filter-btn px-6 py-2.5 rounded-full font-bold transition-all bg-white text-slate-600 border border-slate-200 hover:border-moon-500 hover:text-moon-600" data-filter="health">건강 관리</button>
-            <button onclick="filterCategory('psychology')" class="filter-btn px-6 py-2.5 rounded-full font-bold transition-all bg-white text-slate-600 border border-slate-200 hover:border-moon-500 hover:text-moon-600" data-filter="psychology">심리 & 지식</button>
-            <button onclick="filterCategory('others')" class="filter-btn px-6 py-2.5 rounded-full font-bold transition-all bg-white text-slate-600 border border-slate-200 hover:border-moon-500 hover:text-moon-600" data-filter="others">기타</button>
+            <button onclick="filterCategory('all')"
+                class="filter-btn active px-6 py-2.5 rounded-full font-bold transition-all bg-moon-600 text-white shadow-md"
+                data-filter="all">전체</button>
+            <button onclick="filterCategory('sleep')"
+                class="filter-btn px-6 py-2.5 rounded-full font-bold transition-all bg-white text-slate-600 border border-slate-200 hover:border-moon-500 hover:text-moon-600"
+                data-filter="sleep">수면 자세</button>
+            <button onclick="filterCategory('pain')"
+                class="filter-btn px-6 py-2.5 rounded-full font-bold transition-all bg-white text-slate-600 border border-slate-200 hover:border-moon-500 hover:text-moon-600"
+                data-filter="pain">통증 완화</button>
+            <button onclick="filterCategory('health')"
+                class="filter-btn px-6 py-2.5 rounded-full font-bold transition-all bg-white text-slate-600 border border-slate-200 hover:border-moon-500 hover:text-moon-600"
+                data-filter="health">건강 관리</button>
+            <button onclick="filterCategory('psychology')"
+                class="filter-btn px-6 py-2.5 rounded-full font-bold transition-all bg-white text-slate-600 border border-slate-200 hover:border-moon-500 hover:text-moon-600"
+                data-filter="psychology">심리 & 지식</button>
+            <button onclick="filterCategory('others')"
+                class="filter-btn px-6 py-2.5 rounded-full font-bold transition-all bg-white text-slate-600 border border-slate-200 hover:border-moon-500 hover:text-moon-600"
+                data-filter="others">기타</button>
         </div>
 
         <!-- Masonry Grid -->
@@ -127,10 +126,11 @@
         <div class="max-w-xl mx-auto px-6 text-center">
             <h3 class="text-xl font-bold text-slate-800 mb-6">원하시는 답변을 찾지 못하셨나요?</h3>
             <div class="relative">
-                <input type="text" id="bottom-search-input" placeholder="다시 검색해보세요" 
-                       class="w-full pl-12 pr-24 py-4 rounded-xl border border-slate-300 bg-white focus:border-moon-500 focus:outline-none shadow-sm transition-all">
+                <input type="text" id="bottom-search-input" placeholder="다시 검색해보세요"
+                    class="w-full pl-12 pr-24 py-4 rounded-xl border border-slate-300 bg-white focus:border-moon-500 focus:outline-none shadow-sm transition-all">
                 <span class="material-symbols-outlined absolute left-4 top-4 text-slate-400">search</span>
-                <button onclick="handleSearch('bottom')" class="absolute right-1.5 top-1.5 bottom-1.5 px-6 bg-slate-800 text-white rounded-lg font-bold hover:bg-black transition-colors">검색</button>
+                <button onclick="handleSearch('bottom')"
+                    class="absolute right-1.5 top-1.5 bottom-1.5 px-6 bg-slate-800 text-white rounded-lg font-bold hover:bg-black transition-colors">검색</button>
             </div>
         </div>
     </section>
@@ -155,13 +155,15 @@
                 <h4 class="font-bold text-slate-900 mb-6 uppercase tracking-wider text-xs">Support</h4>
                 <ul class="space-y-4 text-sm text-slate-500">
                     <li><a href="privacy.html" class="hover:text-moon-600 transition-colors">개인정보처리방침</a></li>
-                    <li><a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" class="hover:text-moon-600 transition-colors">네이버 스마트스토어</a></li>
+                    <li><a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank"
+                            class="hover:text-moon-600 transition-colors">네이버 스마트스토어</a></li>
                 </ul>
             </div>
             <div>
                 <h4 class="font-bold text-slate-900 mb-6 uppercase tracking-wider text-xs">Social</h4>
                 <div class="flex gap-4">
-                    <a href="#" class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-moon-500 hover:text-white transition-all">
+                    <a href="#"
+                        class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-moon-500 hover:text-white transition-all">
                         <span class="material-symbols-outlined">share</span>
                     </a>
                 </div>
@@ -185,10 +187,10 @@
         const paginationContainer = document.getElementById('pagination-container');
         const topSearch = document.getElementById('top-search-input');
         const bottomSearch = document.getElementById('bottom-search-input');
-        const nameMap = { 
-            'sleep': '수면 자세', 
-            'pain': '통증 완화', 
-            'health': '건강 관리', 
+        const nameMap = {
+            'sleep': '수면 자세',
+            'pain': '통증 완화',
+            'health': '건강 관리',
             'psychology': '심리 & 지식',
             'others': '기타'
         };
@@ -207,8 +209,8 @@
             } catch (e) {
                 console.error("Load failed:", e);
                 // Load mock data if server fails
-                allPosts = Array.from({length: 12}).map((_, i) => ({
-                    title: `[임산부 궁금증] 수면 자세에 대한 ${i+1}번째 질문입니다.`,
+                allPosts = Array.from({ length: 12 }).map((_, i) => ({
+                    title: `[임산부 궁금증] 수면 자세에 대한 ${i + 1}번째 질문입니다.`,
                     category: 'sleep',
                     categoryName: '수면 자세',
                     desc: '임신 중기부터는 왼쪽으로 누워 자는 것이 혈액 순환에 도움이 된다고 합니다. 하지만 꼭 그래야 할까요?',
@@ -314,7 +316,7 @@
         function filterCategory(cat) {
             currentFilter = cat;
             currentPage = 1;
-            
+
             // Updates buttons
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 if (btn.dataset.filter === cat) {
@@ -342,8 +344,8 @@
         }
 
         // Search Enter Key
-        topSearch.addEventListener('keypress', (e) => { if(e.key === 'Enter') handleSearch('top'); });
-        bottomSearch.addEventListener('keypress', (e) => { if(e.key === 'Enter') handleSearch('bottom'); });
+        topSearch.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSearch('top'); });
+        bottomSearch.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSearch('bottom'); });
 
         init();
 
@@ -366,16 +368,69 @@
 
     <style>
         /* Shared and Nav specific styles preserved */
-        .hamburger-btn span { background-color: #4c1d95; }
-        .nav-link:hover, .nav-link.active { color: #7c3aed; }
-        .btn-primary { background: #7c3aed; color: white; padding: 0.6rem 1.5rem; border-radius: 9999px; font-weight: bold; }
-        .btn-primary:hover { background: #4c1d95; transform: scale(0.98); transition: 0.2s; }
-        
+        .hamburger-btn span {
+            background-color: #4c1d95;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: #7c3aed;
+        }
+
+        .btn-primary {
+            background: #7c3aed;
+            color: white;
+            padding: 0.6rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: bold;
+        }
+
+        .btn-primary:hover {
+            background: #4c1d95;
+            transform: scale(0.98);
+            transition: 0.2s;
+        }
+
         /* Mobile Nav Styles */
-        .mobile-nav { position: fixed; top: 0; right: -100%; width: 80%; max-width: 320px; height: 100vh; background: white; z-index: 1000; padding: 6rem 2rem; transition: 0.4s; box-shadow: -10px 0 30px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 1.5rem; }
-        .mobile-nav.active { right: 0; }
-        .nav-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 999; opacity: 0; visibility: hidden; transition: 0.3s; }
-        .nav-overlay.active { opacity: 1; visibility: visible; }
+        .mobile-nav {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 80%;
+            max-width: 320px;
+            height: 100vh;
+            background: white;
+            z-index: 1000;
+            padding: 6rem 2rem;
+            transition: 0.4s;
+            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .mobile-nav.active {
+            right: 0;
+        }
+
+        .nav-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: 0.3s;
+        }
+
+        .nav-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
     </style>
 </body>
+
 </html>
