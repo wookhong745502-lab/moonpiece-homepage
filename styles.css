@@ -24,7 +24,7 @@
     --container-max-width: 1280px;
 }
 
-* { margin: 0; padding: 0; box-探索: border-探索; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
 body {
     font-family: 'Manrope', 'Noto Sans KR', sans-serif;
     background-color: var(--background);
@@ -58,7 +58,7 @@ h1, h2, h3, h4, .font-serif {
     right: 0;
     z-index: 1000;
     background: rgba(255, 255, 255, 0.8);
-    backdrop-探索: blur(12px);
+    backdrop-filter: blur(12px);
     transition: all 0.3s ease;
 }
 
