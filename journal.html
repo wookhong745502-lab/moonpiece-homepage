@@ -73,24 +73,25 @@
             <p class="text-lg text-slate-500 mb-12 leading-relaxed">임산부의 건강한 숙면을 위한 11년의 연구 데이터. 수면 자세, 통증 완화, 심리 케어까지
                 문피스 수면연구소의 정밀 저널을 만나보세요.</p>
 
-            <div class="relative max-w-xl mx-auto mb-6">
-                <span
-                    class="absolute left-6 top-1/2 -translate-y-1/2 material-symbols-outlined text-slate-400">search</span>
-                <input type="text" placeholder="궁금한 증상을 검색해보세요 (예: 불면증, 요통)"
-                    onfocus="this.placeholder = ''" onblur="this.placeholder = '궁금한 증상을 검색해보세요 (예: 불면증, 요통)'"
-                    class="w-full pl-16 pr-6 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-moon-200 transition-all outline-none text-sm">
+            <div class="relative max-w-2xl mx-auto mb-6">
+                <input type="text" id="top-search-input" placeholder="키워드로 검색해보세요 (예: 불면증, 요통)"
+                    onfocus="this.placeholder = ''" onblur="this.placeholder = '키워드로 검색해보세요 (예: 불면증, 요통)'"
+                    class="w-full pl-14 pr-32 py-5 rounded-full border-2 border-slate-100 bg-slate-50 focus:border-moon-500 focus:bg-white focus:outline-none shadow-sm transition-all text-lg">
+                <span class="material-symbols-outlined absolute left-5 top-5 text-slate-400 text-3xl">search</span>
+                <button onclick="handleSearch('top')"
+                    class="absolute right-2 top-2 bottom-2 px-8 bg-moon-600 text-white rounded-full font-bold hover:bg-moon-500 transition-colors">검색</button>
             </div>
 
             <!-- Hot Hashtags -->
             <div class="flex flex-wrap justify-center gap-2">
                 <button onclick="tagSearch('수면자세')"
-                    class="px-4 py-1.5 rounded-full bg-slate-50 text-slate-500 text-xs font-medium hover:bg-moon-50 hover:text-moon-600 transition-all border border-transparent hover:border-moon-100">#수면자세</button>
+                    class="px-4 py-1.5 rounded-full bg-slate-100 text-slate-600 text-sm font-medium hover:bg-moon-50 hover:text-moon-600 transition-all border border-transparent hover:border-moon-200">#수면자세</button>
                 <button onclick="tagSearch('환도선다')"
-                    class="px-4 py-1.5 rounded-full bg-slate-50 text-slate-500 text-xs font-medium hover:bg-moon-50 hover:text-moon-600 transition-all border border-transparent hover:border-moon-100">#환도선다</button>
+                    class="px-4 py-1.5 rounded-full bg-slate-100 text-slate-600 text-sm font-medium hover:bg-moon-50 hover:text-moon-600 transition-all border border-transparent hover:border-moon-200">#환도선다</button>
                 <button onclick="tagSearch('튼살크림')"
-                    class="px-4 py-1.5 rounded-full bg-slate-50 text-slate-500 text-xs font-medium hover:bg-moon-50 hover:text-moon-600 transition-all border border-transparent hover:border-moon-100">#튼살크림</button>
+                    class="px-4 py-1.5 rounded-full bg-slate-100 text-slate-600 text-sm font-medium hover:bg-moon-50 hover:text-moon-600 transition-all border border-transparent hover:border-moon-200">#튼살크림</button>
                 <button onclick="tagSearch('식단관리')"
-                    class="px-4 py-1.5 rounded-full bg-slate-50 text-slate-500 text-xs font-medium hover:bg-moon-50 hover:text-moon-600 transition-all border border-transparent hover:border-moon-100">#식단관리</button>
+                    class="px-4 py-1.5 rounded-full bg-slate-100 text-slate-600 text-sm font-medium hover:bg-moon-50 hover:text-moon-600 transition-all border border-transparent hover:border-moon-200">#식단관리</button>
             </div>
         </div>
     </header>
@@ -126,6 +127,21 @@
 
             <div id="pagination-container" class="mt-20 flex justify-center gap-2">
                 <!-- Pagination will be injected here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Bottom Search Section -->
+    <section class="bg-slate-100 py-16 border-t border-slate-200">
+        <div class="max-w-xl mx-auto px-6 text-center">
+            <h3 class="text-xl font-bold text-slate-800 mb-6">원하시는 정보를 찾지 못하셨나요?</h3>
+            <div class="relative">
+                <input type="text" id="bottom-search-input" placeholder="다시 검색해보세요"
+                    onfocus="this.placeholder = ''" onblur="this.placeholder = '다시 검색해보세요'"
+                    class="w-full pl-12 pr-24 py-4 rounded-xl border border-slate-300 bg-white focus:border-moon-500 focus:outline-none shadow-sm transition-all">
+                <span class="material-symbols-outlined absolute left-4 top-4 text-slate-400">search</span>
+                <button onclick="handleSearch('bottom')"
+                    class="absolute right-1.5 top-1.5 bottom-1.5 px-6 bg-slate-800 text-white rounded-lg font-bold hover:bg-black transition-colors">검색</button>
             </div>
         </div>
     </section>
@@ -177,7 +193,8 @@
 
         const grid = document.getElementById('journal-grid');
         const paginationContainer = document.getElementById('pagination-container');
-        const searchInput = document.querySelector('input[type="text"]');
+        const topSearch = document.getElementById('top-search-input');
+        const bottomSearch = document.getElementById('bottom-search-input');
         const nameMap = {
             'sleep': '수면자세',
             'pain': '통증완화',
@@ -277,19 +294,24 @@
             applyFilterAndSearch();
         };
 
-        searchInput.addEventListener('input', (e) => {
-            searchQuery = e.target.value;
+        function handleSearch(source) {
+            searchQuery = (source === 'top' ? topSearch.value : bottomSearch.value).trim();
             currentPage = 1;
             applyFilterAndSearch();
-        });
+            if (source === 'bottom') window.scrollTo({ top: grid.offsetTop - 100, behavior: 'smooth' });
+        }
 
         window.tagSearch = (tag) => {
-            searchInput.value = tag;
+            topSearch.value = tag;
             searchQuery = tag;
             currentPage = 1;
             applyFilterAndSearch();
             window.scrollTo({ top: grid.offsetTop - 100, behavior: 'smooth' });
         };
+
+        // Search Enter Key
+        topSearch.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSearch('top'); });
+        bottomSearch.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSearch('bottom'); });
 
         const menuToggle = document.getElementById('menu-toggle');
         const closeMenu = document.getElementById('close-menu');
