@@ -648,16 +648,17 @@ async function renderTemplate(data, env, categoryName) {
         </div>
         
         <section class="mt-24">
-            <h3 class="font-serif mb-8 text-3xl">자주 묻는 질문 (FAQ)</h3>
-            <div class="flex flex-col gap-4">
+            <h3 class="font-serif mb-12 text-3xl">자주 묻는 질문 (FAQ)</h3>
+            <div class="flex flex-col gap-12">
                 ${(data.faqs || []).map(f => `
-                <details class="faq-card p-6 rounded-2xl bg-white shadow-sm mb-4 border border-slate-200 group">
-                    <summary class="font-bold cursor-pointer text-lg list-none flex justify-between items-center">
-                        ${f.q}
-                        <span class="material-symbols-outlined transition-transform group-open:rotate-180">expand_more</span>
-                    </summary>
-                    <p class="mt-4 leading-relaxed text-slate-600 border-t border-slate-100 pt-4">${f.a}</p>
-                </details>`).join("")}
+                <div class="faq-item">
+                    <h3 class="text-xl font-bold mb-4 flex gap-3 text-moon-900">
+                        <span class="text-moon-200">Q.</span> ${f.q}
+                    </h3>
+                    <div class="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm text-slate-600 leading-relaxed">
+                        <p>${f.a}</p>
+                    </div>
+                </div>`).join("")}
             </div>
         </section>
         
