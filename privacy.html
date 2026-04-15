@@ -4,140 +4,127 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>개인정보처리방침 | Moonpiece</title>
-    <meta name="description" content="문피스의 개인정보처리방침을 안내합니다.">
-    <link rel="stylesheet" href="styles.css?v=1.3">
+    <link rel="stylesheet" href="styles.css?v=1.6">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        moon: { 50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 500: '#8b5cf6', 600: '#7c3aed', 900: '#4c1d95' }
+                    },
+                    fontFamily: { serif: ['Noto Serif KR', 'serif'], sans: ['Manrope', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
 </head>
-<body>
-        <!-- Top Navigation -->
-        <nav class="nav-bar">
-        <div class="nav-container">
-            <a href="index.html" class="logo font-serif">Moonpiece</a>
-            <div class="nav-links">
-                <a href="brand.html" class="nav-link">문피스의 약속</a>
-                <a href="review.html" class="nav-link">엄마들의 이야기</a>
-                <a href="journal.html" class="nav-link">임산부 저널</a>
-                <a href="knowledge.html" class="nav-link">임산부 지식인</a>
+<body class="bg-white text-slate-900 font-sans pt-20">
+    <nav class="nav-bar bg-white/80 backdrop-blur-md border-b border-slate-100">
+        <div class="nav-container container">
+            <a href="index.html" class="logo text-2xl font-black text-moon-600 font-serif">Moonpiece</a>
+            <div class="nav-links hidden lg:flex items-center gap-10">
+                <a href="brand.html" class="nav-link text-slate-600 hover:text-moon-600 font-semibold transition-colors">문피스의 약속</a>
+                <a href="review.html" class="nav-link text-slate-600 hover:text-moon-600 font-semibold transition-colors">엄마들의 이야기</a>
+                <a href="journal.html" class="nav-link text-slate-600 hover:text-moon-600 font-semibold transition-colors">임산부 저널</a>
+                <a href="knowledge.html" class="nav-link text-slate-600 hover:text-moon-600 font-semibold transition-colors">임산부 지식인</a>
             </div>
             <div class="flex items-center gap-4">
-                <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" class="btn-primary mobile-hidden">구매하기</a>
-                <button class="hamburger-btn" id="menu-toggle">
-                    <span></span><span></span><span></span>
+                <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" class="btn-primary hidden sm:flex px-6 py-2.5 rounded-full bg-moon-600 text-white font-bold hover:bg-moon-700 transition-all">구매하기</a>
+                <button class="hamburger-btn lg:hidden outline-none" id="menu-toggle">
+                    <span class="block w-6 h-0.5 bg-slate-900 mb-1.5 transition-all"></span>
+                    <span class="block w-6 h-0.5 bg-slate-900 mb-1.5 transition-all"></span>
+                    <span class="block w-6 h-0.5 bg-slate-900 transition-all"></span>
                 </button>
             </div>
         </div>
     </nav>
-
-        <!-- Mobile Navigation Overlay -->
-        <div class="nav-overlay" id="overlay"></div>
-    <div class="mobile-nav" id="mobile-menu">
-        <a href="brand.html" class="nav-link">문피스의 약속</a>
-        <a href="review.html" class="nav-link">엄마들의 이야기</a>
-        <a href="journal.html" class="nav-link">임산부 저널</a>
-        <a href="knowledge.html" class="nav-link">임산부 지식인</a>
-        <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" class="btn-primary text-center mt-8">구매하기</a>
+    <div class="nav-overlay fixed inset-0 bg-slate-900/50 z-[1040] opacity-0 invisible transition-all duration-300" id="overlay"></div>
+    <div class="mobile-nav fixed top-0 right-[-100%] w-[280px] h-full bg-white z-[1050] shadow-2xl p-10 flex flex-col gap-6 transition-all duration-500 ease-in-out" id="mobile-menu">
+        <div class="flex justify-end mb-4"><button id="close-menu" class="text-slate-400 hover:text-slate-900"><span class="material-symbols-outlined text-3xl">close</span></button></div>
+        <a href="brand.html" class="text-lg font-bold text-slate-900">문피스의 약속</a>
+        <a href="review.html" class="text-lg font-bold text-slate-900">엄마들의 이야기</a>
+        <a href="journal.html" class="text-lg font-bold text-slate-900">임산부 저널</a>
+        <a href="knowledge.html" class="text-lg font-bold text-slate-900">임산부 지식인</a>
+        <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" class="btn-primary mt-6 text-center py-4 rounded-xl bg-moon-600 text-white font-bold">구매하기</a>
     </div>
 
-    <header class="py-24 surface-container-low">
-        <div class="container text-center">
-            <h1 class="font-serif mb-6" style="font-size: 3.5rem; color: var(--primary);">개인정보처리방침</h1>
-            <p style="font-size: 1rem; color: var(--on-surface-variant);">시행일자: 2024년 1월 1일</p>
+    <header class="section-padding-lg bg-slate-50">
+        <div class="container text-center max-w-4xl">
+            <h1 class="text-5xl font-serif text-slate-900 mb-8 font-black text-moon-600">개인정보처리방침</h1>
         </div>
     </header>
 
-    <section class="py-24">
-        <div class="container" style="max-width: 800px;">
-            <article style="line-height: 2; color: var(--on-surface-variant); font-size: 1rem;">
-                <p style="margin-bottom: 2rem;">문피스 수면연구소(이하 '회사')는 이용자의 개인정보를 중요시하며, 「개인정보 보호법」 등 관련 법규를 준수합니다. 본 개인정보처리방침을 통해 이용자의 개인정보가 어떤 용도와 방식으로 이용되고 있으며, 어떤 보호 조치가 취해지고 있는지 알려드립니다.</p>
-
-                <h2 class="font-serif mb-6" style="font-size: 1.5rem; color: var(--on-surface);">1. 수집하는 개인정보 항목</h2>
-                <p style="margin-bottom: 1rem;">회사는 별도의 회원가입 없이 웹사이트를 이용하실 수 있습니다. 다만, 서비스 운영 과정에서 아래와 같은 정보가 자동으로 수집될 수 있습니다:</p>
-                <ul style="margin-bottom: 2rem; padding-left: 1.5rem;">
-                    <li style="margin-bottom: 0.5rem;">접속 IP 주소, 접속 일시, 브라우저 종류</li>
-                    <li style="margin-bottom: 0.5rem;">방문 페이지 기록</li>
-                    <li style="margin-bottom: 0.5rem;">쿠키(Cookies) 정보</li>
+    <section class="section-padding bg-white">
+        <div class="container max-w-4xl">
+            <div class="prose prose-slate max-w-none text-slate-600 leading-relaxed space-y-8">
+                <p>문피스 수면연구소(이하 "회사")는 고객님의 개인정보를 중요시하며, "정보통신망 이용촉진 및 정보보호"에 관한 법률을 준수하고 있습니다.</p>
+                <h3 class="text-xl font-bold text-slate-900 mt-12 mb-4">1. 수집하는 개인정보 항목</h3>
+                <p>회사는 상담, 서비스 신청 등을 위해 아래와 같은 개인정보를 수집하고 있습니다.</p>
+                <ul class="list-disc pl-5 space-y-2">
+                    <li>수집항목 : 이름, 휴대전화번호, 이메일, 접속 로그, 쿠키, 접속 IP 정보</li>
+                    <li>개인정보 수집방법 : 홈페이지(상담신청)</li>
                 </ul>
-
-                <h2 class="font-serif mb-6" style="font-size: 1.5rem; color: var(--on-surface);">2. 개인정보의 수집 및 이용 목적</h2>
-                <ul style="margin-bottom: 2rem; padding-left: 1.5rem;">
-                    <li style="margin-bottom: 0.5rem;">서비스 제공 및 운영</li>
-                    <li style="margin-bottom: 0.5rem;">웹사이트 이용 통계 분석 및 서비스 개선</li>
-                    <li style="margin-bottom: 0.5rem;">부정 이용 방지 및 보안</li>
+                <h3 class="text-xl font-bold text-slate-900 mt-12 mb-4">2. 개인정보의 수집 및 이용목적</h3>
+                <p>회사는 수집한 개인정보를 다음의 목적을 위해 활용합니다.</p>
+                <ul class="list-disc pl-5 space-y-2">
+                    <li>서비스 제공에 관한 계약 이행 및 서비스 제공에 따른 요금정산 콘텐츠 제공</li>
+                    <li>고객 관리 : 서비스 이용에 따른 본인확인, 개인 식별, 불량회원의 부정 이용 방지와 비인가 사용 방지, 가입 의사 확인, 불만처리 등 민원처리, 고지사항 전달</li>
                 </ul>
-
-                <h2 class="font-serif mb-6" style="font-size: 1.5rem; color: var(--on-surface);">3. 개인정보의 보유 및 이용 기간</h2>
-                <p style="margin-bottom: 2rem;">자동 수집되는 정보는 수집 목적 달성 후 즉시 파기합니다. 단, 관련 법령에 의해 보존할 필요가 있는 경우 해당 법령에서 정한 기간 동안 보관합니다.</p>
-
-                <h2 class="font-serif mb-6" style="font-size: 1.5rem; color: var(--on-surface);">4. 개인정보의 제3자 제공</h2>
-                <p style="margin-bottom: 2rem;">회사는 이용자의 개인정보를 원칙적으로 외부에 제공하지 않습니다. 다만, 법령의 규정에 의하거나 수사 목적으로 법령에 정해진 절차에 따라 요청이 있는 경우에는 예외로 합니다.</p>
-
-                <h2 class="font-serif mb-6" style="font-size: 1.5rem; color: var(--on-surface);">5. 쿠키(Cookie)의 운용</h2>
-                <p style="margin-bottom: 1rem;">회사는 웹사이트 이용 편의를 위해 쿠키를 사용할 수 있습니다. 이용자는 브라우저 설정을 통해 쿠키 허용 여부를 선택할 수 있습니다.</p>
-                <ul style="margin-bottom: 2rem; padding-left: 1.5rem;">
-                    <li style="margin-bottom: 0.5rem;">쿠키 허용: 브라우저 설정에서 '쿠키 허용' 선택</li>
-                    <li style="margin-bottom: 0.5rem;">쿠키 차단: 브라우저 설정에서 '쿠키 차단' 선택</li>
-                </ul>
-
-                <h2 class="font-serif mb-6" style="font-size: 1.5rem; color: var(--on-surface);">6. 개인정보 보호책임자</h2>
-                <p style="margin-bottom: 1rem;">회사는 개인정보 처리에 관한 업무를 총괄해서 책임지는 개인정보 보호책임자를 지정하고 있습니다.</p>
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 2rem;">
-                    <tr style="border-bottom: 1px solid var(--outline-variant);">
-                        <td style="padding: 0.75rem 0; font-weight: 700; width: 30%;">직위</td>
-                        <td style="padding: 0.75rem 0;">개인정보 보호책임자</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid var(--outline-variant);">
-                        <td style="padding: 0.75rem 0; font-weight: 700;">문의</td>
-                        <td style="padding: 0.75rem 0;">네이버 스마트스토어 고객문의</td>
-                    </tr>
-                </table>
-
-                <h2 class="font-serif mb-6" style="font-size: 1.5rem; color: var(--on-surface);">7. 방침 변경</h2>
-                <p>본 개인정보처리방침은 법령, 정책 또는 보안 기술의 변경에 따라 내용이 추가·삭제·수정될 수 있으며, 변경 시 웹사이트를 통해 공지합니다.</p>
-            </article>
+            </div>
         </div>
     </section>
 
-    <!-- Footer -->
-        <!-- Footer -->
-        <footer>
-        <div class="container grid md:grid-cols-2 gap-12">
+    <footer class="bg-white pt-24 pb-12 border-t border-slate-100">
+        <div class="container grid md:grid-cols-2 lg:grid-cols-4 gap-12">
             <div>
-                <div class="logo font-serif mb-4" style="color: var(--primary);">Moonpiece</div>
-                <p style="max-width: 320px; color: var(--on-surface-variant); line-height: 1.8;">
-                    소중한 엄마와 아기를 위한 달빛의 조각, 문피스. 10년의 진심을 담아 가장 편안한 휴식을 설계합니다.
-                </p>
+                <div class="logo font-serif text-2xl text-moon-600 mb-6 font-bold">Moonpiece</div>
+                <p class="text-slate-500 leading-relaxed text-sm">소중한 엄마와 아기를 위한 달빛의 조각, 문피스. 10년의 진심을 담아 가장 편안한 휴식을 설계합니다.</p>
             </div>
-            <div class="grid md:grid-cols-3 gap-8">
-                <div>
-                    <h4 style="font-weight: 800; margin-bottom: 1.5rem;">Company</h4>
-                    <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.75rem; color: var(--on-surface-variant);">
-                        <li><a href="about.html">회사소개</a></li>
-                        <li><a href="terms.html">이용약관</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 style="font-weight: 800; margin-bottom: 1.5rem;">Support</h4>
-                    <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.75rem; color: var(--on-surface-variant);">
-                        <li><a href="privacy.html">개인정보처리방침</a></li>
-                        <li><a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank">네이버 스마트스토어</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 style="font-weight: 800; margin-bottom: 1.5rem;">Social</h4>
-                    <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.75rem; color: var(--on-surface-variant);">
-                        <li><a href="#">Instagram</a></li>
-                        <li><a href="#">YouTube</a></li>
-                    </ul>
+            <div>
+                <h4 class="font-bold text-slate-900 mb-6 uppercase tracking-wider text-xs">Company</h4>
+                <ul class="space-y-4 text-sm text-slate-500 list-none p-0">
+                    <li><a href="about.html" class="hover:text-moon-600 transition-colors">회사소개</a></li>
+                    <li><a href="terms.html" class="hover:text-moon-600 transition-colors">이용약관</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold text-slate-900 mb-6 uppercase tracking-wider text-xs">Support</h4>
+                <ul class="space-y-4 text-sm text-slate-500 list-none p-0">
+                    <li><a href="privacy.html" class="active text-moon-600 font-bold">개인정보처리방침</a></li>
+                    <li><a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" class="hover:text-moon-600 transition-colors">네이버 스마트스토어</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold text-slate-900 mb-6 uppercase tracking-wider text-xs">Social</h4>
+                <div class="flex gap-4">
+                    <a href="#" class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-moon-500 hover:text-white transition-all">
+                        <span class="material-symbols-outlined">share</span>
+                    </a>
                 </div>
             </div>
         </div>
-        <div class="container" style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--outline-variant); text-align: center; color: var(--on-surface-variant); font-size: 0.85rem;">
-            © 2024 Moonpiece. All rights reserved.
-        </div>
+        <div class="container mt-20 pt-10 border-t border-slate-50 text-center text-slate-400 text-xs">© 2024 Moonpiece. All rights reserved.</div>
     </footer>
+
     <script>
-        const menuToggle = document.getElementById('menu-toggle'); const mobileMenu = document.getElementById('mobile-menu'); const overlay = document.getElementById('overlay');
-        menuToggle.addEventListener('click', () => { const a = mobileMenu.classList.toggle('active'); menuToggle.classList.toggle('active'); overlay.classList.toggle('active'); document.body.style.overflow = a ? 'hidden' : 'auto'; });
-        overlay.addEventListener('click', () => { mobileMenu.classList.remove('active'); menuToggle.classList.remove('active'); overlay.classList.remove('active'); document.body.style.overflow = 'auto'; });
+        const menuToggle = document.getElementById('menu-toggle');
+        const closeMenu = document.getElementById('close-menu');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const overlay = document.getElementById('overlay');
+
+        const toggleMenu = () => {
+            mobileMenu.classList.toggle('right-[-100%]');
+            mobileMenu.classList.toggle('right-0');
+            overlay.classList.toggle('invisible');
+            overlay.classList.toggle('opacity-0');
+            document.body.classList.toggle('overflow-hidden');
+        };
+
+        menuToggle.addEventListener('click', toggleMenu);
+        closeMenu?.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
     </script>
 </body>
 </html>

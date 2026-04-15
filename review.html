@@ -3,277 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>엄마들의 이야기 | Moonpiece Brand Website</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
-    <style>
-        .swiper { width: 100%; padding-bottom: 3rem !important; }
-        .swiper-slide { height: auto; }
-        .swiper-pagination-bullet { background: var(--primary); opacity: 0.5; }
-        .swiper-pagination-bullet-active { opacity: 1; }
-    </style>
+    <title>엄마들의 이야기 | Moonpiece</title>
+    <link rel="stylesheet" href="styles.css?v=1.6">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        moon: { 50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 500: '#8b5cf6', 600: '#7c3aed', 900: '#4c1d95' }
+                    },
+                    fontFamily: { serif: ['Noto Serif KR', 'serif'], sans: ['Manrope', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
 </head>
-<body>
-        <!-- Top Navigation -->
-        <nav class="nav-bar">
-        <div class="nav-container">
-            <a href="index.html" class="logo font-serif">Moonpiece</a>
-            <div class="nav-links">
-                <a href="brand.html" class="nav-link">문피스의 약속</a>
-                <a href="review.html" class="nav-link active">엄마들의 이야기</a>
-                <a href="journal.html" class="nav-link">임산부 저널</a>
-                <a href="knowledge.html" class="nav-link">임산부 지식인</a>
+<body class="bg-white text-slate-900 font-sans pt-20">
+    <!-- Top Navigation -->
+    <nav class="nav-bar bg-white/80 backdrop-blur-md border-b border-slate-100">
+        <div class="nav-container container">
+            <a href="index.html" class="logo text-2xl font-black text-moon-600 font-serif">Moonpiece</a>
+            <div class="nav-links hidden lg:flex items-center gap-10">
+                <a href="brand.html" class="nav-link text-slate-600 hover:text-moon-600 font-semibold transition-colors">문피스의 약속</a>
+                <a href="review.html" class="nav-link active text-moon-600 font-bold">엄마들의 이야기</a>
+                <a href="journal.html" class="nav-link text-slate-600 hover:text-moon-600 font-semibold transition-colors">임산부 저널</a>
+                <a href="knowledge.html" class="nav-link text-slate-600 hover:text-moon-600 font-semibold transition-colors">임산부 지식인</a>
             </div>
             <div class="flex items-center gap-4">
-                <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" class="btn-primary mobile-hidden">구매하기</a>
-                <button class="hamburger-btn" id="menu-toggle">
-                    <span></span><span></span><span></span>
+                <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" class="btn-primary hidden sm:flex px-6 py-2.5 rounded-full bg-moon-600 text-white font-bold hover:bg-moon-700 transition-all">구매하기</a>
+                <button class="hamburger-btn lg:hidden outline-none" id="menu-toggle">
+                    <span class="block w-6 h-0.5 bg-slate-900 mb-1.5 animate-pulse"></span>
+                    <span class="block w-6 h-0.5 bg-slate-900 mb-1.5"></span>
+                    <span class="block w-6 h-0.5 bg-slate-900"></span>
                 </button>
             </div>
         </div>
     </nav>
-
-        <!-- Mobile Navigation Overlay -->
-        <div class="nav-overlay" id="overlay"></div>
-    <div class="mobile-nav" id="mobile-menu">
-        <a href="brand.html" class="nav-link">문피스의 약속</a>
-        <a href="review.html" class="nav-link active">엄마들의 이야기</a>
-        <a href="journal.html" class="nav-link">임산부 저널</a>
-        <a href="knowledge.html" class="nav-link">임산부 지식인</a>
-        <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" class="btn-primary text-center mt-8">구매하기</a>
+    <div class="nav-overlay fixed inset-0 bg-slate-900/50 z-[1040] opacity-0 invisible transition-all duration-300" id="overlay"></div>
+    <div class="mobile-nav fixed top-0 right-[-100%] w-[280px] h-full bg-white z-[1050] shadow-2xl p-10 flex flex-col gap-6 transition-all duration-500 ease-in-out" id="mobile-menu">
+        <div class="flex justify-end mb-4"><button id="close-menu" class="text-slate-400 hover:text-slate-900"><span class="material-symbols-outlined text-3xl">close</span></button></div>
+        <a href="brand.html" class="text-lg font-bold text-slate-900">문피스의 약속</a>
+        <a href="review.html" class="text-lg font-bold text-moon-600 underline">엄마들의 이야기</a>
+        <a href="journal.html" class="text-lg font-bold text-slate-900">임산부 저널</a>
+        <a href="knowledge.html" class="text-lg font-bold text-slate-900">임산부 지식인</a>
+        <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" class="btn-primary mt-6 text-center py-4 rounded-xl bg-moon-600 text-white font-bold">구매하기</a>
     </div>
 
-    <!-- Review Hero Section -->
-    <section class="py-32 text-center" style="max-width: 800px; margin: 0 auto;">
+    <!-- Hero Section -->
+    <header class="section-padding-lg bg-moon-50">
+        <div class="container text-center">
+            <h1 class="text-5xl lg:text-7xl font-serif text-slate-900 mb-8 font-black">엄마들의 <span class="text-moon-600">진심</span>, <br>문피스가 함께한 시간</h1>
+            <p class="text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed">광고보다 강력한 것은 실제 사용해본 엄마들의 목소리입니다. 지난 11년간 문피스와 함께 편안한 밤을 보낸 20만 엄마들의 기록을 확인하세요.</p>
+        </div>
+    </header>
+
+    <!-- Social Review Grid -->
+    <section class="section-padding bg-white">
         <div class="container">
-            <h1 class="font-serif text-primary" style="font-size: 4rem; font-weight: 900; line-height: 1.2; margin-bottom: 2rem;">11년의 데이터,<br>20만 엄마들의 선택</h1>
-            <p style="font-size: 1.2rem; color: var(--secondary); line-height: 1.8;">
-                단순한 제품을 넘어 엄마와 아기가 가장 편안한 밤을 보낼 수 있도록,<br>수만 명의 엄마들이 직접 기록하고 증명한 문피스의 숙면 솔루션을 만나보세요.
-            </p>
-        </div>
-    </section>
-
-    <!-- Blog Reviews Section -->
-    <section class="py-32 surface-container-low" style="background-color: var(--surface-container-low);">
-        <div class="container text-center">
-            <span style="font-weight: 700; color: var(--primary); font-size: 0.9rem; letter-spacing: 0.1em; display: block; margin-bottom: 1rem;">MOM'S BLOGS</span>
-            <h2 class="font-serif mb-12" style="font-size: 2.5rem;">생생한 육아 동지들의 후기</h2>
-            
-            <div class="swiper blog-swiper">
-                <div class="swiper-wrapper" id="blog-wrapper">
-                    <!-- JS Injects Here -->
+            <div class="flex justify-between items-end mb-16 px-4">
+                <div>
+                    <h2 class="text-3xl font-serif font-black mb-4">Instagram Review</h2>
+                    <p class="text-slate-500">인스타그램에서 #문피스 해시태그로 소통하는 엄마들</p>
                 </div>
-                <div class="swiper-pagination"></div>
+                <div class="flex gap-2">
+                    <button class="w-12 h-12 rounded-full border border-slate-100 flex items-center justify-center hover:bg-moon-50 transition-colors swiper-prev"><span class="material-symbols-outlined">arrow_back</span></button>
+                    <button class="w-12 h-12 rounded-full border border-slate-100 flex items-center justify-center hover:bg-moon-50 transition-colors swiper-next"><span class="material-symbols-outlined">arrow_forward</span></button>
+                </div>
             </div>
-        </div>
-    </section>
-
-    <!-- Instagram Reviews Section -->
-    <section class="py-32" style="background-color: white;">
-        <div class="container text-center">
-            <span style="font-weight: 700; color: var(--primary); font-size: 0.9rem; letter-spacing: 0.1em; display: block; margin-bottom: 1rem;">@MOONPIECE_OFFICIAL</span>
-            <h2 class="font-serif mb-12" style="font-size: 2.5rem;">달빛 아래 편안한 밤을 보내는 중이에요</h2>
             
             <div class="swiper insta-swiper">
-                <div class="swiper-wrapper" id="insta-wrapper">
-                    <!-- JS Injects Here -->
+                <div class="swiper-wrapper" id="insta-container">
+                    <!-- Dynamic content -->
                 </div>
-                <div class="swiper-pagination"></div>
+                <div class="swiper-pagination mt-12 relative"></div>
             </div>
         </div>
     </section>
 
-    <!-- Expert Recommendation -->
-    <section class="py-32 text-center" style="background-color: var(--surface-container-highest);">
-        <div class="container mb-16">
-            <span class="material-symbols-outlined text-primary" style="font-size: 3rem; margin-bottom: 1.5rem;">medical_services</span>
-            <h2 class="font-serif mb-4" style="font-size: 2.5rem; color: var(--primary);">전문가가 말하는 문피스</h2>
-            <p style="color: var(--on-surface-variant); font-size: 1.1rem;">각 분야의 전문가들이 문피스를 추천하는 이유</p>
-        </div>
-        <div class="container grid md:grid-cols-3 gap-8 text-left">
-            <!-- Expert 1 -->
-            <div class="card p-12 shadow-md flex flex-col justify-between" style="background: white; border: 1px solid var(--outline-variant); height: 100%; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-10px)'; this.style.boxShadow='0 20px 40px rgba(0,0,0,0.08)';" onmouseout="this.style.transform='none'; this.style.boxShadow='var(--shadow-md)';">
-                <div>
-                    <h3 class="font-serif mb-6" style="font-size: 1.35rem; color: var(--primary);">"이상적인 요추와 골반 지지"</h3>
-                    <p style="font-size: 1rem; color: var(--on-surface-variant); line-height: 1.7; margin-bottom: 2rem;">
-                        "임신기 신체 변화로 인한 체형 불균형에 문피스의 인체공학적 설계는 필수적입니다. 요추와 골반을 완벽하게 받쳐주어 관절 압박을 크게 경감시키며, 수면 중 발생할 수 있는 통증 완화에 탁월한 효과를 보였습니다."
-                    </p>
-                </div>
-                <div class="flex items-center gap-4 mt-auto">
-                    <img src="assets/images/expert_1.jpg" alt="김산부 원장" style="width: 4rem; height: 4rem; border-radius: 50%; border: 2px solid var(--primary-container); object-fit: cover;">
-                    <div>
-                        <div style="font-weight: 800; font-size: 1.05rem;">김산부 전문의</div>
-                        <div style="font-size: 0.8rem; color: var(--outline);">대한산부인과학회 소속</div>
+    <!-- Blog Style Reviews -->
+    <section class="section-padding bg-slate-50">
+        <div class="container">
+            <h2 class="text-3xl font-serif font-black mb-16 text-center">심층 사용 후기</h2>
+            <div class="swiper blog-swiper">
+                <div class="swiper-wrapper">
+                    <div class="swiper-slide p-4">
+                        <div class="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all h-full">
+                            <div class="aspect-video bg-moon-100 relative group overflow-hidden">
+                                <img src="assets/images/review_1.jpg" alt="Review 1" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                                <div class="absolute top-4 right-4 px-3 py-1 bg-white/90 backdrop-blur rounded-full text-xs font-bold text-moon-600 shadow-sm">Naver Blog</div>
+                            </div>
+                            <div class="p-8">
+                                <div class="flex gap-1 text-moon-500 mb-6"><span class="material-symbols-outlined fill text-sm">star</span><span class="material-symbols-outlined fill text-sm">star</span><span class="material-symbols-outlined fill text-sm">star</span><span class="material-symbols-outlined fill text-sm">star</span><span class="material-symbols-outlined fill text-sm">star</span></div>
+                                <h3 class="text-xl font-bold mb-4 line-clamp-2 leading-tight">"임신 7개월, 환도선다 때문에 매일 울었는데.. 문피스 쓰고 광명 찾았어요"</h3>
+                                <p class="text-slate-500 text-sm line-clamp-3 mb-8 leading-relaxed">새벽마다 허리가 끊어질 것 같아서 잠을 못 잤는데, 문피스 U자형 바디필로우 쓰고 나서는 지지가 확실히 되니까 너무 편해요. 특히 무릎 사이에 끼웠을 때 골반이 안 아픈 게 신의 한 수!</p>
+                                <div class="flex items-center gap-3 pt-6 border-t border-slate-50">
+                                    <div class="w-10 h-10 rounded-full bg-moon-200"></div>
+                                    <div><p class="text-sm font-bold">꿈꾸는예비맘</p><p class="text-xs text-slate-400">네이버 블로그 에디터</p></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+                    <!-- More slides -->
                 </div>
-            </div>
-            
-            <!-- Expert 2 -->
-            <div class="card p-12 shadow-md flex flex-col justify-between" style="background: white; border: 1px solid var(--outline-variant); height: 100%; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-10px)'; this.style.boxShadow='0 20px 40px rgba(0,0,0,0.08)';" onmouseout="this.style.transform='none'; this.style.boxShadow='var(--shadow-md)';">
-                <div>
-                    <h3 class="font-serif mb-6" style="font-size: 1.35rem; color: var(--primary);">"숙면 곡선이 가져오는 편안함"</h3>
-                    <p style="font-size: 1rem; color: var(--on-surface-variant); line-height: 1.7; margin-bottom: 2rem;">
-                        "임산부 불면증의 절반 이상은 심리적 불안과 누울 자리의 불편함에서 비롯됩니다. 몸을 빈틈없이 감싸주는 U자형 패턴은 태아에게도 모체에게도 최적화된 포근한 수면 환경을 제공합니다."
-                    </p>
-                </div>
-                <div class="flex items-center gap-4 mt-auto">
-                    <img src="assets/images/expert_2.jpg" alt="박수면 의학박사" style="width: 4rem; height: 4rem; border-radius: 50%; border: 2px solid var(--primary-container); object-fit: cover;">
-                    <div>
-                        <div style="font-weight: 800; font-size: 1.05rem;">박수면 의학박사</div>
-                        <div style="font-size: 0.8rem; color: var(--outline);">국제수면연구학회 연구원</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Expert 3 -->
-            <div class="card p-12 shadow-md flex flex-col justify-between" style="background: white; border: 1px solid var(--outline-variant); height: 100%; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-10px)'; this.style.boxShadow='0 20px 40px rgba(0,0,0,0.08)';" onmouseout="this.style.transform='none'; this.style.boxShadow='var(--shadow-md)';">
-                <div>
-                    <h3 class="font-serif mb-6" style="font-size: 1.35rem; color: var(--primary);">"출산 후에도 변함없는 지지력"</h3>
-                    <p style="font-size: 1rem; color: var(--on-surface-variant); line-height: 1.7; margin-bottom: 2rem;">
-                        "보통 임부용 바디필로우는 일회성으로 생각하기 쉽지만, 탄성 복원력이 뛰어난 무기질 솜 구조 덕분에 출산 후 수유 쿠션이나 소파 등받이로 사용해도 반영구적으로 척추를 견고하게 받쳐줍니다."
-                    </p>
-                </div>
-                <div class="flex items-center gap-4 mt-auto">
-                    <img src="assets/images/expert_3.jpg" alt="정재활 원장" style="width: 4rem; height: 4rem; border-radius: 50%; border: 2px solid var(--primary-container); object-fit: cover;">
-                    <div>
-                        <div style="font-weight: 800; font-size: 1.05rem;">정재활 원장</div>
-                        <div style="font-size: 0.8rem; color: var(--outline);">정형외과 근골격계 교정센터</div>
-                    </div>
-                </div>
+                <div class="swiper-pagination mt-12"></div>
             </div>
         </div>
     </section>
 
-    <!-- Footer -->
-        <!-- Footer -->
-        <footer>
-        <div class="container grid md:grid-cols-2 gap-12">
+    <!-- Footer ... -->
+    <footer class="bg-white pt-24 pb-12 border-t border-slate-100">
+        <div class="container grid md:grid-cols-2 lg:grid-cols-4 gap-12">
             <div>
-                <div class="logo font-serif mb-4" style="color: var(--primary);">Moonpiece</div>
-                <p style="max-width: 320px; color: var(--on-surface-variant); line-height: 1.8;">
-                    소중한 엄마와 아기를 위한 달빛의 조각, 문피스. 10년의 진심을 담아 가장 편안한 휴식을 설계합니다.
-                </p>
+                <div class="logo font-serif text-2xl text-moon-600 mb-6 font-bold">Moonpiece</div>
+                <p class="text-slate-500 leading-relaxed text-sm">소중한 엄마와 아기를 위한 달빛의 조각, 문피스. 10년의 진심을 담아 가장 편안한 휴식을 설계합니다.</p>
             </div>
-            <div class="grid md:grid-cols-3 gap-8">
-                <div>
-                    <h4 style="font-weight: 800; margin-bottom: 1.5rem;">Company</h4>
-                    <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.75rem; color: var(--on-surface-variant);">
-                        <li><a href="about.html">회사소개</a></li>
-                        <li><a href="terms.html">이용약관</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 style="font-weight: 800; margin-bottom: 1.5rem;">Support</h4>
-                    <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.75rem; color: var(--on-surface-variant);">
-                        <li><a href="privacy.html">개인정보처리방침</a></li>
-                        <li><a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank">네이버 스마트스토어</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 style="font-weight: 800; margin-bottom: 1.5rem;">Social</h4>
-                    <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.75rem; color: var(--on-surface-variant);">
-                        <li><a href="#">Instagram</a></li>
-                        <li><a href="#">YouTube</a></li>
-                    </ul>
+            <!-- Standard Footer Links -->
+            <div>
+                <h4 class="font-bold text-slate-900 mb-6 uppercase tracking-wider text-xs">Company</h4>
+                <ul class="space-y-4 text-sm text-slate-500 list-none p-0">
+                    <li><a href="about.html" class="hover:text-moon-600 transition-colors">회사소개</a></li>
+                    <li><a href="terms.html" class="hover:text-moon-600 transition-colors">이용약관</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold text-slate-900 mb-6 uppercase tracking-wider text-xs">Support</h4>
+                <ul class="space-y-4 text-sm text-slate-500 list-none p-0">
+                    <li><a href="privacy.html" class="hover:text-moon-600 transition-colors">개인정보처리방침</a></li>
+                    <li><a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" class="hover:text-moon-600 transition-colors">네이버 스마트스토어</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold text-slate-900 mb-6 uppercase tracking-wider text-xs">Social</h4>
+                <div class="flex gap-4">
+                    <a href="#" class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-moon-500 hover:text-white transition-all"><span class="material-symbols-outlined">share</span></a>
                 </div>
             </div>
         </div>
-        <div class="container" style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--outline-variant); text-align: center; color: var(--on-surface-variant); font-size: 0.85rem;">
-            © 2024 Moonpiece. All rights reserved.
-        </div>
+        <div class="container mt-20 pt-10 border-t border-slate-50 text-center text-slate-400 text-xs">© 2024 Moonpiece. All rights reserved.</div>
     </footer>
-    <!-- Script -->
-    <script>
-        const menuToggle = document.getElementById('menu-toggle');
-        const mobileMenu = document.getElementById('mobile-menu');
-        const overlay = document.getElementById('overlay');
 
-        menuToggle.addEventListener('click', () => {
-            const isActive = mobileMenu.classList.toggle('active');
-            menuToggle.classList.toggle('active');
-            overlay.classList.toggle('active');
-            document.body.style.overflow = isActive ? 'hidden' : 'auto';
-        });
-
-        overlay.addEventListener('click', () => {
-            mobileMenu.classList.remove('active');
-            menuToggle.classList.remove('active');
-            overlay.classList.remove('active');
-            document.body.style.overflow = 'auto';
-        });
-    </script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
-        // Blog Reviews Data
-        const blogWrapper = document.getElementById('blog-wrapper');
-        const blogTexts = [
-            "임신 29주차부터 허리가 뻐근해서 구매해봤는데, 문피스가 왜 국민템이라고 불리는지 첫날부터 느꼈네요. 환도선다에 진짜 좋아요!",
-            "선물 받았는데 포장부터 너무 고급스럽고 예뻐서 감동했어요. 소재도 엄청 부드러워서 피부 예민한 저한테 딱입니다.",
-            "밤마다 수십 번 뒤척였는데, 이거 쓰고 나서 통잠 잤어요. 임산부 필수템 인정합니다.",
-            "둘째 임신인데 첫째 때 쓰던 타사 제품보다 훨씬 빵빵하고 지지력이 좋습니다. 배꼽 아래까지 싹 안아주는 느낌!",
-            "조리원에 챙겨갈 1순위! 출산 후에도 수유쿠션으로나 등받이로 엄청 잘 쓸 것 같아요. 수면의 질이 완전히 달라짐.",
-            "인테리어 해치지 않는 깔끔한 디자인이라 남편도 예쁘다고 칭찬하네요. 노란 컬러감이 정말 산뜻하고 따뜻해요."
-        ];
-        
-        for(let i=1; i<=12; i++){
-            const images = ['post_1.jpg', 'post_2.jpg', 'post_3.jpg', 'post_4.jpg', 'journal_1.jpg', 'journal_2.jpg'];
-            const img = images[i % images.length];
-            const text = blogTexts[i % blogTexts.length];
-            blogWrapper.innerHTML += `
-                <div class="swiper-slide text-left">
-                    <article class="card shadow-sm flex flex-col" style="height: 100%; display: flex; background: white; border: 1px solid var(--outline-variant);">
-                        <div style="aspect-ratio: 4/3; overflow: hidden; border-radius: 1.5rem 1.5rem 0 0;">
-                            <img src="assets/images/${img}" style="width: 100%; height: 100%; object-fit: cover;">
-                        </div>
-                        <div class="p-8 flex-1 flex flex-col justify-between">
-                            <div>
-                                <h3 class="font-serif mb-4" style="font-size: 1.25rem;">"진작 샀어야 했어요!"</h3>
-                                <p style="color: var(--on-surface-variant); font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.5rem; word-break: keep-all;">
-                                    ${text}
-                                </p>
-                            </div>
-                            <div class="flex items-center gap-3 mt-auto pt-4 border-t border-outline-variant">
-                                <div style="width: 2rem; height: 2rem; border-radius: 50%; background: var(--surface-container-high);"></div>
-                                <span style="font-size: 0.85rem; font-weight: 700;">초보맘${i}님의 블로그 리뷰</span>
-                            </div>
-                        </div>
-                    </article>
-                </div>
-            `;
-        }
+        // Menu Toggle
+        const menuToggle = document.getElementById('menu-toggle');
+        const overlay = document.getElementById('overlay');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const closeMenu = document.getElementById('close-menu');
 
-        // Instagram Data
-        const instaWrapper = document.getElementById('insta-wrapper');
-        const instaTexts = [
-            "내 허리의 구원자 #문피스 🌙🤍 밤마다 뒤척였는데 이렇게 편안할 수가 없어요! 예비맘 필수템!",
-            "달빛의 조각이라는 이름도 너무 예쁜데, 사용감은 더 감동적이에요. 배를 싹 감싸주는 이 포근함 ✨ #임산부바디필로우",
-            "드디어 통잠 성공! 남편이 제 코고는 소리 듣고 안심했대요 🤣 고마워 문피스 💕 #주수사진",
-            "가장 따뜻한 노란색. 보기만 해도 기분 좋아지는데 안고 자면 정말 구름 위에 떠있는 기분 ☁️ #임밍아웃",
-            "조리원 들어갈 때 가장 먼저 챙긴 템브로! 없으면 절대 잠 못 자요. #산후조리원 #출산준비물",
-            "아침에 일어날 때 몸이 안 무거운 게 얼마만인지... 임산부 친구들에게 무조건 추천중 🫶 #예비맘소통"
+        const toggleMenu = () => {
+            mobileMenu.classList.toggle('right-[-100%]');
+            mobileMenu.classList.toggle('right-0');
+            overlay.classList.toggle('invisible');
+            overlay.classList.toggle('opacity-0');
+            document.body.classList.toggle('overflow-hidden');
+        };
+
+        menuToggle.addEventListener('click', toggleMenu);
+        closeMenu?.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
+
+        // Insta Container
+        const instaContainer = document.getElementById('insta-container');
+        const mockTexts = [
+            "드디어 통잠 성공했어요! 문피스 없었으면 어쩔 뻔.. #문피스 #임산부환도선다",
+            "무료 교환권 덕분에 한 번 더 빨아도 새 거 같아요. 진심 추천템!! #임신부선물",
+            "U자형이 역시 지지력이 다르네요. 꿀잠 자고 일어났어요 :)",
+            "세탁하기 편해서 위생적이고 너무 폭신폭신해요.",
+            "임신한 친구한테 선물했는데 너무 좋아하네요. 뿌듯합니다."
         ];
-        
-        for(let i=1; i<=12; i++){
-            const images = ['journal_1.jpg', 'journal_2.jpg', 'journal_3.jpg', 'post_1.jpg', 'post_2.jpg', 'post_3.jpg'];
-            const img = images[(i+3) % images.length];
-            const text = instaTexts[i % instaTexts.length];
-            instaWrapper.innerHTML += `
-                <div class="swiper-slide text-left">
-                    <article class="card shadow-sm h-full" style="background: white; border: 1px solid var(--outline-variant); border-radius: 1rem; overflow: hidden;">
-                        <div style="aspect-ratio: 1/1; position: relative;">
-                            <img src="assets/images/${img}" style="width: 100%; height: 100%; object-fit: cover;">
-                            <div style="position: absolute; top: 1rem; right: 1rem; background: rgba(0,0,0,0.5); border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;">
-                                <span class="material-symbols-outlined" style="color: white; font-size: 14px;">filter_none</span>
-                            </div>
+
+        for (let i = 1; i <= 6; i++) {
+            const text = mockTexts[i % 5];
+            instaContainer.innerHTML += `
+                <div class="swiper-slide p-4">
+                    <article class="bg-white rounded-3xl border border-slate-100 overflow-hidden group shadow-sm hover:shadow-xl transition-all">
+                        <div class="aspect-square bg-slate-100 relative overflow-hidden">
+                            <img src="https://picsum.photos/seed/${i+100}/800/800" alt="Insta Review ${i}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                         </div>
                         <div class="p-6">
-                            <div class="flex gap-2 mb-3" style="color:#e91e63;">
-                                <span class="material-symbols-outlined fill" style="font-size: 1.25rem;">favorite</span>
-                                <span style="font-size: 0.9rem; font-weight: 700; color: var(--on-surface);">좋아요 ${200 + i * 23}개</span>
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="material-symbols-outlined text-rose-500 fill text-xl">favorite</span>
+                                <span class="text-sm font-bold text-slate-700">${230 + i * 15}</span>
                             </div>
-                            <p style="font-size: 0.9rem; color: var(--on-surface-variant); line-height: 1.5; word-break: keep-all;">
-                                <b>@loving_mom_0${i}</b> ${text}
-                            </p>
+                            <p class="text-sm text-slate-600 line-clamp-3 leading-relaxed"><b>@loving_mom_0${i}</b> ${text}</p>
                         </div>
                     </article>
                 </div>
@@ -285,6 +200,10 @@
             slidesPerView: 1,
             spaceBetween: 24,
             pagination: { el: ".swiper-pagination", clickable: true },
+            navigation: {
+                nextEl: '.swiper-next',
+                prevEl: '.swiper-prev',
+            },
             breakpoints: {
                 768: { slidesPerView: 2 },
                 1024: { slidesPerView: 3 }
