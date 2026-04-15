@@ -325,12 +325,35 @@ async function generateContentHandler(request, env, type) {
          Use exactly <article class="post-content">, <h2>, <h3>, <p>, <ul>, <strong> tags. Do NOT use markdown code blocks, return ONLY raw HTML for the body.`
       : `Write an elite-level AEO-optimized expert answer about "${keyword}". Title/Question: "${title}". 
          당신은 구글 AI 개요(AI Overviews)가 가장 먼저 인용할 '정답'을 만드는 AEO 전략가입니다.
-         CRITICAL REQUIREMENT: You MUST strictly follow this exact 4-step semantic HTML 구조를 100% 준수하세요:
+         
+         # 시스템 프롬프트: AEO 최적화 글쓰기 및 이미지 메타데이터 파이프라인
+         앞으로 작성하는 모든 문서에는 아래의 [AEO 이미지 최적화 규칙]을 엄격하게 적용하십시오. 본문과 이미지 요소의 결합이 전체 콘텐츠 품질 평가에서 반드시 80점(A등급) 이상을 달성하도록 구성하는 것이 최우선 목표입니다.
+
+         ## 1. 이미지 생성 및 선정 가이드
+         단순 장식용 스톡 사진의 사용 및 생성을 철저히 금지합니다.
+         - 정보 압축형: 텍스트 단락의 핵심 내용을 요약하는 인포그래픽 또는 데이터 차트.
+         - 구조화형: 프로세스, 기술적 파이프라인, 아키텍처 등을 설명하는 명확한 다이어그램.
+         - 실물/상황형: 제품의 실제 텍스처, 크기 비교, 구체적인 사용 환경을 보여주는 묘사 (불필요한 배경 배제).
+
+         ## 2. 메타데이터 및 SEO 최적화 규칙
+         - 파일명: 직관적인 영문 소문자와 하이픈(-) 조합.
+         - 대체 텍스트(Alt Text): 핵심 맥락과 타겟 키워드를 자연스럽게 녹여낸 1~2문장의 서술형 텍스트.
+         - 캡션: 이미지 하단에 배치되어 본문과의 문맥적 연결성을 강화하는 상세 설명.
+
+         ## 3. 마크다운 출력 포맷 (Output Format)
+         본문을 작성할 때, 텍스트 문맥과 1:1로 매칭되는 최적의 위치에 다음의 템플릿을 사용하여 이미지를 "단 1개만" 배치하십시오.
+         다음 컴포넌트(Stable Diffusion)가 이미지를 그릴 수 있도록 영문 프롬프트를 주석으로 함께 제공하십시오.
+         
+         <!-- PROMPT: [English prompt for Stable Diffusion] -->
+         ![[서술형 Alt Text]]([context-specific-file-name.jpg])
+         *캡션: [상세 설명]*
+
+         CRITICAL REQUIREMENT: You MUST strictly follow this exact semantic HTML 구조를 100% 준수하세요:
          1. <h1>${title} (대화형 질문 형식)</h1>
-         2. <div class="aeo-summary-box"><ul><li>핵심 요약 1 (50자 내외)</li><li>핵심 요약 2 (Snippet Bait)</li><li>핵심 요약 3 (정답 요약)</li></ul></div>
-         3. <section><h2>전문적 원인 분석 (E-E-A-T)</h2><p>'코르티솔', '진피층 엘라스틴 파괴', '혈류량 변화' 등 의학적/과학적 전문 키워드를 문맥에 맞게 포함하여 1,000자 이상 심층 서술.</p></section>
-         4. <section><h2>단계별 대처법 가이드</h2><ol><li><strong>1단계:</strong> 상세 설명...</li><li><strong>2단계:</strong> 상세 설명...</li><li><strong>3단계:</strong> 상세 설명...</li></ol></section>
-         The output MUST exceed 1,500 characters. Return ONLY raw HTML for the body.`;
+         2. <div class="aeo-summary-box"><ul><li>핵심 요약 1</li><li>핵심 요약 2</li><li>핵심 요약 3</li></ul></div>
+         3. <section><h2>전문적 원인 분석 (E-E-A-T)</h2><p>설명...</p> (이 곳 등 문맥상 최적의 위치에 위의 이미지 마크다운 템플릿 1회 삽입)</section>
+         4. <section><h2>단계별 대처법 가이드</h2><ol><li><strong>1단계:</strong>...</li></ol></section>
+         The output MUST exceed 1,500 characters. Return ONLY raw HTML for the body, EXCEPT for the image markdown block.`;
 
     const faqPrompt = `Generate exactly 5 AEO-optimized FAQs for "${keyword}". Target long-tail search intent.
          CRITICAL: The Answer text MUST contain the main keyword "${keyword}" at least once. 
@@ -419,10 +442,22 @@ async function generateContentHandler(request, env, type) {
     } else {
       // Single AEO image
       let imageResponse;
+      let aiPrompt = `High-quality AEO vector infographic or clear process diagram for ${keyword}. Minimalist, professional.`;
+      let altText = `${title} 관련 전문 서술형 텍스트`;
+      let captionText = "";
+      
+      const imageMatch = html.match(/<!--\s*PROMPT:\s*(.*?)\s*-->[\s\S]*?!\[\[?(.*?)\]\]?\((.*?)\)[\s\S]*?\*(?:캡션:\s*)?(.*?)\*/i);
+      
+      if (imageMatch) {
+          aiPrompt = imageMatch[1].trim();
+          altText = imageMatch[2].trim();
+          captionText = imageMatch[4].trim();
+      }
+
       try {
         imageResponse = await env.AI.run("@cf/bytedance/stable-diffusion-xl-lightning", {
-          prompt: `Professional high-quality photography for ${keyword}, ${title}, soft lighting, premium maternal vibes, realistic 8k.`,
-          negative_prompt: "deformed, ugly, disfigured, bad anatomy, text, watermark, low resolution, blurry faces, mutated, extra limbs"
+          prompt: `Professional high-quality photography, high quality infographic or clear process diagram. ${aiPrompt}. Soft lighting, realistic 8k, no text, no gibberish text.`,
+          negative_prompt: "deformed, ugly, disfigured, bad anatomy, english text, watermark, low resolution, blurry faces, mutated, extra limbs"
         });
       } catch (e) {
         console.warn("AI Image Generation failed (likely local mode):", e.message);
@@ -433,10 +468,21 @@ async function generateContentHandler(request, env, type) {
         const imageKey = `assets/${type}/${rawSlug}-${imgId}.png`;
         await env.JOURNAL_BUCKET.put(imageKey, imageResponse, { httpMetadata: { contentType: "image/png" } });
         heroImagePath = `/${imageKey}`;
+        
+        if (imageMatch) {
+            const figureHtml = `
+            <figure class="my-12">
+                <img src="${heroImagePath}" alt="${altText}" class="w-full rounded-2xl shadow-md border border-slate-200 object-cover" style="max-height: 600px;">
+                <figcaption class="text-center text-slate-500 text-sm mt-4 font-bold">${captionText}</figcaption>
+            </figure>`;
+            html = html.replace(imageMatch[0], figureHtml);
+        }
       } else {
         heroImagePath = `/assets/images/expert_1.jpg`; // Fallback
+        if (imageMatch) {
+            html = html.replace(imageMatch[0], "");
+        }
       }
-      // In AEO, we don't use placeholders usually, but we set the hero image alt in the template
     }
 
     // Schema format
@@ -594,7 +640,7 @@ async function renderTemplate(data, env, categoryName) {
     <main class="py-24 container mx-auto px-4" style="max-width: 900px; min-height: 80vh;">
         <div class="category-badge mb-8">${categoryName}</div>
         <h1 class="font-serif mb-12" style="font-size: 3.5rem; line-height: 1.2;">${data.title}</h1>
-        <img src="${data.image}" alt="${data.title}" class="w-full rounded-3xl shadow-xl mb-16 object-cover" style="aspect-ratio: 16/9;">
+        ${categoryName === '임산부 지식인' && (data.html || '').includes('<figure') ? '' : `<img src="${data.image}" alt="${data.title}" class="w-full rounded-3xl shadow-xl mb-16 object-cover" style="aspect-ratio: 16/9;">`}
         
         <!-- Post Body -->
         <div class="post-body-container article-content bg-white p-8 md:p-16 rounded-[2.5rem] shadow-sm border border-slate-200">
