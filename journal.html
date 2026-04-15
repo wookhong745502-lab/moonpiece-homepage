@@ -25,7 +25,7 @@
 <body class="bg-slate-50 text-slate-900 font-sans pt-20">
     <!-- Top Navigation -->
     <nav class="nav-bar bg-white/80 backdrop-blur-md border-b border-slate-100">
-        <div class="nav-container container">
+        <div class="nav-mp-container mp-container">
             <a href="index.html" class="logo text-2xl font-black text-moon-600 font-serif">Moonpiece</a>
             <div class="nav-links hidden lg:flex items-center gap-10">
                 <a href="brand.html"
@@ -68,7 +68,7 @@
 
     <!-- Header -->
     <header class="section-padding-lg bg-white border-b border-slate-100">
-        <div class="container text-center">
+        <div class="mp-container text-center">
             <h1 class="text-5xl font-serif text-slate-900 mb-8 font-black">임산부 저널</h1>
             <p class="text-lg text-slate-500 mb-12 leading-relaxed">임산부의 건강한 숙면을 위한 11년의 연구 데이터. 수면 자세, 통증 완화, 심리 케어까지
                 문피스 수면연구소의 정밀 저널을 만나보세요.</p>
@@ -99,7 +99,7 @@
     <!-- Content with Filter & Masonry... -->
     <!-- I'll restore the actual filter buttons and articles from the original -->
     <section class="section-padding">
-        <div class="container">
+        <div class="mp-container">
             <div class="flex flex-wrap justify-center gap-4 mb-16" id="category-filters">
                 <button onclick="filterCategory('all')"
                     class="filter-btn active px-8 py-3 rounded-full bg-moon-600 text-white font-bold shadow-lg"
@@ -125,7 +125,7 @@
                 <!-- Articles will be injected here -->
             </div>
 
-            <div id="pagination-container" class="mt-20 flex justify-center gap-2">
+            <div id="pagination-mp-container" class="mt-20 flex justify-center gap-2">
                 <!-- Pagination will be injected here -->
             </div>
         </div>
@@ -133,7 +133,7 @@
 
     <!-- Bottom Search Section -->
     <section class="bg-slate-100 py-16 border-t border-slate-200">
-        <div class="container text-center">
+        <div class="mp-container text-center">
             <h3 class="text-xl font-bold text-slate-800 mb-6">원하시는 정보를 찾지 못하셨나요?</h3>
             <div class="relative">
                 <input type="text" id="bottom-search-input" placeholder="다시 검색해보세요"
@@ -148,7 +148,7 @@
 
     <!-- Footer -->
     <footer class="bg-white pt-24 pb-12 border-t border-slate-100">
-        <div class="container grid md:grid-cols-2 lg:grid-cols-4 gap-12">
+        <div class="mp-container grid md:grid-cols-2 lg:grid-cols-4 gap-12">
             <div>
                 <div class="logo font-serif text-2xl text-moon-600 mb-6 font-bold">Moonpiece</div>
                 <p class="text-slate-500 leading-relaxed text-sm">소중한 엄마와 아기를 위한 달빛의 조각, 문피스. 10년의 진심을 담아 가장 편안한 휴식을
@@ -179,7 +179,7 @@
                 </div>
             </div>
         </div>
-        <div class="container mt-20 pt-10 border-t border-slate-50 text-center text-slate-400 text-xs">© 2024 Moonpiece.
+        <div class="mp-container mt-20 pt-10 border-t border-slate-50 text-center text-slate-400 text-xs">© 2024 Moonpiece.
             All rights reserved.</div>
     </footer>
 
@@ -192,7 +192,7 @@
         const postsPerPage = 9;
 
         const grid = document.getElementById('journal-grid');
-        const paginationContainer = document.getElementById('pagination-container');
+        const paginationContainer = document.getElementById('pagination-mp-container');
         const topSearch = document.getElementById('top-search-input');
         const bottomSearch = document.getElementById('bottom-search-input');
         const nameMap = {
