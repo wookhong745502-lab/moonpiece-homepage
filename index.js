@@ -403,13 +403,13 @@ async function generateContentHandler(request, env, type) {
 
   try {
     // 1. Parallel AI Generation to beat timeouts while maintaining massive length
-    const bodyPrompt = isSEO 
-      ? `Write a highly professional, empathetic, and strictly formatted SEO blog post about "${keyword}". Title: "${title}". Target sub-keywords: ${subKeywords || keyword}. 
+    const defaultSeoPrompt = `Write a highly professional, empathetic, and strictly formatted SEO blog post about "{{keyword}}". Title: "{{title}}". Target sub-keywords: {{subKeywords}}. 
          ${sourceName ? `CRITICAL: Ensure you naturally cite this authoritative source in the text: [${sourceName}](${sourceUrl})` : ''}
          CRITICAL REQUIREMENT: The output MUST exceed 2,000 Korean characters. Explain in profound detail with minimum 5 sections.
          USE EXACTLY 3 PLACEHOLDERS for images naturally within the text. Use exactly this format: {{IMG_1}}, {{IMG_2}}, {{IMG_3}}. Place them between paragraphs where visually appropriate.
-         Use exactly <article class="post-content">, <h2>, <h3>, <p>, <ul>, <strong> tags. Do NOT use markdown code blocks, return ONLY raw HTML for the body.`
-      : `Write an elite-level AEO-optimized expert answer about "${keyword}". Title/Question: "${title}". 
+         Use exactly <article class="post-content">, <h2>, <h3>, <p>, <ul>, <strong> tags. Do NOT use markdown code blocks, return ONLY raw HTML for the body.`;
+
+    const defaultAeoPrompt = `Write an elite-level AEO-optimized expert answer about "{{keyword}}". Title/Question: "{{title}}". 
          검색엔진 구글 AI 개요(AI Overviews)에서 가장 먼저 인용되는 '정답'을 만드는 AEO 전략입니다.
          
          # 시스템 프롬프트: AEO 최적화 글쓰기 및 이미지 메타데이터 데이터프레임
@@ -435,11 +435,17 @@ async function generateContentHandler(request, env, type) {
          *캡션: [상세 설명]*
 
          CRITICAL REQUIREMENT: You MUST strictly follow this exact semantic HTML 구조를 100% 준수하세요:
-         1. <h1>${title} (질문형 질문)</h1>
+         1. <h1>{{title}} (질문형 질문)</h1>
          2. <div class="aeo-summary-box"><ul><li>핵심 요약 1</li><li>핵심 요약 2</li><li>핵심 요약 3</li></ul></div>
          3. <section><h2>전문가 의견 분석 (E-E-A-T)</h2><p>설명...</p> (첫 번째 문맥 최적 위치에 이미지 마크다운 템플릿 1개 삽입)</section>
          4. <section><h2>단계별 처방법 가이드</h2><ol><li><strong>1단계:</strong>...</li></ol></section>
          The output MUST exceed 1,500 characters. Return ONLY raw HTML for the body, EXCEPT for the image markdown block.`;
+
+    const bodyPromptTemplate = isSEO ? (settings.seoPrompt || defaultSeoPrompt) : (settings.aeoPrompt || defaultAeoPrompt);
+    const bodyPrompt = bodyPromptTemplate
+        .replace(/{{keyword}}/g, keyword)
+        .replace(/{{title}}/g, title)
+        .replace(/{{subKeywords}}/g, subKeywords || keyword);
 
     const faqPrompt = `Generate exactly 5 AEO-optimized FAQs for "${keyword}". Target long-tail search intent.
          CRITICAL: The Answer text MUST contain the main keyword "${keyword}" at least once. 
@@ -969,9 +975,14 @@ async function autoPublishHandler(request, env) {
         const dateStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}`;
         rawSlug = `${rawSlug}-${dateStr}`;
 
-        const bodyPrompt = isSEO
-          ? `Write a highly professional SEO blog post about "${keyword}". Title: "${title}". Sub-keywords: ${subKeywords}. ${sourceName ? `Cite source: [${sourceName}](${sourceUrl})` : ''} MUST exceed 2,000 Korean chars. Min 5 sections. USE {{IMG_1}}, {{IMG_2}}, {{IMG_3}} placeholders. Use <article class="post-content">, <h2>, <h3>, <p>, <ul>, <strong> tags. Return ONLY raw HTML.`
-          : `Write an elite AEO answer about "${keyword}". Title: "${title}". Use semantic HTML: <h1>, <div class="aeo-summary-box"><ul><li></li></ul></div>, <section><h2></h2><p></p></section>, <section><h2>Step-by-step guide</h2><ol><li></li></ol></section>. Place 1 image: <!-- PROMPT: [English] --> ![[Alt Text]]([file.jpg]) *Caption: [desc]*. MUST exceed 1,500 chars. Return ONLY raw HTML + image markdown.`;
+        const defaultSeoPrompt = `Write a highly professional SEO blog post about "{{keyword}}". Title: "{{title}}". Sub-keywords: {{subKeywords}}. ${sourceName ? `Cite source: [${sourceName}](${sourceUrl})` : ''} MUST exceed 2,000 Korean chars. Min 5 sections. USE {{IMG_1}}, {{IMG_2}}, {{IMG_3}} placeholders. Use <article class="post-content">, <h2>, <h3>, <p>, <ul>, <strong> tags. Return ONLY raw HTML.`;
+        const defaultAeoPrompt = `Write an elite AEO answer about "{{keyword}}". Title: "{{title}}". Use semantic HTML: <h1>, <div class="aeo-summary-box"><ul><li></li></ul></div>, <section><h2></h2><p></p></section>, <section><h2>Step-by-step guide</h2><ol><li></li></ol></section>. Place 1 image: <!-- PROMPT: [English] --> ![[Alt Text]]([file.jpg]) *Caption: [desc]*. MUST exceed 1,500 chars. Return ONLY raw HTML + image markdown.`;
+
+        const bodyPromptTemplate = isSEO ? (settings.seoPrompt || defaultSeoPrompt) : (settings.aeoPrompt || defaultAeoPrompt);
+        const bodyPrompt = bodyPromptTemplate
+          .replace(/{{keyword}}/g, keyword)
+          .replace(/{{title}}/g, title)
+          .replace(/{{subKeywords}}/g, subKeywords || keyword);
 
         const faqPrompt = `Generate exactly 5 AEO-optimized FAQs for "${keyword}". Answer MUST contain keyword. Return ONLY JSON array: [{"q": "?", "a": "..."}]`;
 

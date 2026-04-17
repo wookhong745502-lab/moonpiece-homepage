@@ -350,6 +350,42 @@
             </div>
         </div>
 
+        <!-- Content Rules Page -->
+        <div id="page-rules" class="page-content">
+            <div class="flex justify-between items-center mb-12">
+                <div>
+                    <h2 style="font-size: 2rem; font-weight: 900; color: var(--on-surface); margin-bottom: 0.5rem;">콘텐츠 가이드라인 설정</h2>
+                    <p style="color: var(--on-surface-variant);">SEO 및 AEO 글쓰기 AI에게 전달될 상세 지침을 직접 관리합니다.</p>
+                </div>
+                <button class="btn-primary" onclick="saveSettings()">
+                    <span class="material-symbols-outlined" style="font-size: 20px;">save</span>
+                    가이드라인 저장하기
+                </button>
+            </div>
+
+            <div class="card mb-8">
+                <h3 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 1.5rem; color: var(--primary);">
+                    <span class="material-symbols-outlined">description</span> SEO 저널 글쓰기 규칙
+                </h3>
+                <div class="input-group">
+                    <label>SEO 시스템 프롬프트 (세부 지침)</label>
+                    <textarea id="setting-prompt-seo" style="width: 100%; height: 300px; padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--outline); font-family: monospace; font-size: 0.9rem; line-height: 1.6;"></textarea>
+                    <p style="font-size: 0.8rem; color: var(--on-surface-variant); margin-top: 0.5rem;">* {{keyword}}, {{title}}, {{subKeywords}} 등의 변수가 포함되도록 설계하세요.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 1.5rem; color: var(--primary);">
+                    <span class="material-symbols-outlined">quiz</span> AEO 지식인 글쓰기 규칙
+                </h3>
+                <div class="input-group">
+                    <label>AEO 시스템 프롬프트 (세부 지침)</label>
+                    <textarea id="setting-prompt-aeo" style="width: 100%; height: 300px; padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--outline); font-family: monospace; font-size: 0.9rem; line-height: 1.6;"></textarea>
+                    <p style="font-size: 0.8rem; color: var(--on-surface-variant); margin-top: 0.5rem;">* AEO 최적화 로직 및 이미지 마크다운 형식을 포함해야 합니다.</p>
+                </div>
+            </div>
+        </div>
+
         <!-- API Settings Page -->
         <div id="page-settings" class="page-content">
             <header class="mb-12">
@@ -436,6 +472,13 @@
                     if(document.getElementById('setting-text-api')) document.getElementById('setting-text-api').value = settings.textApi || 'deepseek';
                     if(document.getElementById('setting-img-seo')) document.getElementById('setting-img-seo').value = settings.imgSeo || '@cf/bytedance/stable-diffusion-xl-lightning';
                     if(document.getElementById('setting-img-aeo')) document.getElementById('setting-img-aeo').value = settings.imgAeo || '@cf/bytedance/stable-diffusion-xl-lightning';
+                    
+                    // Load Content Rules
+                    const defaultSeoPrompt = `Write a highly professional, empathetic, and strictly formatted SEO blog post about "{{keyword}}". Title: "{{title}}". Target sub-keywords: {{subKeywords}}. \n\nCRITICAL REQUIREMENT: The output MUST exceed 2,000 Korean characters. Explain in profound detail with minimum 5 sections.\nUSE EXACTLY 3 PLACEHOLDERS for images naturally within the text. Use exactly this format: {{IMG_1}}, {{IMG_2}}, {{IMG_3}}. Place them between paragraphs where visually appropriate.\nUse exactly <article class="post-content">, <h2>, <h3>, <p>, <ul>, <strong> tags. Do NOT use markdown code blocks, return ONLY raw HTML for the body.`;
+                    const defaultAeoPrompt = `Write an elite-level AEO-optimized expert answer about "{{keyword}}". Title/Question: "{{title}}". \n\nCRITICAL REQUIREMENT: You MUST strictly follow this exact semantic HTML 구조를 100% 준수하세요:\n1. <h1>{{title}} (질문형 질문)</h1>\n2. <div class="aeo-summary-box"><ul><li>핵심 요약 1</li><li>핵심 요약 2</li><li>핵심 요약 3</li></ul></div>\n3. <section><h2>전문가 의견 분석 (E-E-A-T)</h2><p>설명...</p> (첫 번째 문맥 최적 위치에 이미지 마크다운 템플릿 1개 삽입)</section>\n4. <section><h2>단계별 처방법 가이드</h2><ol><li><strong>1단계:</strong>...</li></ol></section>\nThe output MUST exceed 1,500 characters. Return ONLY raw HTML for the body, EXCEPT for the image markdown block.`;
+
+                    if(document.getElementById('setting-prompt-seo')) document.getElementById('setting-prompt-seo').value = settings.seoPrompt || defaultSeoPrompt;
+                    if(document.getElementById('setting-prompt-aeo')) document.getElementById('setting-prompt-aeo').value = settings.aeoPrompt || defaultAeoPrompt;
                 }
             } catch (e) { console.error("Settings load failed", e); }
         }
@@ -444,11 +487,11 @@
             const settings = {
                 textApi: document.getElementById('setting-text-api').value,
                 imgSeo: document.getElementById('setting-img-seo').value,
-                imgAeo: document.getElementById('setting-img-aeo').value
+                imgAeo: document.getElementById('setting-img-aeo').value,
+                seoPrompt: document.getElementById('setting-prompt-seo').value,
+                aeoPrompt: document.getElementById('setting-prompt-aeo').value
             };
-            const btn = document.querySelector('#page-settings .btn-primary');
-            btn.disabled = true;
-            btn.textContent = '저장 중...';
+            const btn = document.querySelector('.btn-primary'); // Generic selector, might need more specific
             try {
                 const res = await fetch('/admin/api/settings', {
                     method: 'POST',
@@ -457,12 +500,10 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    const status = document.getElementById('settings-status');
-                    status.style.display = 'block';
-                    setTimeout(() => status.style.display = 'none', 3000);
+                    alert('모든 설정이 성공적으로 저장되었습니다.');
+                    location.reload();
                 }
             } catch (e) { alert('설정 저장 실패: ' + e.message); }
-            finally { btn.disabled = false; btn.textContent = '시스템 설정 저장하기'; }
         }
 
         function switchPage(page, element = null) {
