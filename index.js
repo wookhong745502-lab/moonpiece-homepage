@@ -456,14 +456,13 @@ async function generateContentHandler(request, env, type) {
 
     const faqPrompt = `Generate exactly 5 AEO-optimized FAQs for "${keyword}". Answer MUST contain keyword. Return ONLY JSON array: [{"q": "?", "a": "..."}]`;
 
-    const [htmlRaw, faqsRaw, scoringRaw, youtubeIdRaw] = await Promise.all([
+    const [htmlRaw, faqsRaw, scoringRaw] = await Promise.all([
       aiCall(bodyPrompt, env),
       aiCall(faqPrompt, env),
-      aiCall(`Score this content idea (0-100) for SEO/AEO based on keyword "${keyword}". Return ONLY JSON: {"score": 95, "feedback": "Looks great."}`, env),
-      aiCall(`Search task: Find one real, highly authoritative Korean YouTube video ID (11 characters) about "${keyword}". Return ONLY the 11-char ID like "O0H_o8M8C3M". No text.`, env)
+      aiCall(`Score this content idea (0-100) for SEO/AEO based on keyword "${keyword}". Return ONLY JSON: {"score": 95, "feedback": "Looks great."}`, env)
     ]);
 
-    let youtubeId = (youtubeIdRaw.trim().match(/[a-zA-Z0-9_-]{11}/) || ["O0H_o8M8C3M"])[0];
+    let youtubeId = null; // Forced NULL as requested to prevent generation deadlock
     let html = htmlRaw.replace(/```html|```/g, "").trim();
     const faqs = parseAIJson(faqsRaw);
     const scoreData = parseAIJson(scoringRaw);
