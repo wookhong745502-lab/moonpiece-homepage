@@ -486,23 +486,30 @@ async function generateContentHandler(request, env, type) {
         </div>`;
       }
     } else {
-      const imgBasePrompt = settings.imgAeoPrompt || `High-quality AEO infographic or clear process diagram.`;
-      let imageResponse;
-      let aiPrompt = `${imgBasePrompt} for ${keyword}. ${selectedStyle}.`;
+      // AEO Image Logic: More robust regex to catch various Markdown image formats
+      let aiPrompt = `${settings.imgAeoPrompt || "High-quality AEO infographic"} for ${keyword}. ${selectedStyle}.`;
       let altText = `${title} infographic`;
       let captionText = "";
       
-      const imageMatch = html.match(/<!--\s*PROMPT:\s*(.*?)\s*-->[\s\S]*?!\[\[?(.*?)\]\]?\((.*?)\)[\s\S]*?\*(?:캡션:\s*)?(.*?)\*/i);
-      if (imageMatch) {
-          aiPrompt = `${imgBasePrompt} - ${imageMatch[1].trim()}`;
-          altText = imageMatch[2].trim();
-          captionText = imageMatch[4].trim();
+      // Try finding PROMPT comment and image markdown (forgiving regex)
+      const promptRegex = /<!--\s*PROMPT:\s*(.*?)\s*-->/i;
+      const imgMarkdownRegex = /!\[(.*?)\]\((.*?)\)(?:\s*\*?(?:캡션:\s*)?(.*?)\*?)?/i;
+      
+      const pMatch = html.match(promptRegex);
+      const iMatch = html.match(imgMarkdownRegex);
+      
+      if (pMatch) aiPrompt = pMatch[1].trim();
+      if (iMatch) {
+        altText = iMatch[1].trim();
+        // If alt text is long and prompt was missing, use alt as prompt
+        if (!pMatch && altText.length > 10) aiPrompt = altText;
+        captionText = iMatch[3] ? iMatch[3].trim() : "";
       }
 
       try {
         imageResponse = await env.AI.run(imgModel, {
           prompt: `Professional high-quality ${imgStyle}, ${aiPrompt}. ${selectedStyle}, no text.`,
-          negative_prompt: "deformed, ugly, bad anatomy, text"
+          negative_prompt: "deformed, ugly, bad anatomy, text, watermark"
         });
       } catch (e) { imageResponse = null; }
 
@@ -510,13 +517,21 @@ async function generateContentHandler(request, env, type) {
         const imageKey = `assets/${type}/${rawSlug}-${imgId}.png`;
         await env.JOURNAL_BUCKET.put(imageKey, imageResponse, { httpMetadata: { contentType: "image/png" } });
         heroImagePath = `/${imageKey}`;
-        if (imageMatch) {
-            const figureHtml = `<figure class="my-12"><img src="${heroImagePath}" alt="${altText}" class="w-full rounded-2xl shadow-md border border-slate-200"><figcaption class="text-center text-slate-500 text-sm mt-4 font-bold">${captionText}</figcaption></figure>`;
-            html = html.replace(imageMatch[0], figureHtml);
+        
+        const figureHtml = `<figure class="my-12"><img src="${heroImagePath}" alt="${altText}" class="w-full rounded-2xl shadow-md border border-slate-200"><figcaption class="text-center text-slate-500 text-sm mt-4 font-bold">${captionText || altText}</figcaption></figure>`;
+        
+        // Replace all related markdown elements
+        if (pMatch) html = html.replace(pMatch[0], "");
+        if (iMatch) {
+            html = html.replace(iMatch[0], figureHtml);
+        } else {
+            // Fallback: prepend if no match but we got an image
+            html = figureHtml + html;
         }
       } else {
         heroImagePath = `/assets/images/expert_1.jpg`;
-        if (imageMatch) html = html.replace(imageMatch[0], "");
+        if (pMatch) html = html.replace(pMatch[0], "");
+        if (iMatch) html = html.replace(iMatch[0], "");
       }
     }
 
