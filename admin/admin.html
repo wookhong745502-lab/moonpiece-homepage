@@ -185,6 +185,14 @@
                     <input type="date" id="seo-publish-date">
                 </div>
 
+                <div class="input-group">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <label style="margin-bottom: 0;">실서버 임베드 유튜브 영상 ID</label>
+                        <a id="seo-yt-link" href="#" target="_blank" style="font-size: 0.75rem; color: var(--primary); font-weight: bold;">영상 확인하기</a>
+                    </div>
+                    <input type="text" id="seo-youtube-id" placeholder="비워두면 AI가 자동으로 관련 영상을 추천합니다">
+                </div>
+
                 <p style="font-size: 0.85rem; color: var(--on-surface-variant); background: var(--surface-container-low); padding: 1rem; border-radius: 1rem; text-align: center; margin-bottom: 2rem; border: 1px dashed var(--outline-variant);">
                     <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 1.2rem;">info</span> 이미지 모델 및 스타일 설정은 <strong>API 설정</strong> 메뉴에서 통합 관리됩니다.
                 </p>
@@ -242,6 +250,14 @@
                 <div class="input-group">
                     <label>발행 예정일 (미입력 시 즉시 발행)</label>
                     <input type="date" id="aeo-publish-date">
+                </div>
+
+                <div class="input-group">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                        <label style="margin-bottom: 0;">실서버 임베드 유튜브 영상 ID</label>
+                        <a id="aeo-yt-link" href="#" target="_blank" style="font-size: 0.75rem; color: var(--primary); font-weight: bold;">영상 확인하기</a>
+                    </div>
+                    <input type="text" id="aeo-youtube-id" placeholder="비워두면 AI가 자동으로 관련 영상을 추천합니다">
                 </div>
 
                 <p style="font-size: 0.85rem; color: var(--on-surface-variant); background: var(--surface-container-low); padding: 1rem; border-radius: 1rem; text-align: center; margin-bottom: 2rem; border: 1px dashed var(--outline-variant);">
@@ -599,7 +615,8 @@
                 sourceName: type === 'seo' ? document.getElementById('seo-source-name').value : '',
                 sourceUrl: type === 'seo' ? document.getElementById('seo-source-url').value : '',
                 category: document.getElementById(type + '-category').value,
-                draft: true // Just identifier
+                youtubeId: document.getElementById(type + '-youtube-id').value,
+                draft: true 
             };
 
             try {
