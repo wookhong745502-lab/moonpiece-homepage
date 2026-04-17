@@ -151,6 +151,30 @@
                     <input type="date" id="seo-publish-date">
                 </div>
 
+                <div style="background: var(--surface-container-low); padding: 1.5rem; border-radius: 1rem; margin-bottom: 2rem; border: 1.5px solid var(--outline-variant);">
+                    <h3 style="font-size: 1rem; font-weight: 800; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <span class="material-symbols-outlined" style="color: var(--primary);">image</span> 이미지 생성 AI 설정
+                    </h3>
+                    <div class="grid grid-cols-2 gap-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                        <div class="input-group" style="margin-bottom: 0;">
+                            <label>AI 모델</label>
+                            <select id="seo-img-model">
+                                <option value="@cf/bytedance/stable-diffusion-xl-lightning">SDXL Lightning (빠름)</option>
+                                <option value="@cf/stabilityai/stable-diffusion-xl-base-1.0">SDXL Base (정밀)</option>
+                            </select>
+                        </div>
+                        <div class="input-group" style="margin-bottom: 0;">
+                            <label>스타일 프리셋</label>
+                            <select id="seo-img-style">
+                                <option value="photorealistic">실사 (Photorealistic)</option>
+                                <option value="cinematic">시네마틱 (Cinematic)</option>
+                                <option value="illustration">일러스트 (Illustration)</option>
+                                <option value="3d-render">3D 렌더링 (3D Render)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
                 <button id="seo-gen-btn" class="btn-primary w-full p-6 text-xl" style="width: 100%;" onclick="generate('seo')">검수용 콘텐츠 초안 생성하기</button>
             </div>
 
@@ -204,6 +228,30 @@
                 <div class="input-group">
                     <label>발행 예정일 (미입력 시 즉시 발행)</label>
                     <input type="date" id="aeo-publish-date">
+                </div>
+
+                <div style="background: var(--surface-container-low); padding: 1.5rem; border-radius: 1rem; margin-bottom: 2rem; border: 1.5px solid var(--outline-variant);">
+                    <h3 style="font-size: 1rem; font-weight: 800; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <span class="material-symbols-outlined" style="color: var(--primary);">image</span> 이미지 생성 AI 설정
+                    </h3>
+                    <div class="grid grid-cols-2 gap-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                        <div class="input-group" style="margin-bottom: 0;">
+                            <label>AI 모델</label>
+                            <select id="aeo-img-model">
+                                <option value="@cf/bytedance/stable-diffusion-xl-lightning">SDXL Lightning (빠름)</option>
+                                <option value="@cf/stabilityai/stable-diffusion-xl-base-1.0">SDXL Base (정밀)</option>
+                            </select>
+                        </div>
+                        <div class="input-group" style="margin-bottom: 0;">
+                            <label>스타일 프리셋</label>
+                            <select id="aeo-img-style">
+                                <option value="photorealistic">실사 (Photorealistic)</option>
+                                <option value="cinematic">시네마틱 (Cinematic)</option>
+                                <option value="illustration">일러스트 (Illustration)</option>
+                                <option value="3d-render">3D 렌더링 (3D Render)</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
                 <!-- FAQ 생성 여부 버튼 삭제 완료 (백엔드에서 강제 3~10개 자동 생성) -->
                 <button id="aeo-gen-btn" class="btn-primary w-full p-6 text-xl" style="width: 100%;" onclick="generate('aeo')">지식인 검수용 답변 생성하기</button>
@@ -259,6 +307,30 @@
                     <div class="input-group">
                         <label>시작 발행일 (순차 예약 가능)</label>
                         <input type="date" id="auto-start-date">
+                    </div>
+                </div>
+
+                <div style="background: var(--surface-container-low); padding: 1.5rem; border-radius: 1rem; margin-bottom: 2rem; border: 1.5px solid var(--outline-variant);">
+                    <h3 style="font-size: 1rem; font-weight: 800; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <span class="material-symbols-outlined" style="color: var(--primary);">image</span> 이미지 생성 AI 설정 (일괄 적용)
+                    </h3>
+                    <div class="grid grid-cols-2 gap-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                        <div class="input-group" style="margin-bottom: 0;">
+                            <label>AI 모델</label>
+                            <select id="auto-img-model">
+                                <option value="@cf/bytedance/stable-diffusion-xl-lightning">SDXL Lightning (빠름)</option>
+                                <option value="@cf/stabilityai/stable-diffusion-xl-base-1.0">SDXL Base (정밀)</option>
+                            </select>
+                        </div>
+                        <div class="input-group" style="margin-bottom: 0;">
+                            <label>스타일 프리셋</label>
+                            <select id="auto-img-style">
+                                <option value="photorealistic">실사 (Photorealistic)</option>
+                                <option value="cinematic">시네마틱 (Cinematic)</option>
+                                <option value="illustration">일러스트 (Illustration)</option>
+                                <option value="3d-render">3D 렌더링 (3D Render)</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
@@ -379,6 +451,10 @@
                 sourceName: type === 'seo' ? document.getElementById('seo-source-name').value : '',
                 sourceUrl: type === 'seo' ? document.getElementById('seo-source-url').value : '',
                 category: document.getElementById(type + '-category').value,
+                imageConfig: {
+                    model: document.getElementById(type + '-img-model').value,
+                    style: document.getElementById(type + '-img-style').value
+                },
                 draft: true // Just identifier
             };
 
@@ -582,7 +658,16 @@
                 const res = await fetch('/admin/api/auto-publish', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ type, category, count, publishDate: startDate })
+                    body: JSON.stringify({ 
+                        type, 
+                        category, 
+                        count, 
+                        publishDate: startDate,
+                        imageConfig: {
+                            model: document.getElementById('auto-img-model').value,
+                            style: document.getElementById('auto-img-style').value
+                        }
+                    })
                 });
                 const data = await res.json();
                 

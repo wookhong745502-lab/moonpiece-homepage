@@ -248,8 +248,20 @@ export default {
 // --- Optimized Content Generation Engine ---
 async function generateContentHandler(request, env, type) {
   const payload = await request.json();
-  const { keyword, title, slug: rawSlug, subKeywords, sourceName, sourceUrl, category, isFinal = false, finalHtml = "" } = payload;
+  const { keyword, title, slug: rawSlug, subKeywords, sourceName, sourceUrl, category, isFinal = false, finalHtml = "", imageConfig } = payload;
   const isSEO = type === "seo";
+  
+  // Default Image Configuration
+  const imgModel = (imageConfig && imageConfig.model) || "@cf/bytedance/stable-diffusion-xl-lightning";
+  const imgStyle = (imageConfig && imageConfig.style) || "photorealistic";
+  
+  const stylePrompts = {
+    "photorealistic": "photorealistic photography, extremely high quality, realistic, 8k, detailed skin, soft lighting",
+    "cinematic": "cinematic lighting, dramatic atmosphere, high contrast, filmic, 8k, masterwork",
+    "illustration": "beautiful digital illustration, clean lines, soft colors, artistic, premium feel",
+    "3d-render": "3d render, octane render, unreal engine 5, stylized, glossy, cute"
+  };
+  const selectedStyle = stylePrompts[imgStyle] || stylePrompts["photorealistic"];
 
   async function resolveUniqueSlug(baseSlug, prefix) {
     let newSlug = baseSlug;
@@ -416,17 +428,17 @@ async function generateContentHandler(request, env, type) {
     if (isSEO) {
       // 2. Generate multiple images in parallel for SEO
       const imgPrompts = [
-        `Professional photography for ${keyword}, hero wide shot, soft lighting, premium maternal vibes, extremely high quality, realistic.`,
-        `Professional photography for ${keyword}, detailed close-up shot, soft lighting, premium maternal vibes, extremely high quality.`,
-        `Professional photography for ${keyword}, contextual lifestyle shot, soft lighting, premium maternal vibes, extremely high quality.`,
-        `Professional photography for ${keyword}, comforting warm atmosphere, soft lighting, premium maternal vibes, extremely high quality.`
+        `Professional ${imgStyle} shot for ${keyword}, hero wide angle, ${selectedStyle}, premium maternal vibes.`,
+        `Professional ${imgStyle} shot for ${keyword}, detailed close-up, ${selectedStyle}, premium maternal vibes.`,
+        `Professional ${imgStyle} shot for ${keyword}, contextual lifestyle, ${selectedStyle}, premium maternal vibes.`,
+        `Professional ${imgStyle} shot for ${keyword}, comforting warm atmosphere, ${selectedStyle}, premium maternal vibes.`
       ];
       const negativePrompt = "deformed, ugly, disfigured, bad anatomy, text, watermark, low resolution, blurry faces, mutated, extra limbs, impossible belly, weird faces";
       
       let imageResponses;
       try {
         imageResponses = await Promise.all(imgPrompts.map(p => 
-          env.AI.run("@cf/bytedance/stable-diffusion-xl-lightning", { prompt: p, negative_prompt: negativePrompt })
+          env.AI.run(imgModel, { prompt: p, negative_prompt: negativePrompt })
         ));
       } catch (e) {
         console.warn("AI Image Generation failed (likely local mode):", e.message);
@@ -468,7 +480,7 @@ async function generateContentHandler(request, env, type) {
     } else {
       // Single AEO image
       let imageResponse;
-      let aiPrompt = `High-quality AEO vector infographic or clear process diagram for ${keyword}. Minimalist, professional.`;
+      let aiPrompt = `High-quality AEO ${imgStyle} infographic or clear process diagram for ${keyword}. ${selectedStyle}.`;
       let altText = `${title} 관련 전문 서술 텍스트`;
       let captionText = "";
       
@@ -481,8 +493,8 @@ async function generateContentHandler(request, env, type) {
       }
 
       try {
-        imageResponse = await env.AI.run("@cf/bytedance/stable-diffusion-xl-lightning", {
-          prompt: `Professional high-quality photography, high quality infographic or clear process diagram. ${aiPrompt}. Soft lighting, realistic 8k, no text, no gibberish text.`,
+        imageResponse = await env.AI.run(imgModel, {
+          prompt: `Professional high-quality ${imgStyle}, high quality infographic or clear process diagram. ${aiPrompt}. ${selectedStyle}, no text, no gibberish text.`,
           negative_prompt: "deformed, ugly, disfigured, bad anatomy, english text, watermark, low resolution, blurry faces, mutated, extra limbs"
         });
       } catch (e) {
@@ -591,10 +603,10 @@ async function renderTemplate(data, env, categoryName) {
             <h3 class="font-serif mb-12 text-3xl">관련 콘텐츠</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 ${related.map(p => `
-                <a href="${p.url}" class="card overflow-hidden rounded-2xl bg-white shadow-sm border border-slate-100 hover:shadow-md transition-all duration-300" style="padding:0;">
+                <a href="${p.url}" class="mp-card overflow-hidden rounded-2xl bg-white shadow-sm border border-slate-100 hover:shadow-md transition-all duration-300" style="padding:0;">
                     <img src="${p.image}" class="aspect-video object-cover w-full h-48">
                     <div class="p-6">
-                        <h5 class="font-bold text-lg mb-2 text-slate-900 hover:text-purple-600 transition">${p.title}</h5>
+                        <h5 class="font-bold text-lg mb-2 text-slate-900 hover:text-moon-600 transition">${p.title}</h5>
                     </div>
                 </a>`).join("")}
             </div>
@@ -635,10 +647,10 @@ async function renderTemplate(data, env, categoryName) {
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans">
     <!-- Top Navigation -->
-    <nav class="nav-bar">
-        <div class="nav-container">
-            <a href="/" class="logo font-serif">Moonpiece</a>
-            <div class="nav-links">
+    <nav class="nav-bar bg-white/80 backdrop-blur-md border-b border-slate-100">
+        <div class="nav-mp-container mp-container">
+            <a href="/" class="logo font-serif text-2xl font-black text-moon-600">Moonpiece</a>
+            <div class="nav-links hidden lg:flex">
                 <a href="/brand.html" class="nav-link">문피스의 약속</a>
                 <a href="/review.html" class="nav-link">엄마들의 이야기</a>
                 <a href="/journal.html" class="nav-link">임산부 저널</a>
@@ -663,7 +675,7 @@ async function renderTemplate(data, env, categoryName) {
         <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" class="btn-primary text-center mt-8">구매하기</a>
     </div>
 
-    <main class="py-24 container mx-auto px-4" style="max-width: 900px; min-height: 80vh;">
+    <main class="py-24 mp-container mx-auto" style="max-width: 900px; min-height: 80vh;">
         <div class="category-badge mb-8">${categoryName}</div>
         <h1 class="font-serif mb-12" style="font-size: 3.5rem; line-height: 1.2;">${data.title}</h1>
         ${(categoryName === '임산부 지식인') && (data.html || '').includes('<figure') ? '' : `<img src="${data.image}" alt="${data.title}" class="w-full rounded-3xl shadow-xl mb-16 object-cover" style="aspect-ratio: 16/9;">`}
@@ -674,7 +686,7 @@ async function renderTemplate(data, env, categoryName) {
         </div>
         
         <section class="mt-24">
-            <h3 class="font-serif mb-12 text-3xl">?먯＜ 臾삳뒗 吏덈Ц (FAQ)</h3>
+            <h3 class="font-serif mb-12 text-3xl">자주 묻는 질문 (FAQ)</h3>
             <div class="flex flex-col gap-12">
                 ${(data.faqs || []).map(f => `
                 <div class="faq-item">
@@ -692,40 +704,53 @@ async function renderTemplate(data, env, categoryName) {
     </main>
 
     <!-- Footer -->
-    <footer>
-        <div class="container mx-auto px-4 grid md:grid-cols-2 gap-12">
+    <footer class="bg-white pt-24 pb-12 border-t border-slate-100">
+        <div class="mp-container grid md:grid-cols-2 lg:grid-cols-4 gap-12">
             <div>
-                <div class="logo font-serif mb-4" style="color: var(--primary);">Moonpiece</div>
-                <p style="max-width: 320px; color: var(--on-surface-variant); line-height: 1.8;">
+                <div class="logo font-serif text-2xl text-moon-600 mb-6 font-bold">Moonpiece</div>
+                <p class="text-slate-500 leading-relaxed text-sm mb-8" style="max-width: 320px;">
                     소중한 엄마와 아기를 위한 달빛 조각, 문피스. 11년의 진심을 담아 가장 편안한 휴식을 설계합니다.
                 </p>
+                <div class="flex gap-4">
+                    <a href="#" class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-moon-500 hover:text-white transition-all">
+                        <span class="material-symbols-outlined text-xl">share</span>
+                    </a>
+                </div>
             </div>
-            <div class="grid md:grid-cols-3 gap-8">
-                <div>
-                    <h4 class="font-bold mb-6">Company</h4>
-                    <ul class="flex flex-col gap-3 text-slate-600">
-                        <li><a href="/about.html">회사소개</a></li>
-                        <li><a href="/terms.html">이용약관</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-bold mb-6">Support</h4>
-                    <ul class="flex flex-col gap-3 text-slate-600">
-                        <li><a href="/privacy.html">개인정보처리방침</a></li>
-                        <li><a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank">네이버 스마트스토어</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-bold mb-6">Social</h4>
-                    <ul class="flex flex-col gap-3 text-slate-600">
-                        <li><a href="#">Instagram</a></li>
-                        <li><a href="#">YouTube</a></li>
-                    </ul>
-                </div>
+            <div>
+                <h4 class="font-bold text-slate-900 mb-6 uppercase tracking-wider text-xs">Menu</h4>
+                <ul class="flex flex-col gap-4 text-sm text-slate-600 list-none p-0">
+                    <li><a href="/brand.html" class="hover:text-moon-600">문피스의 약속</a></li>
+                    <li><a href="/review.html" class="hover:text-moon-600">엄마들의 이야기</a></li>
+                    <li><a href="/journal.html" class="hover:text-moon-600">임산부 저널</a></li>
+                    <li><a href="/knowledge.html" class="hover:text-moon-600">임산부 지식인</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold text-slate-900 mb-6 uppercase tracking-wider text-xs">Support</h4>
+                <ul class="flex flex-col gap-4 text-sm text-slate-600 list-none p-0">
+                    <li><a href="/about.html">회사소개</a></li>
+                    <li><a href="/terms.html">이용약관</a></li>
+                    <li><a href="/privacy.html">개인정보처리방침</a></li>
+                    <li><a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank">네이버 스마트스토어</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold text-slate-900 mb-6 uppercase tracking-wider text-xs">Social</h4>
+                <ul class="flex flex-col gap-4 text-sm text-slate-600 list-none p-0">
+                    <li><a href="#">Instagram</a></li>
+                    <li><a href="#">YouTube</a></li>
+                </ul>
             </div>
         </div>
-        <div class="container mx-auto px-4 mt-16 pt-8 border-t border-slate-200 text-center text-slate-500 text-sm">
-            © 2024 Moonpiece. All rights reserved.
+        <div class="mp-container mt-20 pt-10 border-t border-slate-50 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="text-slate-400 text-xs text-center md:text-left">
+                © 2024 Moonpiece. All rights reserved.
+            </div>
+            <div class="flex gap-6 text-xs font-bold text-slate-500">
+                <a href="/terms.html" class="hover:text-moon-600">이용약관</a>
+                <a href="/privacy.html" class="hover:text-moon-600">개인정보처리방침</a>
+            </div>
         </div>
     </footer>
     
@@ -757,8 +782,20 @@ async function renderTemplate(data, env, categoryName) {
 // --- Auto-Publish Handler (Full Pipeline: Keyword -> Content -> Deploy) ---
 async function autoPublishHandler(request, env) {
   const payload = await request.json();
-  const { category, count = 1, type = "seo" } = payload;
+  const { category, count = 1, type = "seo", imageConfig } = payload;
   const isSEO = type === "seo";
+  
+  // Default Image Configuration
+  const imgModel = (imageConfig && imageConfig.model) || "@cf/bytedance/stable-diffusion-xl-lightning";
+  const imgStyle = (imageConfig && imageConfig.style) || "photorealistic";
+  
+  const stylePrompts = {
+    "photorealistic": "photorealistic photography, extremely high quality, realistic, 8k, detailed skin, soft lighting",
+    "cinematic": "cinematic lighting, dramatic atmosphere, high contrast, filmic, 8k, masterwork",
+    "illustration": "beautiful digital illustration, clean lines, soft colors, artistic, premium feel",
+    "3d-render": "3d render, octane render, unreal engine 5, stylized, glossy, cute"
+  };
+  const selectedStyle = stylePrompts[imgStyle] || stylePrompts["photorealistic"];
 
   const categoryNameMap = { sleep: "수면 자세", pain: "통증 완화", health: "건강 관리", psychology: "심리 & 지식", others: "기타" };
   const categoryName = categoryNameMap[category] || category;
@@ -881,10 +918,10 @@ async function autoPublishHandler(request, env) {
           let imageResponses;
           try {
             imageResponses = await Promise.all([
-              env.AI.run("@cf/bytedance/stable-diffusion-xl-lightning", { prompt: `Professional photo for ${keyword}, hero wide shot, soft lighting, premium maternal`, negative_prompt: negPrompt }),
-              env.AI.run("@cf/bytedance/stable-diffusion-xl-lightning", { prompt: `Professional photo for ${keyword}, close-up detail, soft lighting`, negative_prompt: negPrompt }),
-              env.AI.run("@cf/bytedance/stable-diffusion-xl-lightning", { prompt: `Professional photo for ${keyword}, lifestyle context, warm light`, negative_prompt: negPrompt }),
-              env.AI.run("@cf/bytedance/stable-diffusion-xl-lightning", { prompt: `Professional photo for ${keyword}, comforting atmosphere`, negative_prompt: negPrompt })
+              env.AI.run(imgModel, { prompt: `Professional ${imgStyle} shot for ${keyword}, hero wide angle, ${selectedStyle}`, negative_prompt: negPrompt }),
+              env.AI.run(imgModel, { prompt: `Professional ${imgStyle} shot for ${keyword}, detail, ${selectedStyle}`, negative_prompt: negPrompt }),
+              env.AI.run(imgModel, { prompt: `Professional ${imgStyle} shot for ${keyword}, lifestyle, ${selectedStyle}`, negative_prompt: negPrompt }),
+              env.AI.run(imgModel, { prompt: `Professional ${imgStyle} shot for ${keyword}, atmosphere, ${selectedStyle}`, negative_prompt: negPrompt })
             ]);
           } catch (e) { imageResponses = Array(4).fill(null); }
 
@@ -915,8 +952,8 @@ async function autoPublishHandler(request, env) {
           const imageMatch = html.match(/<!--\s*PROMPT:\s*(.*?)\s*-->[\s\S]*?!\[\[?(.*?)\]\]?\((.*?)\)[\s\S]*?\*(?:Caption:|caption:|캡션:)?\s*(.*?)\*/i);
           if (imageMatch) { aiImgPrompt = imageMatch[1].trim(); altText = imageMatch[2].trim(); captionText = imageMatch[4].trim(); }
           try {
-            imageResponse = await env.AI.run("@cf/bytedance/stable-diffusion-xl-lightning", {
-              prompt: `Professional infographic or diagram. ${aiImgPrompt}. Soft lighting, realistic 8k, no text.`,
+            imageResponse = await env.AI.run(imgModel, {
+              prompt: `Professional infographic or diagram. ${aiImgPrompt}. ${selectedStyle}, no text.`,
               negative_prompt: negPrompt
             });
           } catch (e) { imageResponse = null; }
