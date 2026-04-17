@@ -234,9 +234,7 @@
                 const data = await res.json();
                 allPosts = data.map(p => ({
                     ...p,
-                    categoryName: nameMap[p.category] || p.category,
-                    views: Math.floor(Math.random() * 500) + 120, // Mock data
-                    likes: Math.floor(Math.random() * 50) + 10    // Mock data
+                    categoryName: nameMap[p.category] || p.category
                 }));
                 applyFilterAndSearch();
             } catch (e) {
@@ -249,9 +247,7 @@
                     desc: '임신 중기부터는 왼쪽으로 누워 자는 것이 혈액 순환에 도움이 된다고 합니다. 하지만 꼭 그래야 할까요?',
                     image: `https://images.unsplash.com/photo-1519824145371-296894a0daa9?w=800&q=8${i}`,
                     date: '2024.04.11',
-                    url: '#',
-                    views: 245,
-                    likes: 32
+                    url: '#'
                 }));
                 applyFilterAndSearch();
             }
@@ -311,15 +307,8 @@
                             </div>
 
                             <!-- Meta info -->
-                            <div class="pt-4 border-t border-slate-50 flex justify-between items-center text-slate-400">
-                                <div class="flex items-center gap-3">
-                                    <span class="flex items-center gap-1 text-[11px]">
-                                        <span class="material-symbols-outlined text-lg">visibility</span> ${post.views}
-                                    </span>
-                                </div>
-                                <span class="flex items-center gap-1 text-[11px] text-rose-400 font-bold">
-                                    <span class="material-symbols-outlined text-lg fill">favorite</span> ${post.likes}
-                                </span>
+                            <div class="pt-2 flex justify-end text-slate-300">
+                                <span class="text-[10px] font-medium tracking-tight">${post.date}</span>
                             </div>
                         </div>
                     </article>
