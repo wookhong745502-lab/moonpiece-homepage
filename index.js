@@ -639,27 +639,29 @@ async function renderTemplate(data, env, categoryName) {
         <div class="category-badge mb-8">${categoryName}</div>
         <h1 class="font-serif mb-12" style="font-size: 3.5rem; line-height: 1.2;">${data.title}</h1>
         ${(categoryName === '임산부 지식인') && (data.html || '').includes('<figure') ? '' : `<img src="${data.image}" alt="${data.title}" class="w-full rounded-3xl shadow-xl mb-16 object-cover" style="aspect-ratio: 16/9;">`}
-        
-        <!-- Post Body -->
-        <div class="post-body-container article-content bg-white p-8 md:p-16 rounded-[2.5rem] shadow-sm border border-slate-200">
-            ${data.html}
-        </div>
-        
-        <section class="faq-section">
-            <h3 class="font-serif mb-12 text-3xl">자주 묻는 질문 (FAQ)</h3>
-            <div class="faq-list">
-                ${(data.faqs || []).map(f => `
-                <div class="faq-item">
-                    <div class="faq-q">
-                        <span class="q-label">Q.</span>
-                        <span>${f.q}</span>
-                    </div>
-                    <div class="faq-a">
-                        <p>${f.a}</p>
-                    </div>
-                </div>`).join("")}
+        <!-- Content Container -->
+        <div class="post-body-container bg-white p-8 md:p-20 rounded-[2.5rem] shadow-sm border border-slate-200">
+            <div class="article-content mb-24">
+                ${data.html}
             </div>
-        </section>
+
+            <!-- FAQ Section Integrated into Card -->
+            <section class="faq-section">
+                <h2 class="faq-title">자주 묻는 질문 (FAQ)</h2>
+                <div class="faq-list">
+                    ${(data.faqs || []).map(f => `
+                    <div class="faq-item">
+                        <div class="faq-q">
+                            <span class="q-label">Q.</span>
+                            <span>${f.q}</span>
+                        </div>
+                        <div class="faq-a">
+                            <p>${f.a}</p>
+                        </div>
+                    </div>`).join("")}
+                </div>
+            </section>
+        </div>
         
         ${relatedHtml}
     </main>
