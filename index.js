@@ -46,14 +46,25 @@ function parseAIJson(raw) {
 }
 
 async function searchYoutube(q) {
-  try {
-    const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(q + " 정보")}`;
-    const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' } });
-    const text = await res.text();
-    // More robust match for YouTube's JSON response
-    const match = text.match(/"videoId":"([^"]+)"/);
-    return (match && match[1] && match[1].length === 11) ? match[1] : null;
-  } catch (e) { return null; }
+  const queries = [q + " 정보", q, "임산부 " + q];
+  for (const query of queries) {
+    try {
+      const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+      const res = await fetch(url, { 
+        headers: { 
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7'
+        } 
+      });
+      const text = await res.text();
+      // Try multiple regex patterns: 1. JSON videoId, 2. watch?v= URL
+      const match = text.match(/"videoId":"([^"]{11})"/) || text.match(/\/watch\?v=([a-zA-Z0-9_-]{11})/);
+      if (match && match[1]) {
+        return match[1];
+      }
+    } catch (e) { continue; }
+  }
+  return null;
 }
 
 function classifyCategory(q) {
