@@ -6,19 +6,7 @@
     <title>문피스 콘텐츠 어드민 | Moonpiece Labs</title>
     <link rel="stylesheet" href="../styles.css?v=1.6">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        moon: { 50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 500: '#8b5cf6', 600: '#7c3aed', 900: '#4c1d95' }
-                    },
-                    fontFamily: { serif: ['Noto Serif KR', 'serif'], sans: ['Manrope', 'sans-serif'] }
-                }
-            }
-        }
-    </script>
+    <!-- Tailwind CDN removed for production stability & performance -->
     <style>
         :root {
             --sidebar-width: 280px;
@@ -89,6 +77,22 @@
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center; }
         .modal-overlay.active { display: flex; }
         .modal { background: white; padding: 2.5rem; border-radius: 2rem; width: 95%; max-width: 900px; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25); }
+
+        /* Legacy Utility Helpers for layout stability */
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-12 { margin-bottom: 3rem; }
+        .grid { display: grid; }
+        .grid-cols-2 { grid-template-columns: 1fr 1fr; }
+        .grid-cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+        .gap-4 { gap: 1rem; }
+        .gap-8 { gap: 2rem; }
+        .flex { display: flex; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .font-serif { font-family: var(--font-serif); }
+        .text-4xl { font-size: 2.25rem; }
+        .text-lg { font-size: 1.125rem; }
+        .p-8 { padding: 2rem; }
     </style>
 </head>
 <body>
