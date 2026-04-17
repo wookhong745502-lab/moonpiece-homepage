@@ -381,13 +381,15 @@ async function generateContentHandler(request, env, type) {
 
   if (isFinal) {
     const slug = await resolveUniqueSlug(rawSlug, isSEO ? 'journal' : 'knowledge');
+    const finalYoutubeId = payload.youtubeId || await searchYoutube(keyword);
+    
     const html = await renderTemplate({ 
         title, 
         image: payload.image, 
         html: finalHtml, 
         faqs: payload.faqs, 
         schema: payload.schema,
-        youtubeId: payload.youtubeId 
+        youtubeId: finalYoutubeId
     }, env, isSEO ? '임산부 저널' : '임산부 지식인');
     
     const filePath = `${isSEO ? 'journal' : 'knowledge'}/${slug}.html`;
@@ -681,11 +683,10 @@ async function renderTemplate(data, env, categoryName) {
 
             ${data.youtubeId ? `
             <!-- Video Section -->
-            <section class="video-section mb-24" style="border-top: 2px solid #f1f5f9; padding-top: 6rem;">
+            <section class="video-section mb-24">
                 <h2 class="faq-title">📢 관련 추천 영상</h2>
-                <div class="relative w-full aspect-video rounded-[2rem] overflow-hidden shadow-2xl border border-slate-100">
+                <div class="video-container">
                     <iframe 
-                        class="absolute top-0 left-0 w-full h-full"
                         src="https://www.youtube.com/embed/${data.youtubeId}" 
                         title="YouTube video player" 
                         frameborder="0" 
