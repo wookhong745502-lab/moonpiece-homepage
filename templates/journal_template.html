@@ -55,38 +55,36 @@
     <!-- Article Content -->
     <article class="py-32">
         <div class="mp-container" style="max-width: 850px;">
-            <a href="../journal.html" style="display: inline-flex; align-items: center; gap: 0.5rem; color: var(--outline); text-decoration: none; margin-bottom: 3rem; font-size: 0.95rem; font-weight: 700;">
+            <a href="../journal.html" class="back-link">
                 <span class="material-symbols-outlined" style="font-size: 1.25rem;">arrow_back</span>
                 저널 목록으로 돌아가기
             </a>
 
             <!-- AEO: Direct Answer Summary (Targeting AI Overviews) -->
-            <div class="card p-8 surface-container-highest mb-12" style="border: 2px solid var(--primary); border-radius: 1.5rem;">
-                <h2 style="font-size: 1.25rem; font-weight: 800; color: var(--primary); margin-bottom: 1rem;">💡 3줄 핵심 요약 (AI Summary)</h2>
-                <div style="font-size: 1.1rem; line-height: 1.8; color: var(--on-surface);">
+            <div class="aeo-summary-box">
+                <h2 style="font-size: 1.25rem; font-weight: 800; color: var(--moon-600); margin: 0 0 1.5rem 0; padding: 0; border: none;">💡 3줄 핵심 요약 (AI Summary)</h2>
+                <div>
                     {{summary}}
                 </div>
             </div>
 
-            <div style="font-size: 0.9rem; color: var(--primary); font-weight: 800; margin-bottom: 1.5rem; letter-spacing: 0.2em; text-transform: uppercase;">{{category}}</div>
+            <div style="font-size: 0.9rem; color: var(--moon-600); font-weight: 800; margin-bottom: 1.5rem; letter-spacing: 0.2em; text-transform: uppercase;">{{category}}</div>
             <h1 class="font-serif mb-8" style="font-size: 3.5rem; line-height: 1.2; word-break: keep-all;">{{title}}</h1>
             
-            <div class="flex items-center gap-4 mb-16 pb-8 border-b border-outline-variant">
-                <span style="color: var(--outline); font-size: 0.95rem;">에디터: 문피스 수면연구소</span>
-                <span style="color: var(--outline); font-size: 0.95rem;">·</span>
-                <span style="color: var(--outline); font-size: 0.95rem;">게시일: {{publish_date}}</span>
-                <span style="color: var(--outline); font-size: 0.95rem;">·</span>
-                <span style="color: var(--outline); font-size: 0.95rem;">읽는 시간: 약 8분</span>
+            <div class="flex items-center gap-4 mb-16 pb-8 border-b border-slate-100">
+                <span style="color: #64748b; font-size: 0.95rem;">에디터: 문피스 수면연구소</span>
+                <span style="color: #cbd5e1; font-size: 0.95rem;">·</span>
+                <span style="color: #64748b; font-size: 0.95rem;">게시일: {{publish_date}}</span>
             </div>
 
             <!-- Main Content Area -->
-            <div class="journal-content-rich" style="font-size: 1.2rem; line-height: 2.1; color: var(--on-surface-variant);">
+            <div class="journal-content-rich">
                 {{rich_content}}
             </div>
             
             <!-- AEO: FAQ Section with Structured Details -->
-            <section class="mt-24 pt-16 border-t border-outline-variant">
-                <h3 class="font-serif mb-12" style="font-size: 2.5rem; color: var(--primary);">많이 묻는 질문 (FAQ)</h3>
+            <section class="faq-section">
+                <h3 class="font-serif mb-12" style="font-size: 2.25rem; color: var(--moon-600);">많이 묻는 질문 (FAQ)</h3>
                 <div class="faq-accordion flex flex-col gap-4">
                     {{faq_content}}
                 </div>

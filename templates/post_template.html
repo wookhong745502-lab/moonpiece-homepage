@@ -8,22 +8,10 @@
     <link rel="stylesheet" href="/styles.css">
     {{JSON_LD}}
     <style>
-        :root { --glass-bg: rgba(255, 255, 255, 0.7); --glass-border: rgba(255, 255, 255, 0.3); }
-        body { background: var(--surface-low); }
-        .post-content { line-height: 2; color: var(--on-surface); font-size: 1.15rem; background: var(--surface-bright); padding: 4rem; border-radius: 3rem; box-shadow: var(--shadow-sm); }
-        .post-content h2 { margin-top: 4rem; margin-bottom: 2rem; font-family: var(--font-serif); color: var(--primary); font-size: 2.25rem; border-left: 6px solid var(--primary); padding-left: 1.5rem; }
-        .post-content p { margin-bottom: 2rem; color: var(--on-surface-variant); }
-        .post-content img { width: 100%; border-radius: 2.5rem; margin: 3rem 0; box-shadow: var(--shadow-lg); transition: transform 0.5s; }
-        .post-content img:hover { transform: scale(1.02); }
-        .category-badge { display: inline-block; padding: 0.6rem 1.5rem; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border-radius: 9999px; font-weight: 800; font-size: 0.9rem; margin-bottom: 2.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        
-        /* AEO Specific Styling */
-        .aeo-box { background: linear-gradient(to bottom right, var(--surface-container-lowest), var(--surface-container-low)); padding: 4rem; border-radius: 3rem; border: 1px solid var(--glass-border); margin-top: 3rem; position: relative; overflow: hidden; }
-        .aeo-box::before { content: "Q&A"; position: absolute; top: -10px; right: 20px; font-size: 5rem; font-weight: 900; opacity: 0.03; color: var(--primary); }
-        .aeo-q { font-weight: 900; color: var(--primary); font-size: 1.75rem; margin-bottom: 2rem; position: relative; }
-        .aeo-a { color: var(--on-surface); font-size: 1.25rem; line-height: 1.8; }
-        .back-link { display: inline-flex; align-items: center; gap: 0.75rem; color: var(--primary); text-decoration: none; font-weight: 800; margin-bottom: 4rem; transition: transform 0.3s; }
+        body { background: #fcfcfd; }
+        .back-link { display: inline-flex; align-items: center; gap: 0.75rem; color: var(--moon-600); text-decoration: none; font-weight: 800; margin-bottom: 4rem; transition: transform 0.3s; }
         .back-link:hover { transform: translateX(-10px); }
+        .category-badge { display: inline-block; padding: 0.6rem 1.5rem; background: var(--moon-600); color: white; border-radius: 9999px; font-weight: 800; font-size: 0.9rem; margin-bottom: 2.5rem; }
     </style>
 </head>
 <body>
