@@ -46,22 +46,31 @@ function parseAIJson(raw) {
 }
 
 async function searchYoutube(q) {
-  const queries = [q + " 정보", q, "임산부 " + q];
+  const queries = [q + " 정보", "임산부 " + q];
   for (const query of queries) {
     try {
       const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
       const res = await fetch(url, { 
         headers: { 
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7'
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+          'Accept-Language': 'ko-KR,ko;q=0.9'
         } 
       });
       const text = await res.text();
-      // Try multiple regex patterns: 1. JSON videoId, 2. watch?v= URL
-      const match = text.match(/"videoId":"([^"]{11})"/) || text.match(/\/watch\?v=([a-zA-Z0-9_-]{11})/);
-      if (match && match[1]) {
-        return match[1];
+      
+      // Look for the complex videoId pattern in YouTube's initial data string
+      const jsonMatch = text.match(/\"videoId\":\"([a-zA-Z0-9_-]{11})\"/g);
+      if (jsonMatch && jsonMatch.length > 0) {
+        // Find the first few unique IDs to avoid ads/UI components
+        const ids = jsonMatch.map(m => m.split('\"')[3]).filter((id, index, self) => self.indexOf(id) === index);
+        if (ids.length > 0) return ids[0];
       }
+      
+      // Fallback: URL pattern match
+      const urlMatch = text.match(/\/watch\?v=([a-zA-Z0-9_-]{11})/);
+      if (urlMatch && urlMatch[1]) return urlMatch[1];
+      
     } catch (e) { continue; }
   }
   return null;
