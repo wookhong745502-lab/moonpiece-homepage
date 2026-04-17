@@ -181,11 +181,6 @@
                 </div>
 
                 <div class="input-group">
-                    <label>발행 예정일 (미입력 시 즉시 발행)</label>
-                    <input type="date" id="seo-publish-date">
-                </div>
-
-                <div class="input-group">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                         <label style="margin-bottom: 0;">실서버 임베드 유튜브 영상 ID</label>
                         <a id="seo-yt-link" href="#" target="_blank" style="font-size: 0.75rem; color: var(--primary); font-weight: bold;">영상 확인하기</a>
@@ -245,11 +240,6 @@
                         <option value="psychology" selected>심리 & 지식</option>
                         <option value="others">기타</option>
                     </select>
-                </div>
-
-                <div class="input-group">
-                    <label>발행 예정일 (미입력 시 즉시 발행)</label>
-                    <input type="date" id="aeo-publish-date">
                 </div>
 
                 <div class="input-group">
@@ -695,7 +685,7 @@
                 finalHtml: ed.innerHTML,
                 isFinal: true,
                 category: document.getElementById(type + '-category').value,
-                publishDate: document.getElementById(type + '-publish-date').value || null,
+                publishDate: new Date(new Date().getTime() + 9 * 60 * 60 * 1000).toISOString().split('T')[0],
                 schema: finalSchema,
                 youtubeId: document.getElementById(type + '-youtube-id').value
             };
