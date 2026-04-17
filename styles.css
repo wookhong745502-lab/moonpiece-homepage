@@ -309,10 +309,14 @@ footer {
     background: white;
     border-radius: 2rem;
     padding: 3rem;
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem; /* Matched with paragraph spacing for consistency */
     border: 1px solid #f1f5f9;
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+}
+
+.faq-item:last-child {
+    margin-bottom: 0; /* Remove redundant bottom margin for the last item */
 }
 
 .faq-item:hover {
