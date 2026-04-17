@@ -75,6 +75,9 @@ export default {
           break;
       }
       
+      const settings = await safeGetJson("config/settings.json");
+      const textEngine = settings.textApi || "deepseek";
+
       const res = await fetch("https://api.deepseek.com/chat/completions", {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${env.DEEPSEEK_API_KEY}` },
@@ -128,6 +131,16 @@ export default {
         console.error(`Safe JSON parse error for ${key}:`, e.message);
         return [];
       }
+    }
+
+    if (url.pathname === "/admin/api/settings" && request.method === "GET") {
+      const settings = await safeGetJson("config/settings.json");
+      return new Response(JSON.stringify(settings || {}), { headers: { "Content-Type": "application/json" } });
+    }
+    if (url.pathname === "/admin/api/settings" && request.method === "POST") {
+      const settings = await request.json();
+      await env.JOURNAL_BUCKET.put("config/settings.json", JSON.stringify(settings));
+      return new Response(JSON.stringify({ success: true }), { headers: { "Content-Type": "application/json" } });
     }
 
     if (url.pathname === "/admin/api/posts") {
@@ -252,8 +265,12 @@ async function generateContentHandler(request, env, type) {
   const isSEO = type === "seo";
   
   // Default Image Configuration
-  const imgModel = (imageConfig && imageConfig.model) || "@cf/bytedance/stable-diffusion-xl-lightning";
-  const imgStyle = (imageConfig && imageConfig.style) || "photorealistic";
+  const settings = await safeGetJson("config/settings.json");
+  const defaultImgModel = isSEO ? (settings.imgSeo || "@cf/bytedance/stable-diffusion-xl-lightning") : (settings.imgAeo || "@cf/bytedance/stable-diffusion-xl-lightning");
+  const defaultImgStyle = settings.imgStyle || "photorealistic";
+
+  const imgModel = (imageConfig && imageConfig.model) || defaultImgModel;
+  const imgStyle = (imageConfig && imageConfig.style) || defaultImgStyle;
   
   const stylePrompts = {
     "photorealistic": "photorealistic photography, extremely high quality, realistic, 8k, detailed skin, soft lighting",
@@ -262,6 +279,20 @@ async function generateContentHandler(request, env, type) {
     "3d-render": "3d render, octane render, unreal engine 5, stylized, glossy, cute"
   };
   const selectedStyle = stylePrompts[imgStyle] || stylePrompts["photorealistic"];
+
+  async function ai(prompt, system = "You are an elite Korean content architect.") {
+    const textEngine = settings.textApi || "deepseek"; // Ready for future expansion
+    const apiUrl = textEngine === "gemini" ? "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent" : "https://api.deepseek.com/chat/completions";
+    
+    // For now, let's keep it to DeepSeek as and extra integration for Gemini is needed for auth
+    const res = await fetch("https://api.deepseek.com/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${env.DEEPSEEK_API_KEY}` },
+      body: JSON.stringify({ model: "deepseek-chat", messages: [{ role: "system", content: system }, { role: "user", content: prompt }] })
+    });
+    const d = await res.json();
+    return d.choices[0].message.content;
+  }
 
   async function resolveUniqueSlug(baseSlug, prefix) {
     let newSlug = baseSlug;
@@ -785,9 +816,9 @@ async function autoPublishHandler(request, env) {
   const { category, count = 1, type = "seo", imageConfig } = payload;
   const isSEO = type === "seo";
   
-  // Default Image Configuration
-  const imgModel = (imageConfig && imageConfig.model) || "@cf/bytedance/stable-diffusion-xl-lightning";
-  const imgStyle = (imageConfig && imageConfig.style) || "photorealistic";
+  const settings = await safeGetJson("config/settings.json");
+  const imgModel = (imageConfig && imageConfig.model) || settings.imgAuto || "@cf/bytedance/stable-diffusion-xl-lightning";
+  const imgStyle = (imageConfig && imageConfig.style) || settings.imgStyle || "photorealistic";
   
   const stylePrompts = {
     "photorealistic": "photorealistic photography, extremely high quality, realistic, 8k, detailed skin, soft lighting",

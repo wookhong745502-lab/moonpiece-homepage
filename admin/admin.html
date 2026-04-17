@@ -102,6 +102,7 @@
             <div class="nav-item" onclick="switchPage('aeo', this)"><span class="material-symbols-outlined">smart_toy</span> AEO 지식인 글쓰기</div>
             <div class="nav-item" onclick="switchPage('auto', this)"><span class="material-symbols-outlined">schedule_send</span> 자동 발행 & 예약</div>
             <div class="nav-item" onclick="switchPage('manage', this)"><span class="material-symbols-outlined">description</span> 포스트 관리</div>
+            <div class="nav-item" onclick="switchPage('settings', this)"><span class="material-symbols-outlined">settings</span> API 설정</div>
         </nav>
         <div style="margin-top: auto; padding: 1rem;">
             <button onclick="logout()" style="color: var(--outline); font-weight: 700; background: none; border: none; cursor: pointer; text-decoration: underline;">로그아웃</button>
@@ -183,29 +184,9 @@
                     <input type="date" id="seo-publish-date">
                 </div>
 
-                <div style="background: var(--surface-container-low); padding: 1.5rem; border-radius: 1rem; margin-bottom: 2rem; border: 1.5px solid var(--outline-variant);">
-                    <h3 style="font-size: 1rem; font-weight: 800; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                        <span class="material-symbols-outlined" style="color: var(--primary);">image</span> 이미지 생성 AI 설정
-                    </h3>
-                    <div class="grid grid-cols-2 gap-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-                        <div class="input-group" style="margin-bottom: 0;">
-                            <label>AI 모델</label>
-                            <select id="seo-img-model">
-                                <option value="@cf/bytedance/stable-diffusion-xl-lightning">SDXL Lightning (빠름)</option>
-                                <option value="@cf/stabilityai/stable-diffusion-xl-base-1.0">SDXL Base (정밀)</option>
-                            </select>
-                        </div>
-                        <div class="input-group" style="margin-bottom: 0;">
-                            <label>스타일 프리셋</label>
-                            <select id="seo-img-style">
-                                <option value="photorealistic">실사 (Photorealistic)</option>
-                                <option value="cinematic">시네마틱 (Cinematic)</option>
-                                <option value="illustration">일러스트 (Illustration)</option>
-                                <option value="3d-render">3D 렌더링 (3D Render)</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
+                <p style="font-size: 0.85rem; color: var(--on-surface-variant); background: var(--surface-container-low); padding: 1rem; border-radius: 1rem; text-align: center; margin-bottom: 2rem; border: 1px dashed var(--outline-variant);">
+                    <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 1.2rem;">info</span> 이미지 모델 및 스타일 설정은 <strong>API 설정</strong> 메뉴에서 통합 관리됩니다.
+                </p>
 
                 <button id="seo-gen-btn" class="btn-primary w-full p-6 text-xl" style="width: 100%;" onclick="generate('seo')">검수용 콘텐츠 초안 생성하기</button>
             </div>
@@ -262,29 +243,9 @@
                     <input type="date" id="aeo-publish-date">
                 </div>
 
-                <div style="background: var(--surface-container-low); padding: 1.5rem; border-radius: 1rem; margin-bottom: 2rem; border: 1.5px solid var(--outline-variant);">
-                    <h3 style="font-size: 1rem; font-weight: 800; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                        <span class="material-symbols-outlined" style="color: var(--primary);">image</span> 이미지 생성 AI 설정
-                    </h3>
-                    <div class="grid grid-cols-2 gap-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-                        <div class="input-group" style="margin-bottom: 0;">
-                            <label>AI 모델</label>
-                            <select id="aeo-img-model">
-                                <option value="@cf/bytedance/stable-diffusion-xl-lightning">SDXL Lightning (빠름)</option>
-                                <option value="@cf/stabilityai/stable-diffusion-xl-base-1.0">SDXL Base (정밀)</option>
-                            </select>
-                        </div>
-                        <div class="input-group" style="margin-bottom: 0;">
-                            <label>스타일 프리셋</label>
-                            <select id="aeo-img-style">
-                                <option value="photorealistic">실사 (Photorealistic)</option>
-                                <option value="cinematic">시네마틱 (Cinematic)</option>
-                                <option value="illustration">일러스트 (Illustration)</option>
-                                <option value="3d-render">3D 렌더링 (3D Render)</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
+                <p style="font-size: 0.85rem; color: var(--on-surface-variant); background: var(--surface-container-low); padding: 1rem; border-radius: 1rem; text-align: center; margin-bottom: 2rem; border: 1px dashed var(--outline-variant);">
+                    <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 1.2rem;">info</span> 이미지 모델 및 스타일 설정은 <strong>API 설정</strong> 메뉴에서 통합 관리됩니다.
+                </p>
                 <!-- FAQ 생성 여부 버튼 삭제 완료 (백엔드에서 강제 3~10개 자동 생성) -->
                 <button id="aeo-gen-btn" class="btn-primary w-full p-6 text-xl" style="width: 100%;" onclick="generate('aeo')">지식인 검수용 답변 생성하기</button>
             </div>
@@ -351,29 +312,9 @@
                     </div>
                 </div>
 
-                <div style="background: var(--surface-container-low); padding: 1.5rem; border-radius: 1rem; margin-bottom: 2rem; border: 1.5px solid var(--outline-variant);">
-                    <h3 style="font-size: 1rem; font-weight: 800; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                        <span class="material-symbols-outlined" style="color: var(--primary);">image</span> 이미지 생성 AI 설정 (일괄 적용)
-                    </h3>
-                    <div class="grid grid-cols-2 gap-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-                        <div class="input-group" style="margin-bottom: 0;">
-                            <label>AI 모델</label>
-                            <select id="auto-img-model">
-                                <option value="@cf/bytedance/stable-diffusion-xl-lightning">SDXL Lightning (빠름)</option>
-                                <option value="@cf/stabilityai/stable-diffusion-xl-base-1.0">SDXL Base (정밀)</option>
-                            </select>
-                        </div>
-                        <div class="input-group" style="margin-bottom: 0;">
-                            <label>스타일 프리셋</label>
-                            <select id="auto-img-style">
-                                <option value="photorealistic">실사 (Photorealistic)</option>
-                                <option value="cinematic">시네마틱 (Cinematic)</option>
-                                <option value="illustration">일러스트 (Illustration)</option>
-                                <option value="3d-render">3D 렌더링 (3D Render)</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
+                <p style="font-size: 0.85rem; color: var(--on-surface-variant); background: var(--surface-container-low); padding: 1rem; border-radius: 1rem; text-align: center; margin-bottom: 2rem; border: 1px dashed var(--outline-variant);">
+                    <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 1.2rem;">info</span> 이미지 모델 및 스타일 설정은 <strong>API 설정</strong> 메뉴에서 통합 관리됩니다.
+                </p>
 
                 <button id="auto-gen-btn" class="btn-primary w-full p-6 text-xl" style="width: 100%;" onclick="runAutoPublish()">대량 자동 예약 발행 시작하기</button>
             </div>
@@ -382,6 +323,8 @@
                 <h3 class="font-serif text-2xl mb-4">자동 발행 결과</h3>
                 <div id="auto-results-list" class="flex flex-col gap-4"></div>
             </div>
+        </div>
+
         </div>
 
         <!-- Manage Page -->
@@ -406,6 +349,76 @@
                 </table>
             </div>
         </div>
+
+        <!-- API Settings Page -->
+        <div id="page-settings" class="page-content">
+            <header class="mb-12">
+                <h1 class="font-serif text-4xl mb-4">공통 API 및 모델 설정 <span class="ai-badge">System Config</span></h1>
+                <p>텍스트 생성 엔진 및 이미지 생성 AI 모델을 전역적으로 관리합니다. 여기서 설정된 값이 모든 글쓰기에 반영됩니다.</p>
+            </header>
+
+            <div class="card">
+                <div class="mb-12">
+                    <h3 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem; color: var(--primary);">
+                        <span class="material-symbols-outlined">description</span> 텍스트 생성 (LLM) 엔진 설정
+                    </h3>
+                    <div class="input-group">
+                        <label>메인 글쓰기 API 엔진</label>
+                        <select id="setting-text-api">
+                            <option value="deepseek">DeepSeek (최적화 성능)</option>
+                            <option value="gemini">Google Gemini (추후 지원)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-12">
+                    <h3 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem; color: var(--primary);">
+                        <span class="material-symbols-outlined">image</span> 이미지 생성 (Image AI) 모델 설정
+                    </h3>
+                    
+                    <div class="grid grid-cols-2 gap-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                        <div class="input-group">
+                            <label>SEO 저널 이미지 모델</label>
+                            <select id="setting-img-seo">
+                                <option value="@cf/bytedance/stable-diffusion-xl-lightning">SDXL Lightning (빠름)</option>
+                                <option value="@cf/stabilityai/stable-diffusion-xl-base-1.0">SDXL Base (정밀)</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>AEO 지식인 이미지 모델</label>
+                            <select id="setting-img-aeo">
+                                <option value="@cf/bytedance/stable-diffusion-xl-lightning">SDXL Lightning (빠름)</option>
+                                <option value="@cf/stabilityai/stable-diffusion-xl-base-1.0">SDXL Base (정밀)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                        <div class="input-group">
+                            <label>자동 발행 이미지 모델</label>
+                            <select id="setting-img-auto">
+                                <option value="@cf/bytedance/stable-diffusion-xl-lightning">SDXL Lightning (빠름)</option>
+                                <option value="@cf/stabilityai/stable-diffusion-xl-base-1.0">SDXL Base (정밀)</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>기본 이미지 스타일</label>
+                            <select id="setting-img-style">
+                                <option value="photorealistic">실사 (Photorealistic)</option>
+                                <option value="cinematic">시네마틱 (Cinematic)</option>
+                                <option value="illustration">일러스트 (Illustration)</option>
+                                <option value="3d-render">3D 렌더링 (3D Render)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 3rem;">
+                    <button onclick="saveSettings()" class="btn-primary w-full p-6 text-xl" style="width: 100%;">시스템 설정 저장하기</button>
+                    <p id="settings-status" style="margin-top: 1rem; text-align: center; font-weight: bold; color: var(--primary); display: none;">설정이 저장되었습니다.</p>
+                </div>
+            </div>
+        </div>
     </main>
 
     <!-- Modal for Editing Raw HTML -->
@@ -423,6 +436,47 @@
     <script>
         let draftDataGlobal = null;
         let editTargetUrl = null;
+
+        async function loadSettings() {
+            try {
+                const res = await fetch('/admin/api/settings');
+                const settings = await res.json();
+                if (settings) {
+                    if(document.getElementById('setting-text-api')) document.getElementById('setting-text-api').value = settings.textApi || 'deepseek';
+                    if(document.getElementById('setting-img-seo')) document.getElementById('setting-img-seo').value = settings.imgSeo || '@cf/bytedance/stable-diffusion-xl-lightning';
+                    if(document.getElementById('setting-img-aeo')) document.getElementById('setting-img-aeo').value = settings.imgAeo || '@cf/bytedance/stable-diffusion-xl-lightning';
+                    if(document.getElementById('setting-img-auto')) document.getElementById('setting-img-auto').value = settings.imgAuto || '@cf/bytedance/stable-diffusion-xl-lightning';
+                    if(document.getElementById('setting-img-style')) document.getElementById('setting-img-style').value = settings.imgStyle || 'photorealistic';
+                }
+            } catch (e) { console.error("Settings load failed", e); }
+        }
+
+        async function saveSettings() {
+            const settings = {
+                textApi: document.getElementById('setting-text-api').value,
+                imgSeo: document.getElementById('setting-img-seo').value,
+                imgAeo: document.getElementById('setting-img-aeo').value,
+                imgAuto: document.getElementById('setting-img-auto').value,
+                imgStyle: document.getElementById('setting-img-style').value
+            };
+            const btn = document.querySelector('#page-settings .btn-primary');
+            btn.disabled = true;
+            btn.textContent = '저장 중...';
+            try {
+                const res = await fetch('/admin/api/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(settings)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    const status = document.getElementById('settings-status');
+                    status.style.display = 'block';
+                    setTimeout(() => status.style.display = 'none', 3000);
+                }
+            } catch (e) { alert('설정 저장 실패: ' + e.message); }
+            finally { btn.disabled = false; btn.textContent = '시스템 설정 저장하기'; }
+        }
 
         function switchPage(page, element = null) {
             document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
@@ -492,10 +546,6 @@
                 sourceName: type === 'seo' ? document.getElementById('seo-source-name').value : '',
                 sourceUrl: type === 'seo' ? document.getElementById('seo-source-url').value : '',
                 category: document.getElementById(type + '-category').value,
-                imageConfig: {
-                    model: document.getElementById(type + '-img-model').value,
-                    style: document.getElementById(type + '-img-style').value
-                },
                 draft: true // Just identifier
             };
 
@@ -706,11 +756,8 @@
                         category, 
                         keywords, 
                         intervalHours,
-                        publishDate: startDate,
-                        imageConfig: {
-                            model: document.getElementById('auto-img-model').value,
-                            style: document.getElementById('auto-img-style').value
-                        }
+                        publishDate: startDate
+                        // imageConfig is now handled by centralized settings on server
                     })
                 });
                 const data = await res.json();
@@ -740,7 +787,11 @@
         }
 
         // Init
-        loadPosts();
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadPosts();
+            loadSettings();
+        });
     </script>
 </body>
 </html>
