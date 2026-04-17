@@ -56,6 +56,15 @@ async function searchYoutube(q) {
   } catch (e) { return null; }
 }
 
+function classifyCategory(q) {
+  const text = q || "";
+  if (/수면|잠|불면|자세|왼쪽|옆으로|엎드려|엎드림/.test(text)) return "sleep";
+  if (/통증|환도|허리|골반|부종|저림|아픔|치료/.test(text)) return "pain";
+  if (/영양|음식|식단|비타민|당뇨|혈압|중독증|체중|운동|관리/.test(text)) return "health";
+  if (/태동|태교|심리|우울|스트레스|준비|지식|질문|방법|출산|육아/.test(text)) return "psychology";
+  return "others";
+}
+
 async function aiCall(prompt, env, system = "You are an elite Korean content architect.") {
   const settings = await safeGetJson("config/settings.json", env);
   const textEngine = settings.textApi || "deepseek";
@@ -322,7 +331,8 @@ export default {
 // --- Optimized Content Generation Engine ---
 async function generateContentHandler(request, env, type) {
   const payload = await request.json();
-  const { keyword, title, slug: rawSlug, subKeywords, sourceName, sourceUrl, category, isFinal = false, finalHtml = "", imageConfig } = payload;
+  const { keyword, title, slug: rawSlug, subKeywords, sourceName, sourceUrl, isFinal = false, finalHtml = "", imageConfig } = payload;
+  const finalCategory = payload.category || classifyCategory(keyword);
   const isSEO = type === "seo";
   
   // Default Image Configuration
@@ -393,7 +403,7 @@ async function generateContentHandler(request, env, type) {
 
     const listEntry = { 
         title: finalTitle, 
-        category, 
+        category: finalCategory, 
         date: payload.publishDate || new Date().toISOString().split('T')[0], 
         url: `/${filePath}`, 
         image: payload.image,
@@ -833,8 +843,8 @@ async function autoPublishHandler(request, env) {
 
     for (let i = 0; i < keywords.length; i++) {
       const keyword = keywords[i].trim();
-      if (!keyword) continue;
-      
+      const category = payload.category || classifyCategory(keyword);
+      const isSEO = payload.type === 'seo';
       const stepResult = { keyword, status: "processing" };
 
       try {
