@@ -267,10 +267,9 @@ async function generateContentHandler(request, env, type) {
   // Default Image Configuration
   const settings = await safeGetJson("config/settings.json");
   const defaultImgModel = isSEO ? (settings.imgSeo || "@cf/bytedance/stable-diffusion-xl-lightning") : (settings.imgAeo || "@cf/bytedance/stable-diffusion-xl-lightning");
-  const defaultImgStyle = settings.imgStyle || "photorealistic";
 
   const imgModel = (imageConfig && imageConfig.model) || defaultImgModel;
-  const imgStyle = (imageConfig && imageConfig.style) || defaultImgStyle;
+  const imgStyle = (imageConfig && imageConfig.style) || "photorealistic";
   
   const stylePrompts = {
     "photorealistic": "photorealistic photography, extremely high quality, realistic, 8k, detailed skin, soft lighting",
@@ -817,8 +816,8 @@ async function autoPublishHandler(request, env) {
   const isSEO = type === "seo";
   
   const settings = await safeGetJson("config/settings.json");
-  const imgModel = (imageConfig && imageConfig.model) || settings.imgAuto || "@cf/bytedance/stable-diffusion-xl-lightning";
-  const imgStyle = (imageConfig && imageConfig.style) || settings.imgStyle || "photorealistic";
+  const imgModel = (imageConfig && imageConfig.model) || (isSEO ? settings.imgSeo : settings.imgAeo) || "@cf/bytedance/stable-diffusion-xl-lightning";
+  const imgStyle = (imageConfig && imageConfig.style) || "photorealistic";
   
   const stylePrompts = {
     "photorealistic": "photorealistic photography, extremely high quality, realistic, 8k, detailed skin, soft lighting",

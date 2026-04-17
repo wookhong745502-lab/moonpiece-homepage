@@ -393,24 +393,9 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-                        <div class="input-group">
-                            <label>자동 발행 이미지 모델</label>
-                            <select id="setting-img-auto">
-                                <option value="@cf/bytedance/stable-diffusion-xl-lightning">SDXL Lightning (빠름)</option>
-                                <option value="@cf/stabilityai/stable-diffusion-xl-base-1.0">SDXL Base (정밀)</option>
-                            </select>
-                        </div>
-                        <div class="input-group">
-                            <label>기본 이미지 스타일</label>
-                            <select id="setting-img-style">
-                                <option value="photorealistic">실사 (Photorealistic)</option>
-                                <option value="cinematic">시네마틱 (Cinematic)</option>
-                                <option value="illustration">일러스트 (Illustration)</option>
-                                <option value="3d-render">3D 렌더링 (3D Render)</option>
-                            </select>
-                        </div>
-                    </div>
+                    <p style="font-size: 0.85rem; color: var(--on-surface-variant); margin-top: 1rem;">
+                        * 자동 발행 시에는 각 글의 유형(SEO/AEO)에 설정된 이미지 모델이 그대로 사용됩니다. 이미지 스타일은 고품질 실사(Photorealistic)로 고정 적용됩니다.
+                    </p>
                 </div>
 
                 <div style="margin-top: 3rem;">
@@ -445,8 +430,6 @@
                     if(document.getElementById('setting-text-api')) document.getElementById('setting-text-api').value = settings.textApi || 'deepseek';
                     if(document.getElementById('setting-img-seo')) document.getElementById('setting-img-seo').value = settings.imgSeo || '@cf/bytedance/stable-diffusion-xl-lightning';
                     if(document.getElementById('setting-img-aeo')) document.getElementById('setting-img-aeo').value = settings.imgAeo || '@cf/bytedance/stable-diffusion-xl-lightning';
-                    if(document.getElementById('setting-img-auto')) document.getElementById('setting-img-auto').value = settings.imgAuto || '@cf/bytedance/stable-diffusion-xl-lightning';
-                    if(document.getElementById('setting-img-style')) document.getElementById('setting-img-style').value = settings.imgStyle || 'photorealistic';
                 }
             } catch (e) { console.error("Settings load failed", e); }
         }
@@ -455,9 +438,7 @@
             const settings = {
                 textApi: document.getElementById('setting-text-api').value,
                 imgSeo: document.getElementById('setting-img-seo').value,
-                imgAeo: document.getElementById('setting-img-aeo').value,
-                imgAuto: document.getElementById('setting-img-auto').value,
-                imgStyle: document.getElementById('setting-img-style').value
+                imgAeo: document.getElementById('setting-img-aeo').value
             };
             const btn = document.querySelector('#page-settings .btn-primary');
             btn.disabled = true;
