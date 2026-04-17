@@ -45,11 +45,9 @@ function parseAIJson(raw) {
   }
 }
 
-async function searchYoutube(q, env) {
+async function searchYoutube(q) {
   const queries = [q + " 정보", "임산부 " + q];
-  let videoId = null;
-
-  // Step 1: Intelligent Scraper with Mobile Emulation
+  
   for (const query of queries) {
     try {
       const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
@@ -61,24 +59,12 @@ async function searchYoutube(q, env) {
         } 
       });
       const text = await res.text();
+      // Fast extraction
       const match = text.match(/"videoId":"([a-zA-Z0-9_-]{11})"/ ) || text.match(/\/watch\?v=([a-zA-Z0-9_-]{11})/);
-      if (match && match[1]) {
-        videoId = match[1];
-        break;
-      }
+      if (match && match[1]) return match[1];
     } catch (e) { continue; }
   }
-
-  // Step 2: AI Fallback (If scraper fails or is blocked)
-  if (!videoId || videoId.length !== 11) {
-    try {
-      const aiResponse = await aiCall(`You are a pregnancy expert. Find the most authoritative and helpful YouTube video ID (11 chars) in Korean for the topic: "${q}". Return ONLY the 11-char ID. If unsure, return "dQw4w9WgXcQ".`, env);
-      const cleanedId = aiResponse.trim().match(/[a-zA-Z0-9_-]{11}/);
-      if (cleanedId) videoId = cleanedId[0];
-    } catch (e) { videoId = "dQw4w9WgXcQ"; }
-  }
-
-  return videoId;
+  return null;
 }
 
 function classifyCategory(q) {
@@ -395,7 +381,7 @@ async function generateContentHandler(request, env, type) {
 
   if (isFinal) {
     const slug = await resolveUniqueSlug(rawSlug, isSEO ? 'journal' : 'knowledge');
-    const finalYoutubeId = payload.youtubeId || await searchYoutube(keyword, env);
+    const finalYoutubeId = payload.youtubeId || await searchYoutube(keyword);
     
     const html = await renderTemplate({ 
         title, 
@@ -480,7 +466,7 @@ async function generateContentHandler(request, env, type) {
       aiCall(bodyPrompt, env),
       aiCall(faqPrompt, env),
       aiCall(`Score this content idea (0-100) for SEO/AEO based on keyword "${keyword}". Return ONLY JSON: {"score": 95, "feedback": "Looks great."}`, env),
-      searchYoutube(keyword, env)
+      searchYoutube(keyword)
     ]);
 
     let html = htmlRaw.replace(/```html|```/g, "").trim();
@@ -988,7 +974,7 @@ async function autoPublishHandler(request, env) {
         ];
 
         const finalSlug = await resolveUniqueSlug(rawSlug, isSEO ? 'journal' : 'knowledge');
-        const youtubeId = await searchYoutube(keyword, env);
+        const youtubeId = await searchYoutube(keyword);
         const finalPageHtml = await renderTemplate({ title, image: heroImagePath, html, faqs, schema: schemaArray, youtubeId }, env, isSEO ? '임산부 저널' : '임산부 지식인');
         const filePath = `${isSEO ? 'journal' : 'knowledge'}/${finalSlug}.html`;
         await env.JOURNAL_BUCKET.put(filePath, finalPageHtml, { httpMetadata: { contentType: "text/html; charset=UTF-8" } });
