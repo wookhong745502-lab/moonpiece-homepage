@@ -223,13 +223,13 @@ footer {
 .post-content h2, .journal-content-rich h2, .article-content h2 {
     font-family: 'Noto Serif KR', serif;
     font-weight: 900;
-    font-size: 2.2rem;
+    font-size: 2.5rem; /* Increased for premium feel */
     color: var(--moon-600);
-    margin-top: 5rem;
-    margin-bottom: 2.5rem;
+    margin-top: 6rem;
+    margin-bottom: 3rem;
     position: relative;
     padding-left: 1.5rem;
-    border-left: 6px solid var(--moon-600);
+    border-left: 7px solid var(--moon-600);
     letter-spacing: -0.02em;
     line-height: 1.25;
 }
@@ -237,20 +237,20 @@ footer {
 .post-content h3, .journal-content-rich h3, .article-content h3 {
     font-family: 'Noto Serif KR', serif;
     font-weight: 800;
-    font-size: 1.75rem;
+    font-size: 1.85rem;
     color: #1e293b;
-    margin-top: 3.5rem;
-    margin-bottom: 1.5rem;
+    margin-top: 4rem;
+    margin-bottom: 1.75rem;
     line-height: 1.4;
 }
 
 .post-content p, .journal-content-rich p, .article-content p {
-    margin-bottom: 2.5rem; /* Increased for better paragraph distinction */
-    line-height: 2;
+    margin-bottom: 2.75rem;
+    line-height: 2.1; /* Even more breathing room */
 }
 
 .post-content section, .article-content section {
-    margin-bottom: 4rem; /* For AEO sections */
+    margin-bottom: 6rem; /* Substantial separation */
 }
 
 .post-content strong, .journal-content-rich strong, .article-content strong {
@@ -266,118 +266,75 @@ footer {
     bottom: 2px;
     left: 0;
     width: 100%;
-    height: 8px;
+    height: 10px;
     background: var(--moon-100);
     z-index: -1;
-    opacity: 0.7;
+    opacity: 0.6;
 }
 
 .post-content ul, .post-content ol, .journal-content-rich ul, .journal-content-rich ol, .article-content ul, .article-content ol {
-    margin-bottom: 2.5rem;
-    padding-left: 1.25rem;
+    margin-bottom: 3rem;
+    padding-left: 1.5rem;
 }
 
 .post-content li, .journal-content-rich li, .article-content li {
-    margin-bottom: 0.75rem;
+    margin-bottom: 1rem;
     position: relative;
     list-style: none;
-    line-height: 1.7;
+    line-height: 1.8;
 }
 
-.post-content ul li::before, .journal-content-rich ul li::before, .article-content ul li::before {
-    content: "•";
-    color: var(--moon-600);
-    font-weight: 900;
-    display: inline-block;
-    width: 1.25rem;
-    margin-left: -1.25rem;
-}
-
-.post-content img, .journal-content-rich img, .article-content img {
-    width: 100%;
-    height: auto;
-    border-radius: 2rem;
-    margin: 4rem 0;
-    box-shadow: 0 25px 50px -12px rgba(124, 58, 237, 0.15);
-    border: 1px solid rgba(124, 58, 237, 0.05);
-}
-
-/* AEO & Summary Box */
-.aeo-summary-box {
-    background: linear-gradient(135deg, var(--moon-50), white);
-    border-radius: 2rem;
-    padding: 2.5rem;
-    margin-bottom: 4rem;
-    border: 1px solid var(--moon-100);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.02);
-}
-
-.aeo-summary-box ul {
-    margin-bottom: 0;
-    padding-left: 0;
-}
-
-.aeo-summary-box li {
-    font-weight: 700;
-    color: var(--moon-900);
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 0.5rem;
-}
-
-.aeo-summary-box li::before {
-    content: "✨";
-    font-size: 1.2rem;
-    width: auto;
-    margin-left: 0;
+.article-content img {
+    border-radius: 2.5rem;
+    margin: 5rem 0;
 }
 
 /* FAQs */
 .faq-section {
-    margin-top: 6rem;
+    margin-top: 8rem;
     border-top: 1px solid var(--outline);
-    padding-top: 4rem;
+    padding-top: 6rem;
 }
 
 .faq-item {
     background: white;
-    border-radius: 1.5rem;
-    padding: 2rem;
-    margin-bottom: 1.25rem; /* Reduced to fix "too far" issue */
+    border-radius: 2.5rem; /* Matched with main card */
+    padding: 2.5rem;
+    margin-bottom: 1.5rem;
     border: 1px solid #f1f5f9;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
 }
 
 .faq-item:hover {
     border-color: var(--moon-200);
-    box-shadow: 0 10px 30px rgba(124, 58, 237, 0.05);
+    box-shadow: 0 20px 40px rgba(124, 58, 237, 0.08);
+    transform: translateY(-4px);
 }
 
 .faq-q {
-    font-weight: 900;
+    font-weight: 950;
     color: var(--moon-900);
-    font-size: 1.15rem;
+    font-size: 1.25rem;
     margin-bottom: 1.5rem;
     display: flex;
     align-items: flex-start;
-    gap: 0.75rem;
+    gap: 1rem;
 }
 
 .faq-q .q-label {
-    color: var(--moon-500);
+    color: var(--moon-600);
     font-weight: 900;
-    font-size: 1.25rem;
+    font-size: 1.5rem;
 }
 
 .faq-a {
     color: #475569;
-    line-height: 1.8;
-    padding: 1.75rem;
+    line-height: 1.9;
+    padding: 2.5rem;
     background: #f8fafc;
-    border-radius: 1rem;
-    font-size: 1rem;
+    border-radius: 1.5rem;
+    font-size: 1.1rem;
 }
 
 /* --- Navigation & detail UI --- */
