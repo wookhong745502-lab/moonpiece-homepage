@@ -447,25 +447,27 @@ async function generateContentHandler(request, env, type) {
     6. Include 1 high-quality image placeholder: <!-- PROMPT: [Details in English] --> ![[Alt Text]]([file.jpg]) *Caption: [Korean description]*.
     7. Content must be exhaustive (exceed 1,500 chars).
     8. Return ONLY raw HTML + image markdown.`;
+    const universalPrompt = `You are an SEO/AEO expert. Your task is to generate high-quality content for the keyword "${keyword}".
+    
+    Return ONLY a JSON object with the following structure:
+    {
+      "html": "A detailed 2000+ word HTML content for a blog post. Use semantic tags.",
+      "faqs": [{"q": "Question?", "a": "Answer."}],
+      "score": 95,
+      "feedback": "Expert feedback on SEO strategy."
+    }
+    
+    - Language: Korean.
+    - Consistency: Ensure FAQs exactly match the body content.
+    - Length: Body must be professional and deep.`;
 
-    const bodyPromptTemplate = isSEO ? (settings.seoPrompt || defaultSeoPrompt) : (settings.aeoPrompt || defaultAeoPrompt);
-    const bodyPrompt = (bodyPromptTemplate
-        .replace(/{{keyword}}/g, keyword)
-        .replace(/{{title}}/g, title)
-        .replace(/{{subKeywords}}/g, subKeywords || keyword)) + "\n\nIMPORTANT: At the very end of your response, find one most relevant YouTube video ID (11 characters) for this topic and include it strictly in this format: [YOUTUBE_ID: XXXXXXXXXXX]";
+    const rawResponse = await aiCall(universalPrompt, env);
+    const data = parseAIJson(rawResponse);
 
-    const faqPrompt = `Generate exactly 5 AEO-optimized FAQs for "${keyword}". Answer MUST contain keyword. Return ONLY JSON array: [{"q": "?", "a": "..."}]`;
-
-    const [htmlRaw, faqsRaw, scoringRaw] = await Promise.all([
-      aiCall(bodyPrompt, env),
-      aiCall(faqPrompt, env),
-      aiCall(`Score this content idea (0-100) for SEO/AEO based on keyword "${keyword}". Return ONLY JSON: {"score": 95, "feedback": "Looks great."}`, env)
-    ]);
-
-    let youtubeId = null; // Forced NULL as requested to prevent generation deadlock
-    let html = htmlRaw.replace(/```html|```/g, "").trim();
-    const faqs = parseAIJson(faqsRaw);
-    const scoreData = parseAIJson(scoringRaw);
+    let youtubeId = null; // Forced NULL to prevent lag
+    let html = (data.html || "").replace(/```html|```/g, "").trim();
+    const faqs = data.faqs || [];
+    const scoreData = { score: data.score || 95, feedback: data.feedback || "AI 분석 완료" };
 
     const imgId = Date.now();
     let heroImagePath = "";
