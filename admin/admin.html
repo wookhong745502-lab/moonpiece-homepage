@@ -213,7 +213,7 @@
             <div class="card">
                 <div class="input-group">
                     <label>메인 키워드 (입력 후 Enter 시 자동 완성)</label>
-                    <input type="text" id="aeo-kw" placeholder="예: 임산부가 엎드려 자도 되나요?" onkeydown="if(event.key==='Enter') autoFillAEO()">
+                    <input type="text" id="aeo-keyword" placeholder="예: 임산부가 엎드려 자도 되나요?" onkeydown="if(event.key==='Enter') autoFillAEO()">
                 </div>
                 <div class="input-group">
                     <label>사용자 질문 (질문형 자동 생성, 직접 수정 가능)</label>
@@ -539,7 +539,8 @@
         }
 
         async function suggest(type, context) {
-            const kw = document.getElementById(context + '-kw').value;
+            const kwElement = document.getElementById(context + '-keyword') || document.getElementById(context + '-kw');
+            const kw = kwElement ? kwElement.value : '';
             if(!kw) return alert('메인 키워드를 먼저 입력해주세요.');
             try {
                 const res = await fetch('/admin/api/suggest', {
