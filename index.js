@@ -853,19 +853,27 @@ async function autoPublishHandler(request, env) {
     const existingList = await safeGetJson(isSEO ? "journal/list.json" : "knowledge/list.json");
     const existingTitles = existingList.map(p => p.title).slice(0, 30).join(", ");
 
-    const keywordPrompt = isSEO
-      ? `임산부 관련 "${categoryName}" 카테고리에서 SEO 블로그 글을 쓸 수 있는 구체적인 한국어 키워드 ${count}개를 생성하세요. 기존 주제 피하기: [${existingTitles}]. Return ONLY a JSON array of strings. No explanation.`
-      : `임산부들이 검색할 법한 "${categoryName}" 관련 질문형 한국어 키워드 ${count}개를 생성하세요. 기존 주제 피하기: [${existingTitles}]. Return ONLY a JSON array of strings. No explanation.`;
+    let keywords = payload.keywords; // Manual keywords from admin
+    if (!keywords || !Array.isArray(keywords) || keywords.length === 0) {
+      const keywordPrompt = isSEO
+        ? `임산부 관련 "${categoryName}" 카테고리에서 SEO 블로그 글을 쓸 수 있는 구체적인 한국어 키워드 ${count}개를 생성하세요. 기존 주제 피하기: [${existingTitles}]. Return ONLY a JSON array of strings. No explanation.`
+        : `임산부들이 검색할 법한 "${categoryName}" 관련 질문형 한국어 키워드 ${count}개를 생성하세요. 기존 주제 피하기: [${existingTitles}]. Return ONLY a JSON array of strings. No explanation.`;
 
-    const keywordsRaw = await aiCall(keywordPrompt);
-    const keywords = parseAIJson(keywordsRaw);
-
-    if (!Array.isArray(keywords) || keywords.length === 0) {
-      return new Response(JSON.stringify({ success: false, error: "Failed to generate keywords" }), { status: 500, headers: { "Content-Type": "application/json" } });
+      const keywordsRaw = await aiCall(keywordPrompt);
+      keywords = parseAIJson(keywordsRaw);
     }
 
-    for (let i = 0; i < Math.min(keywords.length, count); i++) {
-      const keyword = keywords[i];
+    if (!Array.isArray(keywords) || keywords.length === 0) {
+      return new Response(JSON.stringify({ success: false, error: "Failed to resolve keywords" }), { status: 500, headers: { "Content-Type": "application/json" } });
+    }
+
+    const intervalHours = parseInt(payload.intervalHours) || 24;
+    const startPublishDate = payload.publishDate ? new Date(payload.publishDate) : new Date();
+
+    for (let i = 0; i < keywords.length; i++) {
+      const keyword = keywords[i].trim();
+      if (!keyword) continue;
+      
       const stepResult = { keyword, status: "processing" };
 
       try {
@@ -993,26 +1001,25 @@ async function autoPublishHandler(request, env) {
         let list = await safeGetJson(listKey);
         const summary = (html || "").replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
         
-        let targetDate = payload.publishDate || now.toISOString().split('T')[0];
-        if (payload.publishDate && i > 0) {
-            const d = new Date(payload.publishDate);
-            d.setDate(d.getDate() + i);
-            targetDate = d.toISOString().split('T')[0];
-        }
+        // Calculate dynamic publish date/time based on interval
+        const itemPublishDate = new Date(startPublishDate.getTime() + (i * intervalHours * 60 * 60 * 1000));
+        const targetDateStr = itemPublishDate.toISOString().split('T')[0]; // Format for list visibility
 
         list.unshift({ 
           title, 
           category, 
-          date: targetDate, 
+          date: targetDateStr, 
           url: `/${filePath}`, 
           image: heroImagePath, 
-          desc: summary.length > 80 ? summary.substring(0, 80) + "..." : summary 
+          desc: summary.length > 80 ? summary.substring(0, 80) + "..." : summary,
+          timestamp: itemPublishDate.getTime() // For precise future scheduling
         });
         await env.JOURNAL_BUCKET.put(listKey, JSON.stringify(list));
 
         stepResult.status = "success";
         stepResult.path = `/${filePath}`;
         stepResult.title = title;
+        stepResult.publishDate = targetDateStr;
       } catch (itemErr) {
         stepResult.status = "failed";
         stepResult.error = itemErr.message;

@@ -306,11 +306,17 @@
         <!-- Auto Publish Page -->
         <div id="page-auto" class="page-content">
             <header class="mb-12">
-                <h1 class="font-serif text-4xl mb-4">대량 자동 발행 <span class="ai-badge">Auto-Pilot Mode</span></h1>
-                <p>AI가 키워드 추출부터 본문 생성, 배포까지 전 과정을 자동으로 수행합니다.</p>
+                <h1 class="font-serif text-4xl mb-4">대량 자동 예약 발행 <span class="ai-badge">Advanced Scheduler</span></h1>
+                <p>관리자가 입력한 주제들을 바탕으로 AI가 자동으로 글을 쓰고 지정된 간격으로 예약 배포합니다.</p>
             </header>
 
             <div class="card">
+                <div class="input-group">
+                    <label>발행할 주제 목록 (한 줄에 하나씩 제목/키워드 입력)</label>
+                    <textarea id="auto-keywords" rows="10" placeholder="예:&#10;임산부 불면증 해결&#10;임신 초기 영양제 추천&#10;바디필로우 선택 기준&#10;..."></textarea>
+                    <p style="font-size: 0.8rem; color: var(--on-surface-variant); margin-top: 0.5rem;">입력한 순서대로 지정된 간격에 맞춰 발행됩니다. (입력 안하면 AI가 자동 생성)</p>
+                </div>
+
                 <div class="grid grid-cols-2 gap-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
                     <div class="input-group">
                         <label>발행 유형</label>
@@ -333,12 +339,15 @@
 
                 <div class="grid grid-cols-2 gap-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
                     <div class="input-group">
-                        <label>발행 개수</label>
-                        <input type="number" id="auto-count" value="1" min="1" max="10">
+                        <label>발행 시작일</label>
+                        <input type="date" id="auto-start-date">
                     </div>
                     <div class="input-group">
-                        <label>시작 발행일 (순차 예약 가능)</label>
-                        <input type="date" id="auto-start-date">
+                        <label>발행 간격 (시간 단위)</label>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="number" id="auto-interval" value="24" min="1">
+                            <span style="font-weight: bold; color: var(--on-surface-variant);">시간</span>
+                        </div>
                     </div>
                 </div>
 
@@ -366,7 +375,7 @@
                     </div>
                 </div>
 
-                <button id="auto-gen-btn" class="btn-primary w-full p-6 text-xl" style="width: 100%;" onclick="runAutoPublish()">대량 자동 발행 시작하기</button>
+                <button id="auto-gen-btn" class="btn-primary w-full p-6 text-xl" style="width: 100%;" onclick="runAutoPublish()">대량 자동 예약 발행 시작하기</button>
             </div>
 
             <div id="auto-results-zone" class="card" style="display: none;">
@@ -674,17 +683,19 @@
         async function runAutoPublish() {
             const type = document.getElementById('auto-type').value;
             const category = document.getElementById('auto-category').value;
-            const count = parseInt(document.getElementById('auto-count').value);
+            const kwRaw = document.getElementById('auto-keywords').value;
+            const keywords = kwRaw.split('\n').map(k => k.trim()).filter(k => k.length > 0);
+            const intervalHours = parseInt(document.getElementById('auto-interval').value) || 24;
             const startDate = document.getElementById('auto-start-date').value;
             
             const btn = document.getElementById('auto-gen-btn');
             btn.disabled = true;
-            btn.textContent = '대량 자동 발행 시스템 가동 중...';
+            btn.textContent = '대량 자동 예약 발행 엔진 가동 중...';
             
             const resultsZone = document.getElementById('auto-results-zone');
             const resultsList = document.getElementById('auto-results-list');
             resultsZone.style.display = 'block';
-            resultsList.innerHTML = '<div class="p-4 bg-slate-50 rounded-xl text-center">AI가 최적의 주제를 선정하고 있습니다...</div>';
+            resultsList.innerHTML = '<div class="p-4 bg-slate-50 rounded-xl text-center">AI가 주제별 심층 문서를 생성하고 스케줄을 계산 중입니다...</div>';
             
             try {
                 const res = await fetch('/admin/api/auto-publish', {
@@ -693,7 +704,8 @@
                     body: JSON.stringify({ 
                         type, 
                         category, 
-                        count, 
+                        keywords, 
+                        intervalHours,
                         publishDate: startDate,
                         imageConfig: {
                             model: document.getElementById('auto-img-model').value,
