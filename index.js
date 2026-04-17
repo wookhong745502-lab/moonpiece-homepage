@@ -45,6 +45,16 @@ function parseAIJson(raw) {
   }
 }
 
+async function searchYoutube(q) {
+  try {
+    const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(q + " 임산부 가이드")}`;
+    const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+    const text = await res.text();
+    const match = text.match(/"videoId":"(.*?)"/);
+    return match ? match[1] : null;
+  } catch (e) { return null; }
+}
+
 async function aiCall(prompt, env, system = "You are an elite Korean content architect.") {
   const settings = await safeGetJson("config/settings.json", env);
   const textEngine = settings.textApi || "deepseek";
@@ -354,7 +364,8 @@ async function generateContentHandler(request, env, type) {
         image: payload.image, 
         html: finalHtml, 
         faqs: payload.faqs, 
-        schema: payload.schema 
+        schema: payload.schema,
+        youtubeId: payload.youtubeId 
     }, env, isSEO ? '임산부 저널' : '임산부 지식인');
     
     const filePath = `${isSEO ? 'journal' : 'knowledge'}/${slug}.html`;
@@ -427,10 +438,11 @@ async function generateContentHandler(request, env, type) {
 
     const faqPrompt = `Generate exactly 5 AEO-optimized FAQs for "${keyword}". Answer MUST contain keyword. Return ONLY JSON array: [{"q": "?", "a": "..."}]`;
 
-    const [htmlRaw, faqsRaw, scoringRaw] = await Promise.all([
+    const [htmlRaw, faqsRaw, scoringRaw, youtubeId] = await Promise.all([
       aiCall(bodyPrompt, env),
       aiCall(faqPrompt, env),
-      aiCall(`Score this content idea (0-100) for SEO/AEO based on keyword "${keyword}". Return ONLY JSON: {"score": 95, "feedback": "Looks great."}`, env)
+      aiCall(`Score this content idea (0-100) for SEO/AEO based on keyword "${keyword}". Return ONLY JSON: {"score": 95, "feedback": "Looks great."}`, env),
+      searchYoutube(keyword)
     ]);
 
     let html = htmlRaw.replace(/```html|```/g, "").trim();
@@ -538,7 +550,7 @@ async function generateContentHandler(request, env, type) {
     const faqSchema = { "@context": "https://schema.org", "@type": "FAQPage", "mainEntity": faqs.map(f => ({ "@type": "Question", "name": f.q, "acceptedAnswer": { "@type": "Answer", "text": f.a } })) };
     const schemaArray = [faqSchema, { "@context": "https://schema.org", "@type": "Article", "headline": title, "image": heroImagePath, "author": { "@type": "Person", "name": "Moonpiece Editorial Board" }, "publisher": { "@type": "Organization", "name": "Moonpiece" }, "datePublished": new Date().toISOString() }];
 
-    const draftData = { title, slug: rawSlug, html, faqs, score: scoreData.score, feedback: scoreData.feedback, image: heroImagePath, schema: schemaArray };
+    const draftData = { title, slug: rawSlug, html, faqs, score: scoreData.score, feedback: scoreData.feedback, image: heroImagePath, schema: schemaArray, youtubeId };
     return new Response(JSON.stringify({ success: true, draft: draftData }));
   } catch (e) {
     return new Response(JSON.stringify({ success: false, error: e.message }), { status: 500 });
@@ -645,8 +657,25 @@ async function renderTemplate(data, env, categoryName) {
                 ${data.html}
             </div>
 
+            ${data.youtubeId ? `
+            <!-- Video Section -->
+            <section class="video-section mb-24" style="border-top: 2px solid #f1f5f9; padding-top: 6rem;">
+                <h2 class="faq-title">📢 관련 추천 영상</h2>
+                <div class="relative w-full aspect-video rounded-[2rem] overflow-hidden shadow-2xl border border-slate-100">
+                    <iframe 
+                        class="absolute top-0 left-0 w-full h-full"
+                        src="https://www.youtube.com/embed/${data.youtubeId}" 
+                        title="YouTube video player" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                        referrerpolicy="strict-origin-when-cross-origin" 
+                        allowfullscreen>
+                    </iframe>
+                </div>
+            </section>` : ''}
+
             <!-- FAQ Section Integrated into Card -->
-            <section class="faq-section">
+            <section class="faq-section" style="border-top: 2px solid #f1f5f9; padding-top: 6rem;">
                 <h2 class="faq-title">자주 묻는 질문 (FAQ)</h2>
                 <div class="faq-list">
                     ${(data.faqs || []).map(f => `
@@ -922,7 +951,8 @@ async function autoPublishHandler(request, env) {
         ];
 
         const finalSlug = await resolveUniqueSlug(rawSlug, isSEO ? 'journal' : 'knowledge');
-        const finalPageHtml = await renderTemplate({ title, image: heroImagePath, html, faqs, schema: schemaArray }, env, isSEO ? '임산부 저널' : '임산부 지식인');
+        const youtubeId = await searchYoutube(keyword);
+        const finalPageHtml = await renderTemplate({ title, image: heroImagePath, html, faqs, schema: schemaArray, youtubeId }, env, isSEO ? '임산부 저널' : '임산부 지식인');
         const filePath = `${isSEO ? 'journal' : 'knowledge'}/${finalSlug}.html`;
         await env.JOURNAL_BUCKET.put(filePath, finalPageHtml, { httpMetadata: { contentType: "text/html; charset=UTF-8" } });
 

@@ -632,6 +632,16 @@
                         document.getElementById('seo-score').textContent = data.draft.score || 95;
                         document.getElementById('seo-feedback').innerHTML = data.draft.feedback || '훌륭한 심층 문서를 생성했습니다.';
                     }
+
+                    // Set YouTube ID
+                    const ytInput = document.getElementById(type + '-youtube-id');
+                    const ytLink = document.getElementById(type + '-yt-link');
+                    if (ytInput) {
+                        ytInput.value = data.draft.youtubeId || '';
+                        ytLink.href = data.draft.youtubeId ? `https://youtube.com/watch?v=${data.draft.youtubeId}` : '#';
+                        ytLink.textContent = data.draft.youtubeId ? '영상 확인하기' : '영상을 찾지 못했습니다';
+                    }
+
                     setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 200);
                 } else {
                     alert('생성 실패: ' + data.error);
@@ -669,7 +679,8 @@
                 isFinal: true,
                 category: document.getElementById(type + '-category').value,
                 publishDate: document.getElementById(type + '-publish-date').value || null,
-                schema: finalSchema
+                schema: finalSchema,
+                youtubeId: document.getElementById(type + '-youtube-id').value
             };
             
             try {
