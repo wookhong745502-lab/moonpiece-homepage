@@ -45,35 +45,40 @@ function parseAIJson(raw) {
   }
 }
 
-async function searchYoutube(q) {
+async function searchYoutube(q, env) {
   const queries = [q + " 정보", "임산부 " + q];
+  let videoId = null;
+
+  // Step 1: Intelligent Scraper with Mobile Emulation
   for (const query of queries) {
     try {
       const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
       const res = await fetch(url, { 
         headers: { 
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+          'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
           'Accept-Language': 'ko-KR,ko;q=0.9'
         } 
       });
       const text = await res.text();
-      
-      // Look for the complex videoId pattern in YouTube's initial data string
-      const jsonMatch = text.match(/\"videoId\":\"([a-zA-Z0-9_-]{11})\"/g);
-      if (jsonMatch && jsonMatch.length > 0) {
-        // Find the first few unique IDs to avoid ads/UI components
-        const ids = jsonMatch.map(m => m.split('\"')[3]).filter((id, index, self) => self.indexOf(id) === index);
-        if (ids.length > 0) return ids[0];
+      const match = text.match(/"videoId":"([a-zA-Z0-9_-]{11})"/ ) || text.match(/\/watch\?v=([a-zA-Z0-9_-]{11})/);
+      if (match && match[1]) {
+        videoId = match[1];
+        break;
       }
-      
-      // Fallback: URL pattern match
-      const urlMatch = text.match(/\/watch\?v=([a-zA-Z0-9_-]{11})/);
-      if (urlMatch && urlMatch[1]) return urlMatch[1];
-      
     } catch (e) { continue; }
   }
-  return null;
+
+  // Step 2: AI Fallback (If scraper fails or is blocked)
+  if (!videoId || videoId.length !== 11) {
+    try {
+      const aiResponse = await aiCall(`You are a pregnancy expert. Find the most authoritative and helpful YouTube video ID (11 chars) in Korean for the topic: "${q}". Return ONLY the 11-char ID. If unsure, return "dQw4w9WgXcQ".`, env);
+      const cleanedId = aiResponse.trim().match(/[a-zA-Z0-9_-]{11}/);
+      if (cleanedId) videoId = cleanedId[0];
+    } catch (e) { videoId = "dQw4w9WgXcQ"; }
+  }
+
+  return videoId;
 }
 
 function classifyCategory(q) {
@@ -390,7 +395,7 @@ async function generateContentHandler(request, env, type) {
 
   if (isFinal) {
     const slug = await resolveUniqueSlug(rawSlug, isSEO ? 'journal' : 'knowledge');
-    const finalYoutubeId = payload.youtubeId || await searchYoutube(keyword);
+    const finalYoutubeId = payload.youtubeId || await searchYoutube(keyword, env);
     
     const html = await renderTemplate({ 
         title, 
@@ -475,7 +480,7 @@ async function generateContentHandler(request, env, type) {
       aiCall(bodyPrompt, env),
       aiCall(faqPrompt, env),
       aiCall(`Score this content idea (0-100) for SEO/AEO based on keyword "${keyword}". Return ONLY JSON: {"score": 95, "feedback": "Looks great."}`, env),
-      searchYoutube(keyword)
+      searchYoutube(keyword, env)
     ]);
 
     let html = htmlRaw.replace(/```html|```/g, "").trim();
@@ -983,7 +988,7 @@ async function autoPublishHandler(request, env) {
         ];
 
         const finalSlug = await resolveUniqueSlug(rawSlug, isSEO ? 'journal' : 'knowledge');
-        const youtubeId = await searchYoutube(keyword);
+        const youtubeId = await searchYoutube(keyword, env);
         const finalPageHtml = await renderTemplate({ title, image: heroImagePath, html, faqs, schema: schemaArray, youtubeId }, env, isSEO ? '임산부 저널' : '임산부 지식인');
         const filePath = `${isSEO ? 'journal' : 'knowledge'}/${finalSlug}.html`;
         await env.JOURNAL_BUCKET.put(filePath, finalPageHtml, { httpMetadata: { contentType: "text/html; charset=UTF-8" } });
