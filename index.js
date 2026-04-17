@@ -394,8 +394,30 @@ async function generateContentHandler(request, env, type) {
   }
 
   try {
-    const defaultSeoPrompt = `Write a highly professional SEO blog post about "{{keyword}}". Title: "{{title}}". Sub-keywords: {{subKeywords}}. ${sourceName ? `Cite source: [${sourceName}](${sourceUrl})` : ''} MUST exceed 2,000 Korean chars. Min 5 sections. USE {{IMG_1}}, {{IMG_2}}, {{IMG_3}} placeholders. Use <article class="post-content">, <h2>, <h3>, <p>, <ul>, <strong> tags. Return ONLY raw HTML.`;
-    const defaultAeoPrompt = `Write an elite AEO answer about "{{keyword}}". Title: "{{title}}". Use semantic HTML: <h1>, <div class="aeo-summary-box"><ul><li></li></ul></div>, <section><h2></h2><p></p></section>, <section><h2>Step-by-step guide</h2><ol><li></li></ol></section>. Place 1 image: <!-- PROMPT: [English] --> ![[Alt Text]]([file.jpg]) *Caption: [desc]*. MUST exceed 1,500 chars. Return ONLY raw HTML + image markdown.`;
+    const defaultSeoPrompt = `Write a premium, high-authority SEO blog post about "{{keyword}}". 
+    Title: "{{title}}". Sub-keywords: {{subKeywords}}. ${sourceName ? `Cite source: [${sourceName}](${sourceUrl})` : ''}
+    
+    GUIDELINES:
+    1. MUST exceed 2,500 Korean characters for deep topical authority.
+    2. Structure with clear <h2> and <h3> tags for visual hierarchy.
+    3. Ensure each paragraph (<p>) is substantive and separated clearly.
+    4. Provide expert medical insights in a professional yet warm tone.
+    5. USE {{IMG_1}}, {{IMG_2}}, {{IMG_3}} naturally as section breaks.
+    6. Wrap everything in <article class="post-content">.
+    7. Return ONLY clean, valid HTML body.`;
+    
+    const defaultAeoPrompt = `Write an elite-level AEO (Answer Engine Optimized) expert answer about "{{keyword}}". 
+    Title: "{{title}}". 
+    
+    STRUCTURE REQUIREMENTS:
+    1. Start with <h1>{{title}}</h1>.
+    2. <div class="aeo-summary-box">: Core summary bullets for featured snippets.
+    3. Use multiple <section> blocks with descriptive <h2> headings.
+    4. Each section must contain 2-3 detailed paragraphs (<p>) for better distinction.
+    5. Use <section><h2>Step-by-step Guide</h2><ol><li>...</li></ol></section> for procedural queries.
+    6. Include 1 high-quality image placeholder: <!-- PROMPT: [Details in English] --> ![[Alt Text]]([file.jpg]) *Caption: [Korean description]*.
+    7. Content must be exhaustive (exceed 1,500 chars).
+    8. Return ONLY raw HTML + image markdown.`;
 
     const bodyPromptTemplate = isSEO ? (settings.seoPrompt || defaultSeoPrompt) : (settings.aeoPrompt || defaultAeoPrompt);
     const bodyPrompt = bodyPromptTemplate
@@ -608,15 +630,16 @@ async function renderTemplate(data, env, categoryName) {
             ${data.html}
         </div>
         
-        <section class="mt-24">
+        <section class="faq-section">
             <h3 class="font-serif mb-12 text-3xl">자주 묻는 질문 (FAQ)</h3>
-            <div class="flex flex-col gap-12">
+            <div class="faq-list">
                 ${(data.faqs || []).map(f => `
                 <div class="faq-item">
-                    <h3 class="text-xl font-bold mb-4 flex gap-3 text-moon-900">
-                        <span class="text-moon-200">Q.</span> ${f.q}
-                    </h3>
-                    <div class="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm text-slate-600 leading-relaxed">
+                    <div class="faq-q">
+                        <span class="q-label">Q.</span>
+                        <span>${f.q}</span>
+                    </div>
+                    <div class="faq-a">
                         <p>${f.a}</p>
                     </div>
                 </div>`).join("")}
