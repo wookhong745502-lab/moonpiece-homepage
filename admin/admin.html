@@ -194,7 +194,11 @@
                     </div>
                 </div>
                 <h3 class="font-serif text-2xl mb-4">본문 검수 및 수정 (Draft)</h3>
-                <p style="color:var(--on-surface-variant); margin-bottom: 1rem;">본문을 자유롭게 수정하세요. 하단 배포 버튼을 누르면 이 내용으로 실서버에 적용됩니다.</p>
+                <p style="color:var(--on-surface-variant); margin-bottom: 2rem;">본문을 자유롭게 수정하세요. 하단 배포 버튼을 누르면 이 내용으로 실서버에 적용됩니다.</p>
+                
+                <!-- YouTube Preview for Admin -->
+                <div id="seo-yt-preview" class="mb-12"></div>
+
                 <div id="draft-editor" contenteditable="true"></div>
                 <button id="publish-seo-btn" class="btn-primary w-full p-6" style="width: 100%; background: var(--secondary); color: white;" onclick="publish('seo')">전문 저널 실서버에 배포 완료하기</button>
             </div>
@@ -239,6 +243,10 @@
             <div id="aeo-draft-zone" style="display: none;">
                 <h3 class="font-serif text-2xl mb-4">답변 검수 및 수정 (AEO 시맨틱 포맷)</h3>
                 <p style="color:var(--on-surface-variant); margin-bottom: 1rem;">본문을 직접 수정하고 최종 배포를 진행하세요.</p>
+                
+                <!-- YouTube Preview for Admin -->
+                <div id="aeo-yt-preview" class="mb-12"></div>
+
                 <div id="aeo-editor" contenteditable="true" style="border: 1px solid var(--outline-variant); padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 2rem; background: white;"></div>
                 
                 <h4 class="font-serif text-xl mb-2">JSON-LD 스키마 검수 및 수정 (Snippet Editor)</h4>
@@ -618,13 +626,30 @@
                         document.getElementById('seo-feedback').innerHTML = data.draft.feedback || '훌륭한 심층 문서를 생성했습니다.';
                     }
 
-                    // Set YouTube ID
+                    // Update YouTube ID in main form & Preview
                     const ytInput = document.getElementById(type + '-youtube-id');
                     const ytLink = document.getElementById(type + '-yt-link');
+                    const ytPreview = document.getElementById(type + '-yt-preview');
+                    
                     if (ytInput) {
                         ytInput.value = data.draft.youtubeId || '';
                         ytLink.href = data.draft.youtubeId ? `https://youtube.com/watch?v=${data.draft.youtubeId}` : '#';
                         ytLink.textContent = data.draft.youtubeId ? '영상 확인하기' : '영상을 찾지 못했습니다';
+                    }
+
+                    if (ytPreview) {
+                        if (data.draft.youtubeId) {
+                            ytPreview.innerHTML = `
+                                <div class="video-section" style="margin-top: 0; padding-top: 0; border-top: none;">
+                                    <h4 class="font-serif text-lg mb-4">🎬 AI 추천 영상 미리보기</h4>
+                                    <div class="video-container">
+                                        <iframe src="https://www.youtube.com/embed/${data.draft.youtubeId}" frameborder="0" allowfullscreen></iframe>
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            ytPreview.innerHTML = '<p style="color:var(--on-surface-variant); font-size: 0.9rem;">관련 영상을 자동으로 찾지 못했습니다. 필요시 수동으로 ID를 입력해 주세요.</p>';
+                        }
                     }
 
                     setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }), 200);
