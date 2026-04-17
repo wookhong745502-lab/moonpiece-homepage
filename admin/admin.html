@@ -365,7 +365,9 @@
                     <div class="input-group">
                         <label>메인 글쓰기 API 엔진</label>
                         <select id="setting-text-api">
-                            <option value="deepseek">DeepSeek (최적화 성능)</option>
+                            <option value="deepseek">DeepSeek (현재 최적성능)</option>
+                            <option value="@cf/qwen/qwen3-30b-a3b-fp8">Qwen3 30B (Cloudflare 전용)</option>
+                            <option value="@cf/meta/llama-3.3-70b-instruct-fp8-fast">Meta Llama 3.3 70B (Fast)</option>
                             <option value="gemini">Google Gemini (추후 지원)</option>
                         </select>
                     </div>
@@ -382,6 +384,8 @@
                             <select id="setting-img-seo">
                                 <option value="@cf/bytedance/stable-diffusion-xl-lightning">SDXL Lightning (빠름)</option>
                                 <option value="@cf/stabilityai/stable-diffusion-xl-base-1.0">SDXL Base (정밀)</option>
+                                <option value="@cf/black-forest-labs/flux-2-dev">Flux.2 Dev (초고화질)</option>
+                                <option value="@cf/leonardo/phoenix-1.0">Leonardo Phoenix 1.0 (Artistic)</option>
                             </select>
                         </div>
                         <div class="input-group">
@@ -389,6 +393,8 @@
                             <select id="setting-img-aeo">
                                 <option value="@cf/bytedance/stable-diffusion-xl-lightning">SDXL Lightning (빠름)</option>
                                 <option value="@cf/stabilityai/stable-diffusion-xl-base-1.0">SDXL Base (정밀)</option>
+                                <option value="@cf/black-forest-labs/flux-2-dev">Flux.2 Dev (초고화질)</option>
+                                <option value="@cf/leonardo/phoenix-1.0">Leonardo Phoenix 1.0 (Artistic)</option>
                             </select>
                         </div>
                     </div>

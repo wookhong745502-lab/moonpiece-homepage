@@ -78,17 +78,26 @@ export default {
       const settings = await safeGetJson("config/settings.json");
       const textEngine = settings.textApi || "deepseek";
 
-      const res = await fetch("https://api.deepseek.com/chat/completions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${env.DEEPSEEK_API_KEY}` },
-        body: JSON.stringify({
-          model: "deepseek-chat",
+      let result = "";
+      if (textEngine.startsWith("@cf/")) {
+        const response = await env.AI.run(textEngine, {
           messages: [{ role: "user", content: prompt }],
-          temperature: 0.9 // Higher temp for variability on regenerations
-        })
-      });
-      const data = await res.json();
-      let result = data.choices[0].message.content.trim();
+          temperature: 0.9
+        });
+        result = (response.response || response.choices?.[0]?.message?.content || "").trim();
+      } else {
+        const res = await fetch("https://api.deepseek.com/chat/completions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${env.DEEPSEEK_API_KEY}` },
+          body: JSON.stringify({
+            model: "deepseek-chat",
+            messages: [{ role: "user", content: prompt }],
+            temperature: 0.9
+          })
+        });
+        const data = await res.json();
+        result = data.choices[0].message.content.trim();
+      }
       
       if (type === "source") {
         result = result.replace(/```json|```/gi, "").trim();
@@ -280,10 +289,19 @@ async function generateContentHandler(request, env, type) {
   const selectedStyle = stylePrompts[imgStyle] || stylePrompts["photorealistic"];
 
   async function ai(prompt, system = "You are an elite Korean content architect.") {
-    const textEngine = settings.textApi || "deepseek"; // Ready for future expansion
-    const apiUrl = textEngine === "gemini" ? "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent" : "https://api.deepseek.com/chat/completions";
+    const textEngine = settings.textApi || "deepseek";
     
-    // For now, let's keep it to DeepSeek as and extra integration for Gemini is needed for auth
+    if (textEngine.startsWith("@cf/")) {
+      const response = await env.AI.run(textEngine, {
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: prompt }
+        ]
+      });
+      return response.response || response.choices?.[0]?.message?.content || "";
+    }
+    
+    // Default/Fallback: DeepSeek Engine
     const res = await fetch("https://api.deepseek.com/chat/completions", {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": `Bearer ${env.DEEPSEEK_API_KEY}` },
@@ -832,6 +850,19 @@ async function autoPublishHandler(request, env) {
   const results = [];
 
   async function aiCall(prompt, system = "You are a professional content architect.", temperature = 0.9) {
+    const textEngine = settings.textApi || "deepseek";
+    
+    if (textEngine.startsWith("@cf/")) {
+      const response = await env.AI.run(textEngine, {
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: prompt }
+        ],
+        temperature
+      });
+      return response.response || response.choices?.[0]?.message?.content || "";
+    }
+
     const res = await fetch("https://api.deepseek.com/chat/completions", {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": `Bearer ${env.DEEPSEEK_API_KEY}` },
