@@ -481,11 +481,12 @@ async function generateContentHandler(request, env, type) {
 
     if (isSEO) {
       // 2. Generate multiple images in parallel for SEO
+      const imgBasePrompt = settings.imgSeoPrompt || `Professional high-quality photography, premium maternal vibes.`;
       const imgPrompts = [
-        `Professional ${imgStyle} shot for ${keyword}, hero wide angle, ${selectedStyle}, premium maternal vibes.`,
-        `Professional ${imgStyle} shot for ${keyword}, detailed close-up, ${selectedStyle}, premium maternal vibes.`,
-        `Professional ${imgStyle} shot for ${keyword}, contextual lifestyle, ${selectedStyle}, premium maternal vibes.`,
-        `Professional ${imgStyle} shot for ${keyword}, comforting warm atmosphere, ${selectedStyle}, premium maternal vibes.`
+        `${imgBasePrompt} for ${keyword}, hero wide angle, ${selectedStyle}.`,
+        `${imgBasePrompt} for ${keyword}, detailed close-up, ${selectedStyle}.`,
+        `${imgBasePrompt} for ${keyword}, contextual lifestyle, ${selectedStyle}.`,
+        `${imgBasePrompt} for ${keyword}, comforting warm atmosphere, ${selectedStyle}.`
       ];
       const negativePrompt = "deformed, ugly, disfigured, bad anatomy, text, watermark, low resolution, blurry faces, mutated, extra limbs, impossible belly, weird faces";
       
@@ -533,22 +534,23 @@ async function generateContentHandler(request, env, type) {
       }
     } else {
       // Single AEO image
+      const imgBasePrompt = settings.imgAeoPrompt || `High-quality AEO infographic or clear process diagram.`;
       let imageResponse;
-      let aiPrompt = `High-quality AEO ${imgStyle} infographic or clear process diagram for ${keyword}. ${selectedStyle}.`;
+      let aiPrompt = `${imgBasePrompt} for ${keyword}. ${selectedStyle}.`;
       let altText = `${title} 관련 전문 서술 텍스트`;
       let captionText = "";
       
       const imageMatch = html.match(/<!--\s*PROMPT:\s*(.*?)\s*-->[\s\S]*?!\[\[?(.*?)\]\]?\((.*?)\)[\s\S]*?\*(?:캡션:\s*)?(.*?)\*/i);
       
       if (imageMatch) {
-          aiPrompt = imageMatch[1].trim();
+          aiPrompt = `${imgBasePrompt} - ${imageMatch[1].trim()}`;
           altText = imageMatch[2].trim();
           captionText = imageMatch[4].trim();
       }
 
       try {
         imageResponse = await env.AI.run(imgModel, {
-          prompt: `Professional high-quality ${imgStyle}, high quality infographic or clear process diagram. ${aiPrompt}. ${selectedStyle}, no text, no gibberish text.`,
+          prompt: `Professional high-quality ${imgStyle}, ${aiPrompt}. ${selectedStyle}, no text, no gibberish text.`,
           negative_prompt: "deformed, ugly, disfigured, bad anatomy, english text, watermark, low resolution, blurry faces, mutated, extra limbs"
         });
       } catch (e) {
@@ -996,12 +998,13 @@ async function autoPublishHandler(request, env) {
 
         if (isSEO) {
           let imageResponses;
+          const imgBase = settings.imgSeoPrompt || `Professional high-quality photography, premium maternal vibes.`;
           try {
             imageResponses = await Promise.all([
-              env.AI.run(imgModel, { prompt: `Professional ${imgStyle} shot for ${keyword}, hero wide angle, ${selectedStyle}`, negative_prompt: negPrompt }),
-              env.AI.run(imgModel, { prompt: `Professional ${imgStyle} shot for ${keyword}, detail, ${selectedStyle}`, negative_prompt: negPrompt }),
-              env.AI.run(imgModel, { prompt: `Professional ${imgStyle} shot for ${keyword}, lifestyle, ${selectedStyle}`, negative_prompt: negPrompt }),
-              env.AI.run(imgModel, { prompt: `Professional ${imgStyle} shot for ${keyword}, atmosphere, ${selectedStyle}`, negative_prompt: negPrompt })
+              env.AI.run(imgModel, { prompt: `${imgBase} for ${keyword}, hero wide angle, ${selectedStyle}`, negative_prompt: negPrompt }),
+              env.AI.run(imgModel, { prompt: `${imgBase} for ${keyword}, detail, ${selectedStyle}`, negative_prompt: negPrompt }),
+              env.AI.run(imgModel, { prompt: `${imgBase} for ${keyword}, lifestyle, ${selectedStyle}`, negative_prompt: negPrompt }),
+              env.AI.run(imgModel, { prompt: `${imgBase} for ${keyword}, atmosphere, ${selectedStyle}`, negative_prompt: negPrompt })
             ]);
           } catch (e) { imageResponses = Array(4).fill(null); }
 

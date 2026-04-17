@@ -355,34 +355,52 @@
         <div id="page-rules" class="page-content">
             <div class="flex justify-between items-center mb-12">
                 <div>
-                    <h2 style="font-size: 2rem; font-weight: 900; color: var(--on-surface); margin-bottom: 0.5rem;">콘텐츠 가이드라인 설정</h2>
-                    <p style="color: var(--on-surface-variant);">SEO 및 AEO 글쓰기 AI에게 전달될 상세 지침을 직접 관리합니다.</p>
+                    <h2 style="font-size: 2rem; font-weight: 900; color: var(--on-surface); margin-bottom: 0.5rem;">콘텐츠 상세 규칙 관리</h2>
+                    <p style="color: var(--on-surface-variant);">AI가 글을 쓰고 이미지를 만들 때 따르는 '행동 지침'을 분야별로 설정합니다.</p>
                 </div>
                 <button class="btn-primary" onclick="saveSettings()">
                     <span class="material-symbols-outlined" style="font-size: 20px;">save</span>
-                    가이드라인 저장하기
+                    변경된 모든 규칙 저장하기
                 </button>
             </div>
 
-            <div class="card mb-8">
-                <h3 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 1.5rem; color: var(--primary);">
-                    <span class="material-symbols-outlined">description</span> SEO 저널 글쓰기 규칙
+            <!-- Writing Section -->
+            <div style="margin-bottom: 4rem;">
+                <h3 style="font-size: 1.5rem; font-weight: 900; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.75rem; color: var(--primary);">
+                    <span class="material-symbols-outlined" style="font-size: 32px;">edit_note</span> 
+                    1. AI 글쓰기 스타일 지침 (Writing Style)
                 </h3>
-                <div class="input-group">
-                    <label>SEO 시스템 프롬프트 (세부 지침)</label>
-                    <textarea id="setting-prompt-seo" style="width: 100%; height: 300px; padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--outline); font-family: monospace; font-size: 0.9rem; line-height: 1.6;"></textarea>
-                    <p style="font-size: 0.8rem; color: var(--on-surface-variant); margin-top: 0.5rem;">* {{keyword}}, {{title}}, {{subKeywords}} 등의 변수가 포함되도록 설계하세요.</p>
+                <div class="grid grid-cols-2 gap-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <div class="card">
+                        <label style="font-weight: 800; display: block; margin-bottom: 1rem; font-size: 1.1rem;">SEO 저널 글쓰기 스타일</label>
+                        <p style="font-size: 0.85rem; color: var(--on-surface-variant); margin-bottom: 1.5rem;">롱폼 블로그 글의 톤앤매너, 전문성 수준, 문체(예: ~해요, ~합니다) 등을 정의합니다.</p>
+                        <textarea id="setting-prompt-seo" style="width: 100%; height: 250px; padding: 1.25rem; border-radius: 1rem; border: 1px solid var(--outline); font-size: 0.95rem; line-height: 1.6;"></textarea>
+                    </div>
+                    <div class="card">
+                        <label style="font-weight: 800; display: block; margin-bottom: 1rem; font-size: 1.1rem;">AEO 지식인 답변 스타일</label>
+                        <p style="font-size: 0.85rem; color: var(--on-surface-variant); margin-bottom: 1.5rem;">질문에 대한 명쾌한 답변 방식, 전문가적인 권위, 답변의 핵심 요약 방식을 정의합니다.</p>
+                        <textarea id="setting-prompt-aeo" style="width: 100%; height: 250px; padding: 1.25rem; border-radius: 1rem; border: 1px solid var(--outline); font-size: 0.95rem; line-height: 1.6;"></textarea>
+                    </div>
                 </div>
             </div>
 
-            <div class="card">
-                <h3 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 1.5rem; color: var(--primary);">
-                    <span class="material-symbols-outlined">quiz</span> AEO 지식인 글쓰기 규칙
+            <!-- Image Section -->
+            <div>
+                <h3 style="font-size: 1.5rem; font-weight: 900; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.75rem; color: var(--secondary);">
+                    <span class="material-symbols-outlined" style="font-size: 32px;">image_search</span> 
+                    2. AI 이미지 생성 세부 지침 (Image Specs)
                 </h3>
-                <div class="input-group">
-                    <label>AEO 시스템 프롬프트 (세부 지침)</label>
-                    <textarea id="setting-prompt-aeo" style="width: 100%; height: 300px; padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--outline); font-family: monospace; font-size: 0.9rem; line-height: 1.6;"></textarea>
-                    <p style="font-size: 0.8rem; color: var(--on-surface-variant); margin-top: 0.5rem;">* AEO 최적화 로직 및 이미지 마크다운 형식을 포함해야 합니다.</p>
+                <div class="grid grid-cols-2 gap-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <div class="card">
+                        <label style="font-weight: 800; display: block; margin-bottom: 1rem; font-size: 1.1rem;">저널용 이미지 묘사 가이드</label>
+                        <p style="font-size: 0.85rem; color: var(--on-surface-variant); margin-bottom: 1.5rem;">이미지에 포함될 피사체의 특징, 배경 분위기, 색감 등에 대한 영문/한글 지침입니다.</p>
+                        <textarea id="setting-prompt-img-seo" style="width: 100%; height: 200px; padding: 1.25rem; border-radius: 1rem; border: 1px solid var(--outline); font-size: 0.95rem; line-height: 1.6;"></textarea>
+                    </div>
+                    <div class="card">
+                        <label style="font-weight: 800; display: block; margin-bottom: 1rem; font-size: 1.1rem;">지식인용 시각자료 가이드</label>
+                        <p style="font-size: 0.85rem; color: var(--on-surface-variant); margin-bottom: 1.5rem;">인포그래픽, 다이어그램 요소, 정보 전달을 위한 시각적 구성 방식을 정의합니다.</p>
+                        <textarea id="setting-prompt-img-aeo" style="width: 100%; height: 200px; padding: 1.25rem; border-radius: 1rem; border: 1px solid var(--outline); font-size: 0.95rem; line-height: 1.6;"></textarea>
+                    </div>
                 </div>
             </div>
         </div>
@@ -477,9 +495,14 @@
                     // Load Content Rules
                     const defaultSeoPrompt = `Write a highly professional, empathetic, and strictly formatted SEO blog post about "{{keyword}}". Title: "{{title}}". Target sub-keywords: {{subKeywords}}. \n\nCRITICAL REQUIREMENT: The output MUST exceed 2,000 Korean characters. Explain in profound detail with minimum 5 sections.\nUSE EXACTLY 3 PLACEHOLDERS for images naturally within the text. Use exactly this format: {{IMG_1}}, {{IMG_2}}, {{IMG_3}}. Place them between paragraphs where visually appropriate.\nUse exactly <article class="post-content">, <h2>, <h3>, <p>, <ul>, <strong> tags. Do NOT use markdown code blocks, return ONLY raw HTML for the body.`;
                     const defaultAeoPrompt = `Write an elite-level AEO-optimized expert answer about "{{keyword}}". Title/Question: "{{title}}". \n\nCRITICAL REQUIREMENT: You MUST strictly follow this exact semantic HTML 구조를 100% 준수하세요:\n1. <h1>{{title}} (질문형 질문)</h1>\n2. <div class="aeo-summary-box"><ul><li>핵심 요약 1</li><li>핵심 요약 2</li><li>핵심 요약 3</li></ul></div>\n3. <section><h2>전문가 의견 분석 (E-E-A-T)</h2><p>설명...</p> (첫 번째 문맥 최적 위치에 이미지 마크다운 템플릿 1개 삽입)</section>\n4. <section><h2>단계별 처방법 가이드</h2><ol><li><strong>1단계:</strong>...</li></ol></section>\nThe output MUST exceed 1,500 characters. Return ONLY raw HTML for the body, EXCEPT for the image markdown block.`;
+                    
+                    const defaultImgSeo = `Professional high-quality photography, premium maternal vibes, comforting warm atmosphere, soft natural lighting.`;
+                    const defaultImgAeo = `High-quality professional infographic or clear process diagram, minimal clean design, professional medical colors.`;
 
                     if(document.getElementById('setting-prompt-seo')) document.getElementById('setting-prompt-seo').value = settings.seoPrompt || defaultSeoPrompt;
                     if(document.getElementById('setting-prompt-aeo')) document.getElementById('setting-prompt-aeo').value = settings.aeoPrompt || defaultAeoPrompt;
+                    if(document.getElementById('setting-prompt-img-seo')) document.getElementById('setting-prompt-img-seo').value = settings.imgSeoPrompt || defaultImgSeo;
+                    if(document.getElementById('setting-prompt-img-aeo')) document.getElementById('setting-prompt-img-aeo').value = settings.imgAeoPrompt || defaultImgAeo;
                 }
             } catch (e) { console.error("Settings load failed", e); }
         }
@@ -490,9 +513,10 @@
                 imgSeo: document.getElementById('setting-img-seo').value,
                 imgAeo: document.getElementById('setting-img-aeo').value,
                 seoPrompt: document.getElementById('setting-prompt-seo').value,
-                aeoPrompt: document.getElementById('setting-prompt-aeo').value
+                aeoPrompt: document.getElementById('setting-prompt-aeo').value,
+                imgSeoPrompt: document.getElementById('setting-prompt-img-seo').value,
+                imgAeoPrompt: document.getElementById('setting-prompt-img-aeo').value
             };
-            const btn = document.querySelector('.btn-primary'); // Generic selector, might need more specific
             try {
                 const res = await fetch('/admin/api/settings', {
                     method: 'POST',
@@ -501,7 +525,7 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    alert('모든 설정이 성공적으로 저장되었습니다.');
+                    alert('모든 가이드라인과 설정이 안전하게 저장되었습니다.');
                     location.reload();
                 }
             } catch (e) { alert('설정 저장 실패: ' + e.message); }
