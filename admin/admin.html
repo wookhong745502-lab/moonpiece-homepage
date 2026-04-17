@@ -136,7 +136,7 @@
             <div class="card">
                 <div class="input-group">
                     <label>메인 키워드 (입력 후 Enter 시 자동 완성)</label>
-                    <input type="text" id="seo-kw" placeholder="예: 임산부 불면증 완화 방법" onkeydown="if(event.key==='Enter') autoFillSEO()">
+                    <input type="text" id="seo-keyword" placeholder="예: 임산부 불면증 완화 방법" onkeydown="if(event.key==='Enter') autoFillSEO()">
                 </div>
                 
                 <div class="grid grid-cols-2 gap-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
@@ -576,16 +576,22 @@
         }
 
         async function generate(type) {
+            const kwElement = document.getElementById(type + '-keyword');
+            if (!kwElement) return alert('입력 필드를 찾을 수 없습니다. 페이지를 새로고침(F5) 해주세요.');
+            
             const btn = document.getElementById(type + '-gen-btn');
+            if (!btn) return;
+
             btn.disabled = true;
             btn.textContent = 'AI 콘텐츠 생성 중... (10~20초 소요, 페이지를 닫지 마세요)';
             
             // hide previous drafts
-            document.getElementById(type + '-draft-zone').style.display = 'none';
+            const draftZone = document.getElementById(type + '-draft-zone');
+            if (draftZone) draftZone.style.display = 'none';
 
             const payload = {
                 type,
-                keyword: document.getElementById(type + '-keyword').value,
+                keyword: kwElement.value,
                 title: type === 'seo' ? document.getElementById('seo-title').value : document.getElementById('aeo-question').value,
                 slug: document.getElementById(type + '-slug').value,
                 subKeywords: type === 'seo' ? document.getElementById('seo-sub-kw').value : '',
