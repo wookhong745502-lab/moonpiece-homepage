@@ -575,6 +575,11 @@
             await suggest('slug', 'aeo');
         }
 
+        function val(id) {
+            const el = document.getElementById(id);
+            return el ? el.value : '';
+        }
+
         async function generate(type) {
             const kwElement = document.getElementById(type + '-keyword');
             if (!kwElement) return alert('입력 필드를 찾을 수 없습니다. 페이지를 새로고침(F5) 해주세요.');
@@ -585,20 +590,19 @@
             btn.disabled = true;
             btn.textContent = 'AI 콘텐츠 생성 중... (10~20초 소요, 페이지를 닫지 마세요)';
             
-            // hide previous drafts
             const draftZone = document.getElementById(type + '-draft-zone');
             if (draftZone) draftZone.style.display = 'none';
 
             const payload = {
                 type,
-                keyword: kwElement.value,
-                title: type === 'seo' ? document.getElementById('seo-title').value : document.getElementById('aeo-question').value,
-                slug: document.getElementById(type + '-slug').value,
-                subKeywords: type === 'seo' ? document.getElementById('seo-sub-kw').value : '',
-                sourceName: type === 'seo' ? document.getElementById('seo-source-name').value : '',
-                sourceUrl: type === 'seo' ? document.getElementById('seo-source-url').value : '',
-                category: document.getElementById(type + '-category').value,
-                youtubeId: document.getElementById(type + '-youtube-id').value,
+                keyword: val(type + '-keyword'),
+                title: type === 'seo' ? val('seo-title') : val('aeo-question'),
+                slug: val(type + '-slug'),
+                subKeywords: type === 'seo' ? val('seo-sub-kw') : '',
+                sourceName: type === 'seo' ? val('seo-source-name') : '',
+                sourceUrl: type === 'seo' ? val('seo-source-url') : '',
+                category: val(type + '-category'),
+                youtubeId: val(type + '-youtube-id'),
                 draft: true 
             };
 
