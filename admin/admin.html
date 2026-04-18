@@ -456,14 +456,12 @@
                 </div>
             </div>
 
-            <!-- Image Section -->
-            <div>
             <div>
                 <h3 class="settings-heading-sec">
                     <span class="material-symbols-outlined text-[32px]">image_search</span> 
-                    2. AI 이미지 생성 세부 지침 (Image Specs)
+                    2. AI 이미지 및 세부 파라미터 가이드
                 </h3>
-                <div class="grid grid-cols-2 gap-8 grid-2col-fixed">
+                <div class="grid grid-cols-2 gap-8 grid-2col-fixed mb-8">
                     <div class="card">
                         <label class="font-extrabold block mb-4 text-lg">저널용 이미지 묘사 가이드</label>
                         <p class="rules-desc">이미지에 포함될 피사체의 특징, 배경 분위기, 색감 등에 대한 영문/한글 지침입니다.</p>
@@ -475,7 +473,25 @@
                         <textarea id="setting-prompt-img-aeo" class="rules-textarea height-200"></textarea>
                     </div>
                 </div>
-            </div>
+
+                <div class="card mb-8">
+                    <label class="font-extrabold block mb-4 text-lg">이미지 블랙리스트 차단 키워드 (Negative Prompt)</label>
+                    <p class="rules-desc">AI가 절대로 생성해서는 안 되는 부정적 시각 요소(인체 변형, 노출, 괴기함 등)를 영문으로 지정합니다.</p>
+                    <textarea id="setting-neg-prompt" class="rules-textarea height-100"></textarea>
+                </div>
+
+                <div class="grid grid-cols-2 gap-8 grid-2col-fixed">
+                    <div class="card">
+                        <label class="font-extrabold block mb-4 text-lg">SEO 저널 본문 이미지 개수</label>
+                        <p class="rules-desc">저널 본문 문단 사이에 자동으로 배치될 서브 이미지의 개수입니다. (표지 1장 제외, 0~3장 설정 가능)</p>
+                        <input type="number" id="setting-img-count" class="input-style w-full mt-4" min="0" max="3" value="3" style="padding: 1rem; border-radius: 1rem; border: 1px solid #e2e8f0; font-size: 1rem; font-weight: bold;">
+                    </div>
+                    <div class="card">
+                        <label class="font-extrabold block mb-4 text-lg">글 하단 섹션 FAQ(자주 묻는 질문) 개수</label>
+                        <p class="rules-desc">독자 체류 시간을 극대화하기 위해 글 하단에 붙는 Q&A 블록의 생성 개수입니다. (0~5개 설정 가능)</p>
+                        <input type="number" id="setting-faq-count" class="input-style w-full mt-4" min="0" max="5" value="3" style="padding: 1rem; border-radius: 1rem; border: 1px solid #e2e8f0; font-size: 1rem; font-weight: bold;">
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -573,10 +589,15 @@
                     const defaultImgSeo = `Professional high-quality photography, premium maternal vibes, comforting warm atmosphere, soft natural lighting.`;
                     const defaultImgAeo = `High-quality professional infographic or clear process diagram, minimal clean design, professional medical colors.`;
 
+                    const defaultNegPrompt = "bare skin, nude, naked, swimsuit, cleavage, exposed body, bare feet, toes, nsfw, ugly, deformed, disfigured eyes, bad hands, distorted face, blurry, low quality, watermark, text, error, horror, creepy, unnatural skin, bad anatomy, extra fingers, missing fingers, fused fingers, too many fingers, three fingers, six fingers, seven fingers, mutated hands, malformed hands, poorly drawn hands, long fingers, broken fingers, overlapping fingers, cloned fingers, disjointed fingers, floating limbs, disconnected limbs, gross proportions, malformed limbs";
+
                     if(document.getElementById('setting-prompt-seo')) document.getElementById('setting-prompt-seo').value = settings.seoPrompt || defaultSeoPrompt;
                     if(document.getElementById('setting-prompt-aeo')) document.getElementById('setting-prompt-aeo').value = settings.aeoPrompt || defaultAeoPrompt;
                     if(document.getElementById('setting-prompt-img-seo')) document.getElementById('setting-prompt-img-seo').value = settings.imgSeoPrompt || defaultImgSeo;
                     if(document.getElementById('setting-prompt-img-aeo')) document.getElementById('setting-prompt-img-aeo').value = settings.imgAeoPrompt || defaultImgAeo;
+                    if(document.getElementById('setting-neg-prompt')) document.getElementById('setting-neg-prompt').value = settings.negPrompt || defaultNegPrompt;
+                    if(document.getElementById('setting-img-count')) document.getElementById('setting-img-count').value = settings.imgCount !== undefined ? settings.imgCount : 3;
+                    if(document.getElementById('setting-faq-count')) document.getElementById('setting-faq-count').value = settings.faqCount !== undefined ? settings.faqCount : 3;
                 }
             } catch (e) { console.error("Settings load failed", e); }
         }
@@ -589,7 +610,10 @@
                 seoPrompt: document.getElementById('setting-prompt-seo').value,
                 aeoPrompt: document.getElementById('setting-prompt-aeo').value,
                 imgSeoPrompt: document.getElementById('setting-prompt-img-seo').value,
-                imgAeoPrompt: document.getElementById('setting-prompt-img-aeo').value
+                imgAeoPrompt: document.getElementById('setting-prompt-img-aeo').value,
+                negPrompt: document.getElementById('setting-neg-prompt').value,
+                imgCount: parseInt(document.getElementById('setting-img-count').value) || 0,
+                faqCount: parseInt(document.getElementById('setting-faq-count').value) || 0
             };
             try {
                 const res = await fetch('/admin/api/settings', {

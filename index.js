@@ -356,9 +356,12 @@ async function generateContentHandler(request, env) {
       const settings = settingsObj ? JSON.parse(await settingsObj.text()) : {};
       const imgModel = (isSEO ? settings.imgSeo : settings.imgAeo) || "@cf/bytedance/stable-diffusion-xl-lightning";
       const selectedStyle = style || settings.defaultStyle || "Professional photography";
-      const negPrompt = "bare skin, nude, naked, swimsuit, cleavage, exposed body, bare feet, toes, nsfw, ugly, deformed, disfigured eyes, bad hands, distorted face, blurry, low quality, watermark, text, error, horror, creepy, unnatural skin, bad anatomy, extra fingers, missing fingers, fused fingers, too many fingers, three fingers, six fingers, seven fingers, mutated hands, malformed hands, poorly drawn hands, long fingers, broken fingers, overlapping fingers, cloned fingers, disjointed fingers, floating limbs, disconnected limbs, gross proportions, malformed limbs";
+      const defaultNeg = "bare skin, nude, naked, swimsuit, cleavage, exposed body, bare feet, toes, nsfw, ugly, deformed, disfigured eyes, bad hands, distorted face, blurry, low quality, watermark, text, error, horror, creepy, unnatural skin, bad anatomy, extra fingers, missing fingers, fused fingers, too many fingers, three fingers, six fingers, seven fingers, mutated hands, malformed hands, poorly drawn hands, long fingers, broken fingers, overlapping fingers, cloned fingers, disjointed fingers, floating limbs, disconnected limbs, gross proportions, malformed limbs";
+      const negPrompt = settings.negPrompt || defaultNeg;
+      const imgSeoCount = settings.imgCount !== undefined ? parseInt(settings.imgCount) : 3;
+      const faqCount = settings.faqCount !== undefined ? parseInt(settings.faqCount) : 3;
 
-      await log(`🚀 AI 프로세스 가동: ${keyword}`);
+      await log(`🚀 AI 프로세 가동: ${keyword}`);
 
       let englishKeyword = keyword;
       try {
@@ -367,7 +370,11 @@ async function generateContentHandler(request, env) {
         await log(`🗣️ 이미지 변환: ${englishKeyword}`);
       } catch (e) {}
 
-      let universalPrompt = `You are a premium Korean content architect. Write a deep article for "${keyword}". Return JSON: {"html": "...", "faqs": [{"q": "...", "a": "..."}], "summary": "3-line summary"}. Use {{IMG_1}}, {{IMG_2}}, {{IMG_3}} markers in HTML. IMPORTANT: Ensure all anatomical details in images are perfect. Avoid horror or distorted visuals. Style: ${selectedStyle}.`;
+      let markers = [];
+      for(let i=1; i<=imgSeoCount; i++) markers.push(`{{IMG_${i}}}`);
+      const markersText = markers.length > 0 ? `Use ${markers.join(', ')} markers in HTML sequentially between paragraphs.` : `Do NOT use any IMG markers.`;
+      
+      let universalPrompt = `You are a premium Korean content architect. Write a deep article for "${keyword}". Return JSON: {"html": "raw HTML string", "faqs": [Exactly ${faqCount} items with {"q": "...", "a": "..."}], "summary": "3-line summary"}. ${markersText} IMPORTANT: Ensure all anatomical details in images are perfect. Avoid horror or distorted visuals. Style: ${selectedStyle}.`;
       if (!isSEO) {
           universalPrompt = universalPrompt.replace('(첫 번째 문맥 최적 위치에 이미지 마크다운 템플릿 1개 삽입)', '').replace('EXCEPT for the image markdown block', '');
       }
@@ -376,11 +383,15 @@ async function generateContentHandler(request, env) {
         aiCall(universalPrompt, env).then(r => { log(`✅ 텍스트 생성 전송 완료`); return r; }),
         (async () => {
           if (isSEO) {
-            log(`🎨 이미지 4개 병렬 생성 중 (네거티브 프롬프트 적용)...`);
-            return Promise.all([0,1,2,3].map(i => env.AI.run(imgModel, { 
-              prompt: `Photo of ${englishKeyword}, modest, fully clothed, elegant high-end catalog style, premium photography, highly detailed, perfect composition, ${selectedStyle}`,
-              negative_prompt: negPrompt
-            }).then(r => { log(`🖼️ 이미지 ${i+1} 완료`); return r; })));
+            log(`🎨 이미지 ${imgSeoCount + 1}개 병렬 생성 중 (네거티브 프롬프트 적용)...`);
+            const promises = [];
+            for (let i = 0; i <= imgSeoCount; i++) {
+                promises.push(env.AI.run(imgModel, { 
+                  prompt: `Photo of ${englishKeyword}, modest, fully clothed, elegant high-end catalog style, premium photography, highly detailed, perfect composition, ${selectedStyle}`,
+                  negative_prompt: negPrompt
+                }).then(r => { log(`🖼️ 이미지 ${i+1} 완료`); return r; }));
+            }
+            return Promise.all(promises);
           }
           log(`🎨 대표 이미지 생성 중 (네거티브 프롬프트 적용)...`);
           return [await env.AI.run(imgModel, { 
@@ -405,7 +416,7 @@ async function generateContentHandler(request, env) {
           heroPath = `/${heroKey}`;
         }
         // Body Images
-        for(let j=1; j<=3; j++) {
+        for(let j=1; j<=imgSeoCount; j++) {
           if (imgRes[j]) {
             const bKey = `assets/journal/${slugBase}-${timeStamp}-${j}.png`;
             await env.JOURNAL_BUCKET.put(bKey, imgRes[j], { httpMetadata: { contentType: "image/png" } });

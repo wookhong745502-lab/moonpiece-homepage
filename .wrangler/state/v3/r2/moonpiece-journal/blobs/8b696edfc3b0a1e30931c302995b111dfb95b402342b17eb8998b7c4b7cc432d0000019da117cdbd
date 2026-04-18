@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}} | 문피스 임산부 저널</title>
+    <meta name="description" content="{{description}}">
+    
+    <!-- Open Graph / SEO -->
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{description}}">
+    <meta property="og:image" content="{{og_image}}">
+    <meta property="og:url" content="https://www.moonpiece.co.kr/journal/{{slug}}.html">
+    <link rel="canonical" href="https://www.moonpiece.co.kr/journal/{{slug}}.html">
+
+    <!-- Styles & Fonts -->
+    <link rel="stylesheet" href="../styles.css?v=1.6">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        moon: { 50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 500: '#8b5cf6', 600: '#7c3aed', 900: '#4c1d95' }
+                    },
+                    fontFamily: { serif: ['Noto Serif KR', 'serif'], sans: ['Manrope', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        .journal-rich-content h2 { font-family: 'Noto Serif KR', serif; font-size: 2rem; font-weight: 900; margin-top: 3rem; margin-bottom: 1.5rem; color: #1e293b; line-height: 1.3; }
+        .journal-rich-content h3 { font-family: 'Noto Serif KR', serif; font-size: 1.5rem; font-weight: 800; margin-top: 2.5rem; margin-bottom: 1rem; color: var(--moon-600); }
+        .journal-rich-content p { font-size: 1.125rem; line-height: 1.8; color: #475569; margin-bottom: 1.5rem; word-break: keep-all; }
+        .journal-rich-content ul, .journal-rich-content ol { margin-bottom: 1.5rem; padding-left: 1.5rem; }
+        .journal-rich-content li { font-size: 1.125rem; line-height: 1.8; color: #475569; margin-bottom: 0.5rem; }
+        .journal-rich-content strong { color: #0f172a; font-weight: 700; }
+        .hero-img { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 2rem; margin-bottom: 3rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15); }
+    </style>
+</head>
+<body class="bg-white text-slate-900 font-sans pt-20">
+    <!-- Top Navigation -->
+    <nav class="nav-bar fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md border-b border-slate-100 z-[1000]">
+        <div class="nav-mp-container mp-container flex justify-between items-center h-20">
+            <a href="../index.html" class="logo text-2xl font-black text-moon-600 font-serif no-underline">Moonpiece</a>
+            <div class="nav-links hidden lg:flex items-center gap-10">
+                <a href="../brand.html" class="nav-link text-slate-600 hover:text-moon-600 font-semibold transition-colors no-underline">문피스의 약속</a>
+                <a href="../review.html" class="nav-link text-slate-600 hover:text-moon-600 font-semibold transition-colors no-underline">엄마들의 이야기</a>
+                <a href="../journal.html" class="nav-link text-moon-600 font-bold transition-colors no-underline border-b-2 border-moon-600 pb-1">임산부 저널</a>
+                <a href="../knowledge.html" class="nav-link text-slate-600 hover:text-moon-600 font-semibold transition-colors no-underline">임산부 지식인</a>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" rel="noopener" class="btn-primary hidden sm:flex px-6 py-2.5 rounded-full bg-moon-600 text-white font-bold hover:bg-moon-700 transition-all no-underline">구매하기</a>
+                <button class="hamburger-btn lg:hidden outline-none" id="menu-toggle" aria-label="메뉴 열기" title="메뉴 열기">
+                    <span class="block w-6 h-0.5 bg-slate-900 mb-1.5 transition-all"></span>
+                    <span class="block w-6 h-0.5 bg-slate-900 mb-1.5 transition-all"></span>
+                    <span class="block w-6 h-0.5 bg-slate-900 transition-all"></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Navigation Overlay -->
+    <div class="nav-overlay fixed inset-0 bg-slate-900/50 z-[1040] opacity-0 invisible transition-all duration-300" id="overlay"></div>
+    <div class="mobile-nav fixed top-0 right-[-100%] w-[280px] h-full bg-white z-[1050] shadow-2xl p-10 flex flex-col gap-6 transition-all duration-500 ease-in-out" id="mobile-menu">
+        <div class="flex justify-end mb-4">
+            <button id="close-menu" class="text-slate-400 hover:text-slate-900">
+                <span class="material-symbols-outlined text-3xl">close</span>
+            </button>
+        </div>
+        <a href="../brand.html" class="text-lg font-bold text-slate-900 border-b border-slate-50 pb-4 no-underline">문피스의 약속</a>
+        <a href="../review.html" class="text-lg font-bold text-slate-900 border-b border-slate-50 pb-4 no-underline">엄마들의 이야기</a>
+        <a href="../journal.html" class="text-lg font-bold text-moon-600 border-b border-slate-50 pb-4 no-underline">임산부 저널</a>
+        <a href="../knowledge.html" class="text-lg font-bold text-slate-900 border-b border-slate-50 pb-4 no-underline">임산부 지식인</a>
+        <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" rel="noopener" class="btn-primary mt-6 text-center py-4 rounded-xl bg-moon-600 text-white font-bold no-underline">구매하기</a>
+    </div>
+
+    <!-- Article Header -->
+    <header class="pt-24 pb-12 bg-white">
+        <div class="mp-container max-w-4xl">
+            <a href="../journal.html" class="text-moon-600 font-bold flex items-center gap-2 mb-8 text-sm no-underline hover:translate-x-[-4px] transition-transform">
+                <span class="material-symbols-outlined text-sm">west</span> 저널 목록으로 돌아가기
+            </a>
+            <span class="inline-block px-4 py-1.5 bg-moon-50 text-moon-600 rounded-full text-xs font-bold mb-6 tracking-widest uppercase">{{category}}</span>
+            <h1 class="text-4xl lg:text-5xl font-serif text-slate-900 mb-8 leading-[1.2] font-black break-keep">
+                {{title}}
+            </h1>
+            <div class="flex items-center gap-4 text-slate-400 text-sm border-b border-slate-100 pb-8">
+                <span class="font-bold text-slate-600">문피스 수면연구소</span>
+                <span>•</span>
+                <span>{{publish_date}}</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="pb-32 bg-white">
+        <div class="mp-container max-w-4xl">
+            <!-- AI Summary Box -->
+            <div class="bg-slate-50 rounded-3xl p-8 lg:p-12 mb-16 border border-slate-100 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-2 h-full bg-moon-600"></div>
+                <h2 class="text-xl lg:text-2xl font-serif font-black mb-6 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-moon-600">lightbulb</span> 핵심 요약
+                </h2>
+                <div class="text-lg text-slate-600 leading-relaxed italic">
+                    {{summary}}
+                </div>
+            </div>
+
+            <!-- Hero Image -->
+            <img src="{{og_image}}" alt="{{title}}" class="hero-img" onerror="this.style.display='none'">
+
+            <!-- Rich Content -->
+            <div class="journal-rich-content">
+                {{rich_content}}
+            </div>
+
+            <!-- FAQ Section -->
+            <section class="mt-24 p-8 lg:p-16 bg-slate-50 rounded-[3rem] border border-slate-100">
+                <h3 class="text-3xl font-serif font-black mb-10 text-slate-900">도움이 되는 질문 (FAQ)</h3>
+                <div class="space-y-8">
+                    {{faq_content}}
+                </div>
+            </section>
+
+            <!-- CTA Section -->
+            <div class="mt-24 bg-moon-900 rounded-[3rem] p-12 lg:p-20 text-center text-white relative overflow-hidden">
+                <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full opacity-10 pointer-events-none">
+                    <span class="material-symbols-outlined text-[400px]">nights_stay</span>
+                </div>
+                <h3 class="text-3xl lg:text-4xl font-serif font-black mb-8 relative z-10">엄마의 밤을 바꾸는 가장 쉬운 방법</h3>
+                <p class="text-moon-100 text-lg mb-12 max-w-xl mx-auto opacity-80 relative z-10">지금 문피스 바디필로우와 함께 11년 연구의 결정체를 경험해보세요.</p>
+                <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" rel="noopener" class="inline-block px-12 py-5 bg-white text-moon-900 rounded-full font-black text-xl shadow-2xl hover:scale-105 transition-all relative z-10 no-underline">공식몰 바로가기</a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white pt-24 pb-12 border-t border-slate-100">
+        <div class="mp-container grid md:grid-cols-2 lg:grid-cols-4 gap-12">
+            <div>
+                <div class="logo font-serif text-2xl text-moon-600 mb-6 font-bold">Moonpiece</div>
+                <p class="text-slate-500 leading-relaxed text-sm mb-8">소중한 엄마와 아기를 위한 달빛의 조각, 문피스. 11년의 진심을 담아 가장 편안한 휴식을 설계합니다.</p>
+                <div class="flex gap-4">
+                    <a href="#" class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-moon-500 hover:text-white transition-all">
+                        <span class="material-symbols-outlined text-xl">share</span>
+                    </a>
+                    <a href="https://smartstore.naver.com/moonwalk00" target="_blank" rel="noopener" class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-[#2DB400] hover:text-white transition-all">
+                        <span class="material-symbols-outlined text-xl">shopping_cart</span>
+                    </a>
+                </div>
+            </div>
+            <div>
+                <h4 class="font-bold text-slate-900 mb-6 uppercase tracking-wider text-xs">Menu</h4>
+                <ul class="space-y-4 text-sm text-slate-500 list-none p-0">
+                    <li><a href="../brand.html" class="hover:text-moon-600 transition-colors no-underline">문피스의 약속</a></li>
+                    <li><a href="../review.html" class="hover:text-moon-600 transition-colors no-underline">엄마들의 이야기</a></li>
+                    <li><a href="../journal.html" class="hover:text-moon-600 transition-colors no-underline">임산부 저널</a></li>
+                    <li><a href="../knowledge.html" class="hover:text-moon-600 transition-colors no-underline">임산부 지식인</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold text-slate-900 mb-6 uppercase tracking-wider text-xs">Customer Center</h4>
+                <div class="space-y-4">
+                    <p class="text-2xl font-black text-moon-600 font-serif">1544-0000</p>
+                    <p class="text-sm text-slate-500">평일 10:00 - 17:00 (Lunch 12:00 - 13:00)<br>주말 및 공휴일 휴무</p>
+                    <a href="mailto:support@moonpiece.co.kr" class="text-sm text-moon-600 font-bold hover:underline">support@moonpiece.co.kr</a>
+                </div>
+            </div>
+            <div>
+                <h4 class="font-bold text-slate-900 mb-6 uppercase tracking-wider text-xs">Company Info</h4>
+                <div class="text-xs text-slate-400 leading-relaxed space-y-2">
+                    <p>상호명: 문피스 수면연구소</p>
+                    <p>대표자: 박연하 | 사업자번호: 123-45-67890</p>
+                    <p>주소: 서울특별시 성동구 아차산로 123, 405호</p>
+                    <p>통신판매업신고: 제2024-서울성동-0000호</p>
+                </div>
+            </div>
+        </div>
+        <div class="mp-container mt-20 pt-10 border-t border-slate-50 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="text-slate-400 text-xs text-center md:text-left">
+                © 2024 Moonpiece. All rights reserved.
+            </div>
+            <div class="flex gap-6 text-xs font-bold text-slate-500">
+                <a href="../terms.html" class="hover:text-moon-600 no-underline">이용약관</a>
+                <a href="../privacy.html" class="hover:text-moon-600 no-underline">개인정보처리방침</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const menuToggle = document.getElementById('menu-toggle');
+        const closeMenu = document.getElementById('close-menu');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const overlay = document.getElementById('overlay');
+
+        const toggleMenu = () => {
+            mobileMenu.classList.toggle('right-[-100%]');
+            mobileMenu.classList.toggle('right-0');
+            overlay.classList.toggle('invisible');
+            overlay.classList.toggle('opacity-0');
+            document.body.classList.toggle('overflow-hidden');
+        };
+
+        menuToggle.addEventListener('click', toggleMenu);
+        closeMenu?.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
+    </script>
+</body>
+</html>
