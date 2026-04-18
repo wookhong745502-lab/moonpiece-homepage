@@ -49,7 +49,16 @@
         .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 1.1rem; border: 1.5px solid var(--outline-variant); border-radius: 1rem; font-family: inherit; font-size: 1rem; background: var(--surface-container-lowest); transition: all 0.2s; box-sizing: border-box; }
         .input-group input:focus, .input-group textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-container); outline: none; }
         
-        .ai-badge { background: var(--secondary-container); color: var(--on-secondary-container); padding: 0.25rem 0.6rem; border-radius: 0.4rem; font-size: 0.75rem; font-weight: 900; vertical-align: middle; margin-left: 0.5rem; }
+        .ai-badge { background: var(--primary); color: white; padding: 0.2rem 0.6rem; border-radius: 2rem; font-size: 0.7rem; font-weight: 800; vertical-align: middle; }
+        
+        /* New AI Console Styles */
+        .ai-console { background: #1a1a1a; border-radius: 1.5rem; padding: 1.5rem; border: 1px solid #333; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
+        .log-list { height: 150px; overflow-y: auto; color: #d4d4d4; font-family: 'JetBrains Mono', 'Fira Code', monospace; scroll-behavior: smooth; }
+        .log-list::-webkit-scrollbar { width: 4px; }
+        .log-list::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+        .pulse-red { width: 8px; height: 8px; background: #ff4757; border-radius: 50%; display: inline-block; box-shadow: 0 0 0 rgba(255, 71, 87, 0.4); animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(255, 71, 87, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); } }
+
         .btn-ai { position: absolute; right: 0.6rem; bottom: 0.6rem; padding: 0.5rem 1rem; background: var(--primary); color: white; border: none; border-radius: 0.6rem; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; gap: 0.4rem; transition: all 0.2s; cursor: pointer; }
         .btn-ai:hover { transform: scale(1.05); opacity: 0.9; }
         .btn-ai:active { transform: scale(0.95); }
@@ -187,6 +196,18 @@
                 </p>
 
                 <button id="seo-gen-btn" class="btn-primary w-full p-6 text-xl" style="width: 100%;" onclick="generate('seo')">검수용 콘텐츠 초안 생성하기</button>
+
+                <!-- AI Generation Log Console -->
+                <div id="seo-log-console" class="ai-console mt-8" style="display: none;">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="pulse-red"></span>
+                            <span style="font-size: 0.8rem; font-weight: 800; color: var(--primary); letter-spacing: 0.1em;">AI ENGINE LIVE STATUS</span>
+                        </div>
+                        <div style="font-size: 0.7rem; color: var(--on-surface-variant); font-family: monospace;">LOGS_STDOUT_V2.0</div>
+                    </div>
+                    <div id="seo-log-list" class="log-list"></div>
+                </div>
             </div>
 
             <!-- SEO Draft Mode -->
@@ -242,6 +263,18 @@
                 </p>
                 <!-- FAQ 생성 여부 버튼 삭제 완료 (백엔드에서 강제 3~10개 자동 생성) -->
                 <button id="aeo-gen-btn" class="btn-primary w-full p-6 text-xl" style="width: 100%;" onclick="generate('aeo')">지식인 검수용 답변 생성하기</button>
+                
+                <!-- AI Generation Log Console -->
+                <div id="aeo-log-console" class="ai-console mt-8" style="display: none;">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="flex items-center gap-2">
+                            <span class="pulse-red"></span>
+                            <span style="font-size: 0.8rem; font-weight: 800; color: var(--primary); letter-spacing: 0.1em;">AI ENGINE LIVE STATUS</span>
+                        </div>
+                        <div style="font-size: 0.7rem; color: var(--on-surface-variant); font-family: monospace;">LOGS_STDOUT_V2.0</div>
+                    </div>
+                    <div id="aeo-log-list" class="log-list"></div>
+                </div>
             </div>
 
             <!-- AEO Draft Mode -->
@@ -592,8 +625,26 @@
             const btn = document.getElementById(type + '-gen-btn');
             if (!btn) return;
 
+            // Show and Clear Logs
+            const logConsole = document.getElementById(type + '-log-console');
+            const logList = document.getElementById(type + '-log-list');
+            logConsole.style.display = 'block';
+            logList.innerHTML = '';
+            
+            function addLog(msg, color = 'var(--on-surface)') {
+                const now = new Date().toLocaleTimeString();
+                const div = document.createElement('div');
+                div.style.marginBottom = '0.5rem';
+                div.style.fontSize = '0.85rem';
+                div.style.fontFamily = 'monospace';
+                div.innerHTML = `<span style="color:var(--primary); opacity:0.6;">[${now}]</span> <span style="color:${color}">${msg}</span>`;
+                logList.appendChild(div);
+                logList.scrollTop = logList.scrollHeight;
+            }
+
             btn.disabled = true;
-            btn.textContent = 'AI 콘텐츠 생성 중... (10~20초 소요, 페이지를 닫지 마세요)';
+            btn.textContent = 'AI 콘텐츠 생성 엔진 가동 중...';
+            addLog('🚀 AI 콘텐츠 엔진 초기화 중...', 'var(--primary)');
             
             const draftZone = document.getElementById(type + '-draft-zone');
             if (draftZone) draftZone.style.display = 'none';
@@ -615,6 +666,8 @@
             const timeoutId = setTimeout(() => controller.abort(), 180000); // 180s safety timeout
 
             try {
+                addLog(`⚙️ [System] Backend connection established. Generating ${type.toUpperCase()} content...`);
+                
                 const res = await fetch('/admin/api/generate-' + (type === 'seo' ? 'journal' : 'knowledge'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -623,13 +676,35 @@
                 });
                 clearTimeout(timeoutId);
                 
-                const responseText = await res.text();
+                // --- NEW: Streaming Response Handling ---
+                const reader = res.body.getReader();
+                const decoder = new TextDecoder();
+                let fullData = '';
+                
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    const chunk = decoder.decode(value, { stream: true });
+                    const lines = chunk.split('\n');
+                    
+                    for (const line of lines) {
+                        if (!line.trim()) continue;
+                        if (line.startsWith('LOG:')) {
+                            addLog(line.substring(4), '#9cdcfe');
+                        } else {
+                            fullData += line;
+                        }
+                    }
+                }
+                
                 let data;
                 try {
-                    data = JSON.parse(responseText);
+                    data = JSON.parse(fullData);
                 } catch (jsonErr) {
-                    console.error("Server returned non-JSON response:", responseText);
-                    alert('서버에서 올바르지 않은 응답이 반환되었습니다. (HTML 에러 가능성)\n\n상태 코드: ' + res.status + '\n응답 요약: ' + responseText.substring(0, 100) + '...');
+                    addLog('❌ 서버 응답 파싱 실패 (JSON 형식 오류)', 'var(--error)');
+                    console.error("Server returned non-JSON response:", fullData);
+                    alert('서버 응답 파싱 실패');
                     return;
                 }
 
@@ -679,7 +754,7 @@
                 }
             } catch(e) { 
                 if (e.name === 'AbortError') {
-                    alert('서버 응답 시간이 너무 길어 중단되었습니다. (60초 초과) 잠시 후 다시 시도해 주세요.');
+                    alert('서버 응답 시간이 너무 길어 중단되었습니다. (180초 초과) 잠시 후 다시 시도해 주세요.');
                 } else {
                     alert('생성 중 네트워크 오류 발생: ' + e.message); 
                 }
