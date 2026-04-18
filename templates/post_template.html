@@ -14,21 +14,31 @@
     <meta property="og:url" content="https://www.moonpiece.co.kr/knowledge/{{slug}}.html">
     <link rel="canonical" href="https://www.moonpiece.co.kr/knowledge/{{slug}}.html">
 
-    </script>
+    <!-- Fonts & Icons -->
+    <link rel="stylesheet" href="../styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700;900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap">
+
     <style>
         .post-container { max-width: 850px; margin-left: auto; margin-right: auto; }
+        .hero-img { width: 100%; height: auto; border-radius: 2rem; margin-bottom: 3rem; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
         .aeo-summary-title { font-size: 1.25rem; font-weight: 800; color: var(--moon-600); margin: 0 0 1.5rem 0; padding: 0; border: none; }
         .category-label { font-size: 0.9rem; color: var(--moon-600); font-weight: 800; margin-bottom: 1.5rem; letter-spacing: 0.2em; text-transform: uppercase; }
-        .post-h1 { font-size: 3.5rem; line-height: 1.2; word-break: keep-all; }
+        .post-h1 { font-size: 3.5rem; line-height: 1.2; word-break: keep-all; font-weight: 900; }
         .meta-text { color: #64748b; font-size: 0.95rem; }
         .meta-dot { color: #cbd5e1; font-size: 0.95rem; }
-        .prescription-card { border: 1px solid var(--outline-variant); border-radius: 2rem; }
-        .prescription-h4 { font-weight: 900; font-size: 1.5rem; margin-bottom: 1.5rem; color: var(--on-surface); }
+        .prescription-card { border: 1px solid var(--outline-variant); border-radius: 2.5rem; }
+        .prescription-h4 { font-weight: 900; font-size: 1.6rem; margin-bottom: 2rem; color: var(--on-surface); }
         .prescription-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-        .prescription-item-h { font-weight: 800; font-size: 1.1rem; color: var(--primary); }
-        .prescription-item-p { font-size: 0.9rem; color: var(--on-surface-variant); }
+        .prescription-item-h { font-weight: 800; font-size: 1.2rem; color: var(--primary); }
+        .prescription-item-p { font-size: 0.9rem; color: var(--on-surface-variant); line-height: 1.5; }
         .icon-back { font-size: 1.25rem; }
-        .icon-prescription { font-size: 2rem; }
+        .icon-prescription { font-size: 2.5rem; }
+
+        @media (max-width: 768px) {
+            .post-h1 { font-size: 2.25rem; }
+            .prescription-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
@@ -64,15 +74,15 @@
     <!-- Article Content -->
     <article class="py-32">
         <div class="mp-container post-container">
-            <a href="../knowledge.html" class="back-link">
+            <a href="../knowledge.html" class="back-link mb-12">
                 <span class="material-symbols-outlined icon-back">arrow_back</span>
                 지식인 목록으로 돌아가기
             </a>
 
             <!-- AEO: Direct Answer Summary -->
-            <div class="aeo-summary-box">
+            <div class="aeo-summary-box mb-16">
                 <h2 class="aeo-summary-title">💡 AI 핵심 답변 요약</h2>
-                <div>
+                <div class="leading-relaxed text-slate-700">
                     {{summary}}
                 </div>
             </div>
@@ -86,6 +96,9 @@
                 <span class="meta-text">게시일: {{publish_date}}</span>
             </div>
 
+            <!-- Hero Image -->
+            <img src="{{og_image}}" alt="{{title}}" class="hero-img">
+
             <!-- Main Content Area -->
             <div class="journal-content-rich">
                 {{rich_content}}
@@ -98,15 +111,19 @@
             <div class="card p-12 mt-20 surface-container-low shadow-md prescription-card">
                 <h4 class="prescription-h4">🌙 엄마의 밤을 위한 문피스 처방전</h4>
                 <div class="prescription-grid">
-                    <a href="../brand.html" class="flex flex-col gap-2 p-6 surface-container-high rounded-2xl transition hover:shadow-lg">
+                    <a href="../brand.html" class="flex flex-col gap-4 p-8 surface-container-high rounded-3xl transition hover:shadow-lg no-underline group">
                         <span class="material-symbols-outlined text-primary icon-prescription">verified</span>
-                        <span class="prescription-item-h">문피스의 약속</span>
-                        <span class="prescription-item-p">문피스 바디필로우의 인체공학적 설계가 궁금하다면?</span>
+                        <div>
+                            <span class="prescription-item-h block mb-2">문피스의 약속</span>
+                            <span class="prescription-item-p">문피스 바디필로우의 인체공학적 설계가 궁금하다면?</span>
+                        </div>
                     </a>
-                    <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" class="flex flex-col gap-2 p-6 surface-container-high rounded-2xl transition hover:shadow-lg">
+                    <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" rel="noopener" class="flex flex-col gap-4 p-8 surface-container-high rounded-3xl transition hover:shadow-lg no-underline group">
                         <span class="material-symbols-outlined text-primary icon-prescription">shopping_bag</span>
-                        <span class="prescription-item-h">구매하러 가기</span>
-                        <span class="prescription-item-p">임산부 수면 과학의 결정체, 네이버 스마트스토어 공식몰</span>
+                        <div>
+                            <span class="prescription-item-h block mb-2">구매하러 가기</span>
+                            <span class="prescription-item-p">임산부 수면 과학의 결정체, 네이버 스마트스토어 공식몰</span>
+                        </div>
                     </a>
                 </div>
             </div>
