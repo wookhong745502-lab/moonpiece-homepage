@@ -6,12 +6,21 @@
     <title>관리자 로그인 | Moonpiece</title>
     <link rel="stylesheet" href="../styles.css">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        .login-body { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--surface-low); }
+        .login-card { max-width: 450px; width: 100%; }
+        .login-logo { color: var(--primary); font-size: 2.5rem; }
+        .login-title { font-size: 1.5rem; }
+        .login-desc { color: var(--on-surface-variant); margin-bottom: 2.5rem; }
+        .error-msg { color: #c53030; margin-top: 1.5rem; font-size: 0.9rem; font-weight: 700; display: none; }
+        .btn-bypass { width: 100%; font-size: 0.85rem; border-color: var(--outline-variant); color: var(--outline); }
+    </style>
 </head>
-<body style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--surface-low);">
-    <div class="card p-16 text-center" style="max-width: 450px; width: 100%;">
-        <div class="logo font-serif mb-8" style="color: var(--primary); font-size: 2.5rem;">Moonpiece</div>
-        <h1 class="font-serif mb-6" style="font-size: 1.5rem;">관리자 워크스페이스</h1>
-        <p style="color: var(--on-surface-variant); margin-bottom: 2.5rem;">허가된 관리자 계정(wookhong745502)으로만 접근 가능합니다.</p>
+<body class="login-body">
+    <div class="card p-16 text-center login-card">
+        <div class="logo font-serif mb-8 login-logo">Moonpiece</div>
+        <h1 class="font-serif mb-6 login-title">관리자 워크스페이스</h1>
+        <p class="login-desc">허가된 관리자 계정(wookhong745502)으로만 접근 가능합니다.</p>
         
         <div id="g_id_onload"
              data-client_id="1026397178764-0rnevfnk7idullrd7h85cm2setegvudu.apps.googleusercontent.com"
@@ -30,10 +39,10 @@
              data-logo_alignment="left">
         </div>
 
-        <div id="errorMsg" style="color: #c53030; margin-top: 1.5rem; font-size: 0.9rem; font-weight: 700; display: none;"></div>
+        <div id="errorMsg" class="error-msg"></div>
         
         <!-- 개발용 임시 강제 로그인 버튼 (테스트 완료 후 제거 요망) -->
-        <button onclick="devBypass()" class="btn-outline mt-8" style="width: 100%; font-size: 0.85rem; border-color: var(--outline-variant); color: var(--outline);">개발용: 우회 로그인 (Bypass)</button>
+        <button onclick="devBypass()" class="btn-outline mt-8 btn-bypass">개발용: 우회 로그인 (Bypass)</button>
     </div>
 
     <script>

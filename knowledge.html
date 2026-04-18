@@ -38,9 +38,9 @@
                 <a href="knowledge.html" class="nav-link active text-moon-600 font-bold">임산부 지식인</a>
             </div>
             <div class="flex items-center gap-4">
-                <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank"
+                <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" rel="noopener"
                     class="btn-primary hidden sm:flex px-6 py-2.5 rounded-full bg-moon-600 text-white font-bold hover:bg-moon-700 transition-all">구매하기</a>
-                <button class="hamburger-btn lg:hidden outline-none" id="menu-toggle">
+                <button class="hamburger-btn lg:hidden outline-none" id="menu-toggle" aria-label="메뉴 열기" title="메뉴 열기">
                     <span class="block w-6 h-0.5 bg-slate-900 mb-1.5 transition-all"></span>
                     <span class="block w-6 h-0.5 bg-slate-900 mb-1.5 transition-all"></span>
                     <span class="block w-6 h-0.5 bg-slate-900 transition-all"></span>
@@ -67,7 +67,7 @@
             <a href="knowledge.html" class="text-lg font-bold text-moon-600 bg-moon-50 px-4 py-3 rounded-2xl">임산부 지식인</a>
         </div>
         <div class="mt-auto border-t border-slate-100 pt-8">
-            <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank"
+            <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" rel="noopener"
                 class="block w-full text-center py-4 rounded-2xl bg-moon-600 text-white font-bold shadow-lg shadow-moon-200 active:scale-95 transition-all">구매하러 가기</a>
         </div>
     </div>
@@ -164,7 +164,7 @@
                     <a href="#" class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-moon-500 hover:text-white transition-all">
                         <span class="material-symbols-outlined text-xl">share</span>
                     </a>
-                    <a href="https://smartstore.naver.com/moonwalk00" target="_blank" class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-[#2DB400] hover:text-white transition-all">
+                    <a href="https://smartstore.naver.com/moonwalk00" target="_blank" rel="noopener" class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-[#2DB400] hover:text-white transition-all">
                         <span class="material-symbols-outlined text-xl">shopping_cart</span>
                     </a>
                 </div>
@@ -239,16 +239,7 @@
                 applyFilterAndSearch();
             } catch (e) {
                 console.error("Load failed:", e);
-                // Load mock data if server fails
-                allPosts = Array.from({ length: 12 }).map((_, i) => ({
-                    title: `[임산부 궁금증] 수면 자세에 대한 ${i + 1}번째 질문입니다.`,
-                    category: 'sleep',
-                    categoryName: '수면 자세',
-                    desc: '임신 중기부터는 왼쪽으로 누워 자는 것이 혈액 순환에 도움이 된다고 합니다. 하지만 꼭 그래야 할까요?',
-                    image: `https://images.unsplash.com/photo-1519824145371-296894a0daa9?w=800&q=8${i}`,
-                    date: '2024.04.11',
-                    url: '#'
-                }));
+                grid.innerHTML = '<div class="col-span-full py-32 text-center text-slate-400">지식인 문서를 불러오는데 실패했습니다.</div>';
                 applyFilterAndSearch();
             }
         }
@@ -415,16 +406,29 @@
             h1 { font-size: 2.25rem !important; }
         }
 
-        .masonry-grid {
-            column-count: 1;
-            column-gap: 1.5rem;
+        .nav-bar {
+            height: 80px;
+            z-index: 1001;
         }
-        @media (min-width: 640px) { .masonry-grid { column-count: 2; } }
-        @media (min-width: 1024px) { .masonry-grid { column-count: 3; } }
-        
-        .masonry-item {
-            break-inside: avoid;
-            margin-bottom: 1.5rem;
+
+        /* Standard Grid for Knowledge Page */
+        @media (max-width: 768px) {
+            .section-padding { padding: 4rem 1.5rem; }
+            h1 { font-size: 2.25rem !important; }
+        }
+
+        #knowledge-grid {
+            display: grid;
+            grid-template-columns: repeat(1, minmax(0, 1fr));
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 640px) {
+            #knowledge-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+
+        @media (min-width: 1024px) {
+            #knowledge-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
         }
     </style>
 </body>

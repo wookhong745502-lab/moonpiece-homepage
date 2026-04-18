@@ -3,24 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{TITLE}} | Moonpiece</title>
-    <meta name="description" content="{{DESC}}">
+    <title>{{title}} | 문피스 임산부 지식인</title>
+    <meta name="description" content="{{description}}">
     
     <!-- Open Graph / SEO -->
     <meta property="og:type" content="article">
-    <meta property="og:title" content="{{TITLE}}">
-    <meta property="og:description" content="{{DESC}}">
-    <meta property="og:image" content="{{OG_IMAGE}}">
-    <meta property="og:url" content="https://www.moonpiece.co.kr/post/{{SLUG}}.html">
-    <link rel="canonical" href="https://www.moonpiece.co.kr/post/{{SLUG}}.html">
+    <meta property="og:title" content="{{title}}">
+    <meta property="og:description" content="{{description}}">
+    <meta property="og:image" content="{{og_image}}">
+    <meta property="og:url" content="https://www.moonpiece.co.kr/knowledge/{{slug}}.html">
+    <link rel="canonical" href="https://www.moonpiece.co.kr/knowledge/{{slug}}.html">
 
-    <link rel="stylesheet" href="../styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-
-    <!-- AEO: JSON-LD Structured Data (Google Semantic Search Optimization) -->
-    <script type="application/ld+json">
-        {{JSON_LD}}
     </script>
+    <style>
+        .post-container { max-width: 850px; margin-left: auto; margin-right: auto; }
+        .aeo-summary-title { font-size: 1.25rem; font-weight: 800; color: var(--moon-600); margin: 0 0 1.5rem 0; padding: 0; border: none; }
+        .category-label { font-size: 0.9rem; color: var(--moon-600); font-weight: 800; margin-bottom: 1.5rem; letter-spacing: 0.2em; text-transform: uppercase; }
+        .post-h1 { font-size: 3.5rem; line-height: 1.2; word-break: keep-all; }
+        .meta-text { color: #64748b; font-size: 0.95rem; }
+        .meta-dot { color: #cbd5e1; font-size: 0.95rem; }
+        .prescription-card { border: 1px solid var(--outline-variant); border-radius: 2rem; }
+        .prescription-h4 { font-weight: 900; font-size: 1.5rem; margin-bottom: 1.5rem; color: var(--on-surface); }
+        .prescription-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .prescription-item-h { font-weight: 800; font-size: 1.1rem; color: var(--primary); }
+        .prescription-item-p { font-size: 0.9rem; color: var(--on-surface-variant); }
+        .icon-back { font-size: 1.25rem; }
+        .icon-prescription { font-size: 2rem; }
+    </style>
 </head>
 <body>
     <!-- Top Navigation -->
@@ -31,11 +40,11 @@
                 <a href="../brand.html" class="nav-link">문피스의 약속</a>
                 <a href="../review.html" class="nav-link">엄마들의 이야기</a>
                 <a href="../journal.html" class="nav-link">임산부 저널</a>
-                <a href="../knowledge.html" class="nav-link">임산부 지식인</a>
+                <a href="../knowledge.html" class="nav-link active">임산부 지식인</a>
             </div>
             <div class="flex items-center gap-4">
-                <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" class="btn-primary mobile-hidden">구매하기</a>
-                <button class="hamburger-btn" id="menu-toggle">
+                <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" rel="noopener" class="btn-primary mobile-hidden">구매하기</a>
+                <button class="hamburger-btn" id="menu-toggle" aria-label="메뉴 열기" title="메뉴 열기">
                     <span></span><span></span><span></span>
                 </button>
             </div>
@@ -48,56 +57,56 @@
         <a href="../brand.html" class="nav-link">문피스의 약속</a>
         <a href="../review.html" class="nav-link">엄마들의 이야기</a>
         <a href="../journal.html" class="nav-link">임산부 저널</a>
-        <a href="../knowledge.html" class="nav-link">임산부 지식인</a>
+        <a href="../knowledge.html" class="nav-link active">임산부 지식인</a>
         <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" class="btn-primary text-center mt-8">구매하기</a>
     </div>
 
     <!-- Article Content -->
     <article class="py-32">
-        <div class="mp-container" style="max-width: 850px;">
-            <a href="../index.html" class="back-link">
-                <span class="material-symbols-outlined" style="font-size: 1.25rem;">arrow_back</span>
-                홈으로 돌아가기
+        <div class="mp-container post-container">
+            <a href="../knowledge.html" class="back-link">
+                <span class="material-symbols-outlined icon-back">arrow_back</span>
+                지식인 목록으로 돌아가기
             </a>
 
-            <!-- AEO: Direct Answer Summary (Targeting AI Overviews) -->
+            <!-- AEO: Direct Answer Summary -->
             <div class="aeo-summary-box">
-                <h2 style="font-size: 1.25rem; font-weight: 800; color: var(--moon-600); margin: 0 0 1.5rem 0; padding: 0; border: none;">💡 3줄 핵심 요약 (AI Summary)</h2>
+                <h2 class="aeo-summary-title">💡 AI 핵심 답변 요약</h2>
                 <div>
-                    {{SUMMARY}}
+                    {{summary}}
                 </div>
             </div>
 
-            <div style="font-size: 0.9rem; color: var(--moon-600); font-weight: 800; margin-bottom: 1.5rem; letter-spacing: 0.2em; text-transform: uppercase;">{{CATEGORY}}</div>
-            <h1 class="font-serif mb-8" style="font-size: 3.5rem; line-height: 1.2; word-break: keep-all;">{{TITLE}}</h1>
+            <div class="category-label">{{category}}</div>
+            <h1 class="font-serif mb-8 post-h1">{{title}}</h1>
             
             <div class="flex items-center gap-4 mb-16 pb-8 border-b border-slate-100">
-                <span style="color: #64748b; font-size: 0.95rem;">에디터: 문피스 수면연구소</span>
-                <span style="color: #cbd5e1; font-size: 0.95rem;">·</span>
-                <span style="color: #64748b; font-size: 0.95rem;">게시일: {{DATE}}</span>
+                <span class="meta-text">에디터: 문피스 수면연구소</span>
+                <span class="meta-dot">·</span>
+                <span class="meta-text">게시일: {{publish_date}}</span>
             </div>
 
             <!-- Main Content Area -->
             <div class="journal-content-rich">
-                {{CONTENT}}
+                {{rich_content}}
             </div>
             
-            <!-- AEO: FAQ Section (Optional for generic posts) -->
-            {{FAQ_SECTION}}
+            <!-- FAQ Section -->
+            {{faq_section}}
 
             <!-- Internal SEO Links -->
-            <div class="card p-12 mt-20 surface-container-low shadow-md" style="border: 1px solid var(--outline-variant); border-radius: 2rem;">
-                <h4 style="font-weight: 900; font-size: 1.5rem; margin-bottom: 1.5rem; color: var(--on-surface);">🌙 엄마의 밤을 위한 문피스 처방전</h4>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div class="card p-12 mt-20 surface-container-low shadow-md prescription-card">
+                <h4 class="prescription-h4">🌙 엄마의 밤을 위한 문피스 처방전</h4>
+                <div class="prescription-grid">
                     <a href="../brand.html" class="flex flex-col gap-2 p-6 surface-container-high rounded-2xl transition hover:shadow-lg">
-                        <span class="material-symbols-outlined text-primary" style="font-size: 2rem;">verified</span>
-                        <span style="font-weight: 800; font-size: 1.1rem; color: var(--primary);">문피스의 약속</span>
-                        <span style="font-size: 0.9rem; color: var(--on-surface-variant);">문피스 바디필로우의 인체공학적 설계가 궁금하다면?</span>
+                        <span class="material-symbols-outlined text-primary icon-prescription">verified</span>
+                        <span class="prescription-item-h">문피스의 약속</span>
+                        <span class="prescription-item-p">문피스 바디필로우의 인체공학적 설계가 궁금하다면?</span>
                     </a>
                     <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" class="flex flex-col gap-2 p-6 surface-container-high rounded-2xl transition hover:shadow-lg">
-                        <span class="material-symbols-outlined text-primary" style="font-size: 2rem;">shopping_bag</span>
-                        <span style="font-weight: 800; font-size: 1.1rem; color: var(--primary);">구매하러 가기</span>
-                        <span style="font-size: 0.9rem; color: var(--on-surface-variant);">임산부 수면 과학의 결정체, 네이버 스마트스토어 공식몰</span>
+                        <span class="material-symbols-outlined text-primary icon-prescription">shopping_bag</span>
+                        <span class="prescription-item-h">구매하러 가기</span>
+                        <span class="prescription-item-p">임산부 수면 과학의 결정체, 네이버 스마트스토어 공식몰</span>
                     </a>
                 </div>
             </div>
@@ -114,7 +123,7 @@
                     <a href="#" class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-moon-500 hover:text-white transition-all">
                         <span class="material-symbols-outlined text-xl">share</span>
                     </a>
-                    <a href="https://smartstore.naver.com/moonwalk00" target="_blank" class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-[#2DB400] hover:text-white transition-all">
+                    <a href="https://smartstore.naver.com/moonwalk00" target="_blank" rel="noopener" class="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-[#2DB400] hover:text-white transition-all">
                         <span class="material-symbols-outlined text-xl">shopping_cart</span>
                     </a>
                 </div>

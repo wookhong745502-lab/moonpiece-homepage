@@ -20,14 +20,15 @@ function parseCookies(request) {
 async function safeGetJson(key, env) {
   try {
     const obj = await env.JOURNAL_BUCKET.get(key);
-    if (!obj) return {};
+    if (!obj) return key.endsWith('.json') && !key.includes('list.json') ? {} : [];
     let text = await obj.text();
     text = text.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\uFEFF]/g, '').trim();
-    if (!text) return {};
-    return JSON.parse(text);
+    if (!text) return key.endsWith('.json') && !key.includes('list.json') ? {} : [];
+    const data = JSON.parse(text);
+    return data;
   } catch (e) {
     console.error(`Safe JSON parse error for ${key}:`, e.message);
-    return {};
+    return key.endsWith('.json') && !key.includes('list.json') ? {} : [];
   }
 }
 
@@ -77,8 +78,9 @@ function classifyCategory(q) {
 }
 
 async function aiCall(prompt, env, system = "You are an elite Korean content architect.") {
-  const settings = await safeGetJson("config/settings.json", env);
-  const textEngine = settings.textApi || "deepseek";
+  const settings = await safeGetJson("config/settings.json", env); // Note: settings is an object usually but safeGetJson returns [] if missing.
+  // Fix settings check
+  const textEngine = (settings && settings.textApi) || "deepseek";
 
   if (textEngine.startsWith("@cf/")) {
     try {
@@ -109,13 +111,23 @@ export default {
     try {
       const url = new URL(request.url);
 
+      // Public API Routes
+      if (url.pathname === "/list-journals") {
+        const list = await safeGetJson("journal/list.json", env);
+        return new Response(JSON.stringify(list), { headers: { "Content-Type": "application/json", "Cache-Control": "no-cache" } });
+      }
+      if (url.pathname === "/list-knowledge") {
+        const list = await safeGetJson("knowledge/list.json", env);
+        return new Response(JSON.stringify(list), { headers: { "Content-Type": "application/json", "Cache-Control": "no-cache" } });
+      }
+
       // Auth middleware
       if (url.pathname.startsWith('/admin/') && url.pathname !== '/admin/login.html' && !url.pathname.startsWith('/admin/api/auth/')) {
         const cookies = parseCookies(request);
         if (cookies['admin_session'] !== 'wookhong_verified') return Response.redirect(`${url.origin}/admin/login.html`, 302);
       }
 
-      // APIs
+      // Admin APIs
       if (url.pathname === '/admin/api/auth/verify' && request.method === 'POST') {
         const body = await request.json();
         if (body.bypass || body.token) {
@@ -143,10 +155,34 @@ export default {
         return await generateContentHandler(request, env);
       }
 
+      if (url.pathname === "/admin/api/cleanup-lists") {
+        const keys = ["journal/list.json", "knowledge/list.json"];
+        const results = {};
+        for (const key of keys) {
+          let list = await safeGetJson(key, env);
+          const originalLen = list.length;
+          // Filter: remove items with "Test", "Dummy", "가나다", or very short descriptions
+          list = list.filter(item => {
+            const t = (item.title || "").toLowerCase();
+            const d = (item.desc || "").toLowerCase();
+            const isDummy = t.includes("test") || t.includes("dummy") || t.includes("더미") || t.includes("테스트") || t.includes("asdf") || d.length < 10;
+            return !isDummy;
+          });
+          if (list.length !== originalLen) {
+            await env.JOURNAL_BUCKET.put(key, JSON.stringify(list));
+          }
+          results[key] = { original: originalLen, cleaned: list.length };
+        }
+        return new Response(JSON.stringify({ success: true, results }), { headers: { "Content-Type": "application/json" } });
+      }
+
       if (url.pathname === "/admin/api/auto-publish") return await autoPublishHandler(request, env);
 
       if (url.pathname === "/admin/api/settings") {
-        if (request.method === "GET") return new Response(JSON.stringify(await safeGetJson("config/settings.json", env)));
+        if (request.method === "GET") {
+          const cfg = await env.JOURNAL_BUCKET.get("config/settings.json");
+          return new Response(cfg ? await cfg.text() : "{}", { headers: { "Content-Type": "application/json" } });
+        }
         const settings = await request.json();
         await env.JOURNAL_BUCKET.put("config/settings.json", JSON.stringify(settings));
         return new Response(JSON.stringify({ success: true }));
@@ -155,7 +191,7 @@ export default {
       if (url.pathname === "/admin/api/posts") {
         const j = await safeGetJson("journal/list.json", env);
         const k = await safeGetJson("knowledge/list.json", env);
-        const combined = [...(Array.isArray(j) ? j : []).map(p=>({...p, type:'journal'})), ...(Array.isArray(k) ? k : []).map(p=>({...p, type:'knowledge'}))];
+        const combined = [...j.map(p=>({...p, type:'journal'})), ...k.map(p=>({...p, type:'knowledge'}))];
         return new Response(JSON.stringify(combined.sort((a,b)=>new Date(b.date)-new Date(a.date))));
       }
 
@@ -178,66 +214,168 @@ export default {
 };
 
 // --- Core Logic ---
+
+async function resolveUniqueSlug(type, requestedSlug, env) {
+  const listKey = type === 'seo' ? "journal/list.json" : "knowledge/list.json";
+  const list = await safeGetJson(listKey, env);
+  let slug = requestedSlug || "untitled";
+  let finalSlug = slug;
+  let counter = 1;
+  while (list.some(item => (item.slug === finalSlug || item.url?.includes(`/${finalSlug}.html`)))) {
+    finalSlug = `${slug}-${counter}`;
+    counter++;
+  }
+  return finalSlug;
+}
+
+async function renderTemplate(templateName, data, env) {
+  const templateObj = await env.JOURNAL_BUCKET.get(`templates/${templateName}`);
+  if (!templateObj) throw new Error(`Template ${templateName} not found`);
+  let html = await templateObj.text();
+  
+  for (const [key, value] of Object.entries(data)) {
+    const regex = new RegExp(`{{${key}}}|{{${key.toUpperCase()}}}`, 'g');
+    html = html.replace(regex, value || "");
+  }
+  return html;
+}
+
 async function generateContentHandler(request, env) {
+  const payload = await request.json();
+  const { isFinal, type, keyword, title, slug: requestedSlug, finalHtml, style, category, summary, youtubeId, faqs, schema } = payload;
+  const isSEO = type === 'seo';
+
+  // --- FINAL PUBLISH MODE (Direct JSON Response) ---
+  if (isFinal) {
+    try {
+      const finalSlug = await resolveUniqueSlug(type, requestedSlug || generateSlug(title), env);
+      const publishDate = new Date(new Date().getTime() + 9 * 60 * 60 * 1000).toISOString().split('T')[0];
+      const targetKey = isSEO ? `journal/${finalSlug}.html` : `knowledge/${finalSlug}.html`;
+      
+      const templateData = {
+        title,
+        description: summary || "",
+        desc: summary || "",
+        summary: summary || "",
+        category: category || classifyCategory(keyword),
+        publish_date: publishDate,
+        date: publishDate,
+        rich_content: finalHtml,
+        content: finalHtml,
+        faq_content: (faqs || []).map(f => `<div class="faq-item"><strong>Q: ${f.q}</strong><p>A: ${f.a}</p></div>`).join(''),
+        faq_section: (faqs && faqs.length) ? `<section class="p-10 bg-slate-50 rounded-3xl mt-20"><h3>FAQ</h3>${faqs.map(f => `<p><b>${f.q}</b><br>${f.a}</p>`).join('')}</section>` : "",
+        og_image: payload.image || "",
+        slug: finalSlug,
+        json_ld: JSON.stringify(schema || {})
+      };
+
+      const finalOutput = await renderTemplate(isSEO ? "journal_template.html" : "post_template.html", templateData, env);
+      await env.JOURNAL_BUCKET.put(targetKey, finalOutput, { httpMetadata: { contentType: "text/html" } });
+
+      const listKey = isSEO ? "journal/list.json" : "knowledge/list.json";
+      let list = await safeGetJson(listKey, env);
+      list.push({
+        title,
+        desc: summary || "",
+        url: `/${targetKey}`,
+        date: publishDate,
+        category: templateData.category,
+        image: payload.image,
+        slug: finalSlug
+      });
+      await env.JOURNAL_BUCKET.put(listKey, JSON.stringify(list));
+
+      return new Response(JSON.stringify({ success: true, path: `/${targetKey}` }), { headers: { "Content-Type": "application/json" } });
+    } catch (e) {
+      return new Response(JSON.stringify({ success: false, error: e.message }), { status: 500, headers: { "Content-Type": "application/json" } });
+    }
+  }
+
+  // --- DRAFT GENERATION MODE (Streaming Response) ---
   const { readable, writable } = new TransformStream();
   const writer = writable.getWriter();
   const encoder = new TextEncoder();
   const log = async (msg) => { await writer.write(encoder.encode(`LOG:${msg}\n`)); };
 
-  const task = (async () => {
+  (async () => {
     try {
-      const payload = await request.json();
-      const { keyword, title, type, style, sourceName, sourceUrl } = payload;
-      const isSEO = type === 'seo';
-      const settings = await safeGetJson("config/settings.json", env);
+      const settingsObj = await env.JOURNAL_BUCKET.get("config/settings.json");
+      const settings = settingsObj ? JSON.parse(await settingsObj.text()) : {};
       const imgModel = (isSEO ? settings.imgSeo : settings.imgAeo) || "@cf/bytedance/stable-diffusion-xl-lightning";
       const selectedStyle = style || settings.defaultStyle || "Professional photography";
+      const negPrompt = "ugly, deformed, disfigured eyes, bad hands, distorted face, blurry, low quality, watermark, text, error, horror, creepy, unnatural skin, bad anatomy, extra fingers, missing fingers, fused fingers, too many fingers, three fingers, six fingers, seven fingers, mutated hands, malformed hands, poorly drawn hands, long fingers, broken fingers, overlapping fingers, cloned fingers, disjointed fingers, floating limbs, disconnected limbs, gross proportions, malformed limbs";
 
       await log(`🚀 AI 프로세스 가동: ${keyword}`);
 
-      const universalPrompt = `You are an SEO expert. Write a deep article for "${keyword}". Return JSON: {"html": "...", "faqs": [], "score": 95}. SEO needs {{IMG_1}}, {{IMG_2}}, {{IMG_3}}. AEO needs markdown image. Korean language.`;
+      const universalPrompt = `You are a premium Korean content architect. Write a deep article for "${keyword}". Return JSON: {"html": "...", "faqs": [{"q": "...", "a": "..."}], "summary": "3-line summary"}. Use {{IMG_1}}, {{IMG_2}}, {{IMG_3}} markers in HTML. IMPORTANT: Ensure all anatomical details in images are perfect. Avoid horror or distorted visuals. Style: ${selectedStyle}.`;
 
       const [textRes, imgRes] = await Promise.all([
         aiCall(universalPrompt, env).then(r => { log(`✅ 텍스트 생성 전송 완료`); return r; }),
         (async () => {
           if (isSEO) {
-            log(`🎨 이미지 4개 병렬 생성 중...`);
-            return Promise.all([1,2,3,4].map(i => env.AI.run(imgModel, { prompt: `${keyword} premium photography, ${selectedStyle}` }).then(r => { log(`🖼️ 이미지 ${i} 완료`); return r; })));
+            log(`🎨 이미지 4개 병렬 생성 중 (네거티브 프롬프트 적용)...`);
+            return Promise.all([0,1,2,3].map(i => env.AI.run(imgModel, { 
+              prompt: `${keyword} premium photography, highly detailed, realistic skin, perfect anatomy, ${selectedStyle}`,
+              negative_prompt: negPrompt
+            }).then(r => { log(`🖼️ 이미지 ${i+1} 완료`); return r; })));
           }
-          log(`🎨 AEO 인포그래픽 생성 중...`);
-          return [await env.AI.run(imgModel, { prompt: `${keyword} infographic, ${selectedStyle}` })];
+          log(`🎨 대표 이미지 생성 중 (네거티브 프롬프트 적용)...`);
+          return [await env.AI.run(imgModel, { 
+            prompt: `${keyword} informative infographic style, clean design, premium aesthetic, ${selectedStyle}`,
+            negative_prompt: negPrompt
+          })];
         })()
       ]);
 
       const data = parseAIJson(textRes);
-      let html = data.html || "";
-      const imgId = Date.now();
+      let draftHtml = data.html || "";
+      const timeStamp = Date.now();
+      const slugBase = generateSlug(title);
       let heroPath = "";
+      let gallery = [];
 
       if (isSEO) {
-        const heroKey = `assets/journal/${generateSlug(title)}-${imgId}-hero.png`;
+        // Hero Image
         if (imgRes[0]) {
-           await env.JOURNAL_BUCKET.put(heroKey, imgRes[0], { httpMetadata: { contentType: "image/png" } });
-           heroPath = `/${heroKey}`;
+          const heroKey = `assets/journal/${slugBase}-${timeStamp}-hero.png`;
+          await env.JOURNAL_BUCKET.put(heroKey, imgRes[0], { httpMetadata: { contentType: "image/png" } });
+          heroPath = `/${heroKey}`;
         }
+        // Body Images
         for(let j=1; j<=3; j++) {
           if (imgRes[j]) {
-            const bKey = `assets/journal/${generateSlug(title)}-${imgId}-${j}.png`;
+            const bKey = `assets/journal/${slugBase}-${timeStamp}-${j}.png`;
             await env.JOURNAL_BUCKET.put(bKey, imgRes[j], { httpMetadata: { contentType: "image/png" } });
-            html = html.replace(`{{IMG_${j}}}`, `<img src="/${bKey}" style="width:100%; border-radius:1rem; margin:2rem 0;">`);
+            const imgTag = `<img src="/${bKey}" style="width:100%; border-radius:1rem; margin:2rem 0;" alt="${keyword} ${j}">`;
+            gallery.push(`/${bKey}`);
+            if (draftHtml.includes(`{{IMG_${j}}}`)) {
+              draftHtml = draftHtml.replace(`{{IMG_${j}}}`, imgTag);
+            } else {
+              draftHtml += `\n\n${imgTag}`;
+            }
           }
         }
       } else {
-        const aeoKey = `assets/knowledge/${generateSlug(title)}-${imgId}.png`;
+        const aeoKey = `assets/knowledge/${slugBase}-${timeStamp}.png`;
         if (imgRes[0]) {
-           await env.JOURNAL_BUCKET.put(aeoKey, imgRes[0], { httpMetadata: { contentType: "image/png" } });
-           heroPath = `/${aeoKey}`;
-           html = `<img src="${heroPath}" class="w-full rounded-2xl mb-8">` + html;
+          await env.JOURNAL_BUCKET.put(aeoKey, imgRes[0], { httpMetadata: { contentType: "image/png" } });
+          heroPath = `/${aeoKey}`;
+          draftHtml = `<img src="${heroPath}" class="w-full rounded-2xl mb-8">` + draftHtml;
         }
       }
 
-      const youtubeId = await getAiRecommendedYoutubeId(keyword, env);
-      const draft = { title, html, faqs: data.faqs || [], image: heroPath, youtubeId, type };
+      const recYoutubeId = await getAiRecommendedYoutubeId(keyword, env);
+      const draft = { 
+        title, 
+        html: draftHtml, 
+        faqs: data.faqs || [], 
+        summary: data.summary || "",
+        image: heroPath, 
+        youtubeId: recYoutubeId, 
+        type,
+        slug: requestedSlug || slugBase,
+        schema: { "@context": "https://schema.org", "@type": "Article", "headline": title, "image": heroPath, "author": { "@type": "Organization", "name": "Moonpiece" } }
+      };
       
       await log(`✨ 모든 작업 완료!`);
       await writer.write(encoder.encode(JSON.stringify({ success: true, draft })));
@@ -250,6 +388,5 @@ async function generateContentHandler(request, env) {
 }
 
 async function autoPublishHandler(request, env) {
-  // Simple implementation for brevirty, assuming user wants fix for generateContentHandler mostly
-  return new Response(JSON.stringify({ success: true, message: "Auto-publish called" }));
+  return new Response(JSON.stringify({ success: true, message: "Auto-publish placeholder" }));
 }

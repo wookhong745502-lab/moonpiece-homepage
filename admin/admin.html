@@ -84,7 +84,7 @@
         .text-primary { color: var(--primary); border: none; background: none; cursor: pointer; font-weight: 800; }
         
         /* Modal */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.5); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center; }
         .modal-overlay.active { display: flex; }
         .modal { background: white; padding: 2.5rem; border-radius: 2rem; width: 95%; max-width: 900px; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25); }
 
@@ -103,6 +103,46 @@
         .text-4xl { font-size: 2.25rem; }
         .text-lg { font-size: 1.125rem; }
         .p-8 { padding: 2rem; }
+
+        /* Custom Utility Classes for Lint-Free Code */
+        .w-full { width: 100%; }
+        .hidden { display: none; }
+        .flex-center-between { display: flex; justify-content: space-between; align-items: center; }
+        .sidebar-footer { margin-top: auto; padding: 1rem; }
+        .btn-logout { color: var(--outline); font-weight: 700; background: none; border: none; cursor: pointer; text-decoration: underline; }
+        .stat-label { font-size: 0.9rem; color: var(--on-surface-variant); }
+        .stat-value-primary { font-size: 3rem; font-weight: 900; color: var(--primary); }
+        .stat-value-secondary { font-size: 3rem; font-weight: 900; color: var(--secondary); }
+        .grid-2col-fixed { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        .info-box { font-size: 0.85rem; color: var(--on-surface-variant); background: var(--surface-container-low); padding: 1rem; border-radius: 1rem; text-align: center; border: 1px dashed var(--outline-variant); }
+        .console-status-label { font-size: 0.8rem; font-weight: 800; color: var(--primary); letter-spacing: 0.1em; }
+        .mono-label { font-size: 0.7rem; color: var(--on-surface-variant); font-family: monospace; }
+        .draft-desc { color: var(--on-surface-variant); margin-bottom: 2rem; }
+        .aeo-editor-box { border: 1px solid var(--outline-variant); padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 2rem; background: white; }
+        .schema-preview-box { width: 100%; height: 250px; background: #1e1e1e; color: #d4d4d4; padding: 1rem; border-radius: 0.5rem; font-family: monospace; font-size: 0.85rem; margin-bottom: 2rem; border: none; outline: none; resize: vertical; }
+        .small-hint { font-size: 0.8rem; color: var(--on-surface-variant); margin-top: 0.5rem; }
+        .settings-heading { font-size: 1.5rem; font-weight: 900; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.75rem; color: var(--primary); }
+        .settings-heading-sec { font-size: 1.5rem; font-weight: 900; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.75rem; color: var(--secondary); }
+        .rules-textarea { width: 100%; height: 250px; padding: 1.25rem; border-radius: 1rem; border: 1px solid var(--outline); font-size: 0.95rem; line-height: 1.6; }
+        .rules-desc { font-size: 0.85rem; color: var(--on-surface-variant); margin-bottom: 1.5rem; }
+        .modal-textarea { width: 100%; box-sizing:border-box; margin-bottom:1rem; padding:1rem; border-radius:1rem; border:1px solid var(--outline); }
+
+        /* Classes for dynamically generated content */
+        .log-item { margin-bottom: 0.5rem; font-size: 0.85rem; font-family: monospace; }
+        .log-time { color: var(--primary); opacity: 0.6; }
+        .result-success-card { padding: 2rem; border-radius: 1rem; border: 2px solid var(--primary); background: var(--primary-container); }
+        .result-card-title { color: var(--on-primary-container); font-size: 1.5rem; font-weight: 800; margin-bottom: 1rem; }
+        .result-card-desc { color: var(--on-primary-container); font-weight: 700; margin-bottom: 1.5rem; }
+        .table-cell-title { padding-left: 2rem; }
+        .table-cell-actions { padding-right: 2rem; text-align: right; }
+        .btn-edit-link { color: var(--primary); margin-right: 1rem; background: none; border: none; cursor: pointer; }
+        .yt-preview-box { background: var(--surface-container-low); padding: 1.5rem; border-radius: 1rem; border: 1px dashed var(--outline-variant); }
+        .yt-preview-hint { color: var(--on-surface-variant); font-size: 0.9rem; }
+        .auto-res-item { padding: 1rem; border-radius: 0.75rem; border-width: 1px; display: flex; justify-content: space-between; align-items: center; }
+        .auto-res-success { background: #f0fdf4; border-color: #dcfce7; }
+        .auto-res-fail { background: #fef2f2; border-color: #fee2e2; }
+        .btn-secondary-full { background: var(--secondary); color: white; width: 100%; padding: 1.5rem; }
+        .height-200 { height: 200px; }
     </style>
 </head>
 <body>
@@ -119,8 +159,8 @@
             <div class="nav-item" onclick="switchPage('settings', this)"><span class="material-symbols-outlined">settings</span> API 설정</div>
             <div class="nav-item" onclick="switchPage('rules', this)"><span class="material-symbols-outlined">rule</span> 콘텐츠 가이드라인</div>
         </nav>
-        <div style="margin-top: auto; padding: 1rem;">
-            <button onclick="logout()" style="color: var(--outline); font-weight: 700; background: none; border: none; cursor: pointer; text-decoration: underline;">로그아웃</button>
+        <div class="sidebar-footer">
+            <button onclick="logout()" class="btn-logout">로그아웃</button>
         </div>
     </aside>
 
@@ -130,12 +170,12 @@
             <h1 class="font-serif mb-8 text-4xl">콘텐츠 상태 현황</h1>
             <div class="grid grid-cols-2 gap-8 mb-12">
                 <div class="card p-8">
-                    <div style="font-size: 0.9rem; color: var(--on-surface-variant);">발행된 콘텐츠</div>
-                    <div style="font-size: 3rem; font-weight: 900; color: var(--primary);" id="stat-total">0</div>
+                    <div class="stat-label">발행된 콘텐츠</div>
+                    <div class="stat-value-primary" id="stat-total">0</div>
                 </div>
                 <div class="card p-8">
-                    <div style="font-size: 0.9rem; color: var(--on-surface-variant);">예약된 콘텐츠</div>
-                    <div style="font-size: 3rem; font-weight: 900; color: var(--secondary);" id="stat-scheduled">0</div>
+                    <div class="stat-label">예약된 콘텐츠</div>
+                    <div class="stat-value-secondary" id="stat-scheduled">0</div>
                 </div>
             </div>
         </div>
@@ -153,11 +193,11 @@
                     <input type="text" id="seo-keyword" placeholder="예: 임산부 불면증 완화 방법" onkeydown="if(event.key==='Enter') autoFillSEO()">
                 </div>
                 
-                <div class="grid grid-cols-2 gap-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <div class="grid grid-cols-2 gap-8 grid-2col-fixed">
                     <div class="input-group">
                         <label>문서 제목</label>
                         <input type="text" id="seo-title">
-                        <button class="btn-ai" onclick="suggest('title', 'seo')"><span class="material-symbols-outlined">magic_button</span> 추천</button>
+                        <button class="btn-ai" onclick="suggest('title', 'seo')" title="제목 추천받기" aria-label="제목 추천받기"><span class="material-symbols-outlined">magic_button</span> 추천</button>
                     </div>
                     <div class="input-group">
                         <label>URL 슬러그</label>
@@ -168,14 +208,14 @@
                 <div class="input-group">
                     <label>보조 키워드 (10개 연동)</label>
                     <textarea id="seo-sub-kw" rows="3"></textarea>
-                    <button class="btn-ai" onclick="suggest('keywords', 'seo')"><span class="material-symbols-outlined">auto_awesome</span> 재생성</button>
+                    <button class="btn-ai" onclick="suggest('keywords', 'seo')" title="보조 키워드 재생성" aria-label="보조 키워드 재생성"><span class="material-symbols-outlined">auto_awesome</span> 재생성</button>
                 </div>
 
-                <div class="grid grid-cols-2 gap-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <div class="grid grid-cols-2 gap-8 grid-2col-fixed">
                     <div class="input-group">
                         <label>신뢰도 출처명</label>
                         <input type="text" id="seo-source-name">
-                        <button class="btn-ai" onclick="suggest('source', 'seo')"><span class="material-symbols-outlined">find_in_page</span> 다시 찾기</button>
+                        <button class="btn-ai" onclick="suggest('source', 'seo')" title="출처 다시 찾기" aria-label="출처 다시 찾기"><span class="material-symbols-outlined">find_in_page</span> 다시 찾기</button>
                     </div>
                     <div class="input-group">
                         <label>출처 URL</label>
@@ -184,34 +224,35 @@
                 </div>
 
                 <div class="input-group">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <label style="margin-bottom: 0;">실서버 임베드 유튜브 영상 ID</label>
-                        <a id="seo-yt-link" href="#" target="_blank" style="font-size: 0.75rem; color: var(--primary); font-weight: bold;">영상 확인하기</a>
+                    <div class="flex-center-between mb-2">
+                        <label class="mb-0">실서버 임베드 유튜브 영상 ID</label>
+                        <a id="seo-yt-link" href="#" target="_blank" rel="noopener" class="text-xs text-primary font-bold">영상 확인하기</a>
                     </div>
                     <input type="text" id="seo-youtube-id" placeholder="비워두면 AI가 자동으로 관련 영상을 추천합니다">
                 </div>
 
-                <p style="font-size: 0.85rem; color: var(--on-surface-variant); background: var(--surface-container-low); padding: 1rem; border-radius: 1rem; text-align: center; margin-bottom: 2rem; border: 1px dashed var(--outline-variant);">
-                    <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 1.2rem;">info</span> 이미지 모델 및 스타일 설정은 <strong>API 설정</strong> 메뉴에서 통합 관리됩니다.
+                <p class="info-box mb-8">
+                    <span class="material-symbols-outlined align-middle text-lg">info</span> 이미지 모델 및 스타일 설정은 <strong>API 설정</strong> 메뉴에서 통합 관리됩니다.
                 </p>
 
-                <button id="seo-gen-btn" class="btn-primary w-full p-6 text-xl" style="width: 100%;" onclick="generate('seo')">검수용 콘텐츠 초안 생성하기</button>
+                <button id="seo-gen-btn" class="btn-primary w-full p-6 text-xl" onclick="quickPublish('seo')">AI 콘텐츠 즉시 발행하기 (1분 소요)</button>
+                <div id="seo-result-zone" class="mt-8 hidden"></div>
 
                 <!-- AI Generation Log Console -->
-                <div id="seo-log-console" class="ai-console mt-8" style="display: none;">
-                    <div class="flex justify-between items-center mb-4">
+                <div id="seo-log-console" class="ai-console mt-8 hidden">
+                    <div class="flex-center-between mb-4">
                         <div class="flex items-center gap-2">
                             <span class="pulse-red"></span>
-                            <span style="font-size: 0.8rem; font-weight: 800; color: var(--primary); letter-spacing: 0.1em;">AI ENGINE LIVE STATUS</span>
+                            <span class="console-status-label">AI ENGINE LIVE STATUS</span>
                         </div>
-                        <div style="font-size: 0.7rem; color: var(--on-surface-variant); font-family: monospace;">LOGS_STDOUT_V2.0</div>
+                        <div class="mono-label">LOGS_STDOUT_V2.0</div>
                     </div>
                     <div id="seo-log-list" class="log-list"></div>
                 </div>
             </div>
 
             <!-- SEO Draft Mode -->
-            <div id="seo-draft-zone" style="display: none;">
+            <div id="seo-draft-zone" class="hidden">
                 <div class="score-box">
                     <div class="score-circle" id="seo-score">0</div>
                     <div>
@@ -220,13 +261,13 @@
                     </div>
                 </div>
                 <h3 class="font-serif text-2xl mb-4">본문 검수 및 수정 (Draft)</h3>
-                <p style="color:var(--on-surface-variant); margin-bottom: 2rem;">본문을 자유롭게 수정하세요. 하단 배포 버튼을 누르면 이 내용으로 실서버에 적용됩니다.</p>
+                <p class="draft-desc">본문을 자유롭게 수정하세요. 하단 배포 버튼을 누르면 이 내용으로 실서버에 적용됩니다.</p>
                 
                 <!-- YouTube Preview for Admin -->
                 <div id="seo-yt-preview" class="mb-12"></div>
 
                 <div id="draft-editor" contenteditable="true"></div>
-                <button id="publish-seo-btn" class="btn-primary w-full p-6" style="width: 100%; background: var(--secondary); color: white;" onclick="publish('seo')">전문 저널 실서버에 배포 완료하기</button>
+                <button id="publish-seo-btn" class="btn-primary btn-secondary-full" onclick="publish('seo')">전문 저널 실서버에 배포 완료하기</button>
             </div>
         </div>
 
@@ -244,54 +285,55 @@
                 <div class="input-group">
                     <label>사용자 질문 (질문형 자동 생성, 직접 수정 가능)</label>
                     <textarea id="aeo-question" rows="2"></textarea>
-                    <button class="btn-ai" onclick="suggest('question', 'aeo')"><span class="material-symbols-outlined">auto_awesome</span> 질문 재생성</button>
+                    <button class="btn-ai" onclick="suggest('question', 'aeo')" title="질문 재생성" aria-label="질문 재생성"><span class="material-symbols-outlined">auto_awesome</span> 질문 재생성</button>
                 </div>
                 <div class="input-group">
                     <label>URL 슬러그</label>
                     <input type="text" id="aeo-slug">
                 </div>
                 <div class="input-group">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <label style="margin-bottom: 0;">실서버 임베드 유튜브 영상 ID</label>
-                        <a id="aeo-yt-link" href="#" target="_blank" style="font-size: 0.75rem; color: var(--primary); font-weight: bold;">영상 확인하기</a>
+                    <div class="flex-center-between mb-2">
+                        <label class="mb-0">실서버 임베드 유튜브 영상 ID</label>
+                        <a id="aeo-yt-link" href="#" target="_blank" rel="noopener" class="text-xs text-primary font-bold">영상 확인하기</a>
                     </div>
                     <input type="text" id="aeo-youtube-id" placeholder="비워두면 AI가 자동으로 관련 영상을 추천합니다">
                 </div>
 
-                <p style="font-size: 0.85rem; color: var(--on-surface-variant); background: var(--surface-container-low); padding: 1rem; border-radius: 1rem; text-align: center; margin-bottom: 2rem; border: 1px dashed var(--outline-variant);">
-                    <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 1.2rem;">info</span> 이미지 모델 및 스타일 설정은 <strong>API 설정</strong> 메뉴에서 통합 관리됩니다.
+                <p class="info-box mb-8">
+                    <span class="material-symbols-outlined align-middle text-lg">info</span> 이미지 모델 및 스타일 설정은 <strong>API 설정</strong> 메뉴에서 통합 관리됩니다.
                 </p>
                 <!-- FAQ 생성 여부 버튼 삭제 완료 (백엔드에서 강제 3~10개 자동 생성) -->
-                <button id="aeo-gen-btn" class="btn-primary w-full p-6 text-xl" style="width: 100%;" onclick="generate('aeo')">지식인 검수용 답변 생성하기</button>
+                <button id="aeo-gen-btn" class="btn-primary w-full p-6 text-xl" onclick="quickPublish('aeo')">AI 답변 즉시 발행하기 (30초 소요)</button>
+                <div id="aeo-result-zone" class="mt-8 hidden"></div>
                 
                 <!-- AI Generation Log Console -->
-                <div id="aeo-log-console" class="ai-console mt-8" style="display: none;">
-                    <div class="flex justify-between items-center mb-4">
+                <div id="aeo-log-console" class="ai-console mt-8 hidden">
+                    <div class="flex-center-between mb-4">
                         <div class="flex items-center gap-2">
                             <span class="pulse-red"></span>
-                            <span style="font-size: 0.8rem; font-weight: 800; color: var(--primary); letter-spacing: 0.1em;">AI ENGINE LIVE STATUS</span>
+                            <span class="console-status-label">AI ENGINE LIVE STATUS</span>
                         </div>
-                        <div style="font-size: 0.7rem; color: var(--on-surface-variant); font-family: monospace;">LOGS_STDOUT_V2.0</div>
+                        <div class="mono-label">LOGS_STDOUT_V2.0</div>
                     </div>
                     <div id="aeo-log-list" class="log-list"></div>
                 </div>
             </div>
 
             <!-- AEO Draft Mode -->
-            <div id="aeo-draft-zone" style="display: none;">
+            <div id="aeo-draft-zone" class="hidden">
                 <h3 class="font-serif text-2xl mb-4">답변 검수 및 수정 (AEO 시맨틱 포맷)</h3>
-                <p style="color:var(--on-surface-variant); margin-bottom: 1rem;">본문을 직접 수정하고 최종 배포를 진행하세요.</p>
+                <p class="draft-desc mb-4">본문을 직접 수정하고 최종 배포를 진행하세요.</p>
                 
                 <!-- YouTube Preview for Admin -->
                 <div id="aeo-yt-preview" class="mb-12"></div>
 
-                <div id="aeo-editor" contenteditable="true" style="border: 1px solid var(--outline-variant); padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 2rem; background: white;"></div>
+                <div id="aeo-editor" contenteditable="true" class="aeo-editor-box"></div>
                 
                 <h4 class="font-serif text-xl mb-2">JSON-LD 스키마 검수 및 수정 (Snippet Editor)</h4>
-                <p style="color:var(--on-surface-variant); font-size: 0.9rem; margin-bottom: 0.5rem;">AI 검색 결과 노출을 위해 생성된 복잡 스키마입니다. 직접 수정이 가능합니다.</p>
-                <textarea id="aeo-schema-preview" style="width: 100%; height: 250px; background: #1e1e1e; color: #d4d4d4; padding: 1rem; border-radius: 0.5rem; font-family: monospace; font-size: 0.85rem; margin-bottom: 2rem; border: none; outline: none; resize: vertical;"></textarea>
+                <p class="draft-desc text-sm mb-2">AI 검색 결과 노출을 위해 생성된 복잡 스키마입니다. 직접 수정이 가능합니다.</p>
+                <textarea id="aeo-schema-preview" class="schema-preview-box"></textarea>
 
-                <button id="publish-aeo-btn" class="btn-primary w-full p-6" style="width: 100%; background: var(--secondary); color: white;" onclick="publish('aeo')">지식인 문서 실서버에 배포 완료하기</button>
+                <button id="publish-aeo-btn" class="btn-primary btn-secondary-full" onclick="publish('aeo')">지식인 문서 실서버에 배포 완료하기</button>
             </div>
         </div>
 
@@ -306,10 +348,10 @@
                 <div class="input-group">
                     <label>발행할 주제 목록 (한 줄에 하나씩 제목/키워드 입력)</label>
                     <textarea id="auto-keywords" rows="10" placeholder="예:&#10;임산부 불면증 해결&#10;임신 초기 영양제 추천&#10;바디필로우 선택 기준&#10;..."></textarea>
-                    <p style="font-size: 0.8rem; color: var(--on-surface-variant); margin-top: 0.5rem;">입력한 순서대로 지정된 간격에 맞춰 발행됩니다. (입력 안하면 AI가 자동 생성)</p>
+                    <p class="small-hint">입력한 순서대로 지정된 간격에 맞춰 발행됩니다. (입력 안하면 AI가 자동 생성)</p>
                 </div>
 
-                <div class="grid grid-cols-2 gap-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <div class="grid grid-cols-2 gap-8 grid-2col-fixed">
                     <div class="input-group">
                         <label>발행 유형</label>
                         <select id="auto-type">
@@ -329,28 +371,28 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <div class="grid grid-cols-2 gap-8 grid-2col-fixed">
                     <div class="input-group">
                         <label>발행 시작일</label>
                         <input type="date" id="auto-start-date">
                     </div>
                     <div class="input-group">
                         <label>발행 간격 (시간 단위)</label>
-                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <div class="flex items-center gap-2">
                             <input type="number" id="auto-interval" value="24" min="1">
-                            <span style="font-weight: bold; color: var(--on-surface-variant);">시간</span>
+                            <span class="font-bold text-slate-500">시간</span>
                         </div>
                     </div>
                 </div>
 
-                <p style="font-size: 0.85rem; color: var(--on-surface-variant); background: var(--surface-container-low); padding: 1rem; border-radius: 1rem; text-align: center; margin-bottom: 2rem; border: 1px dashed var(--outline-variant);">
-                    <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 1.2rem;">info</span> 이미지 모델 및 스타일 설정은 <strong>API 설정</strong> 메뉴에서 통합 관리됩니다.
+                <p class="info-box mb-8">
+                    <span class="material-symbols-outlined align-middle text-lg">info</span> 이미지 모델 및 스타일 설정은 <strong>API 설정</strong> 메뉴에서 통합 관리됩니다.
                 </p>
 
-                <button id="auto-gen-btn" class="btn-primary w-full p-6 text-xl" style="width: 100%;" onclick="runAutoPublish()">대량 자동 예약 발행 시작하기</button>
+                <button id="auto-gen-btn" class="btn-primary w-full p-6 text-xl" onclick="runAutoPublish()">대량 자동 예약 발행 시작하기</button>
             </div>
 
-            <div id="auto-results-zone" class="card" style="display: none;">
+            <div id="auto-results-zone" class="card hidden">
                 <h3 class="font-serif text-2xl mb-4">자동 발행 결과</h3>
                 <div id="auto-results-list" class="flex flex-col gap-4"></div>
             </div>
@@ -360,20 +402,20 @@
 
         <!-- Manage Page -->
         <div id="page-manage" class="page-content">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 3rem;">
+            <div class="flex-center-between mb-12">
                 <h1 class="font-serif text-4xl">포스트 관리</h1>
-                <button onclick="migrateClear()" class="btn-primary" style="background:var(--error); border:none;">모든 데이터 초기화</button>
+                <button onclick="migrateClear()" class="btn-primary bg-red-600 border-none">모든 데이터 초기화</button>
             </div>
             
-            <div class="card" style="padding: 0; overflow: hidden;">
+            <div class="card p-0 overflow-hidden">
                 <table id="post-table">
                     <thead>
                         <tr>
-                            <th style="padding-left: 2rem;">제목</th>
+                            <th class="pl-8">제목</th>
                             <th>유형/카테고리</th>
                             <th>상태</th>
                             <th>발행(예정)일</th>
-                            <th style="padding-right: 2rem; text-align: right;">관리</th>
+                            <th class="pr-8 text-right">관리</th>
                         </tr>
                     </thead>
                     <tbody id="post-list"></tbody>
@@ -385,53 +427,55 @@
         <div id="page-rules" class="page-content">
             <div class="flex justify-between items-center mb-12">
                 <div>
-                    <h2 style="font-size: 2rem; font-weight: 900; color: var(--on-surface); margin-bottom: 0.5rem;">콘텐츠 상세 규칙 관리</h2>
-                    <p style="color: var(--on-surface-variant);">AI가 글을 쓰고 이미지를 만들 때 따르는 '행동 지침'을 분야별로 설정합니다.</p>
+                    <h2 class="text-3xl font-black text-slate-900 mb-2">콘텐츠 상세 규칙 관리</h2>
+                    <p class="text-slate-500">AI가 글을 쓰고 이미지를 만들 때 따르는 '행동 지침'을 분야별로 설정합니다.</p>
                 </div>
                 <button class="btn-primary" onclick="saveSettings()">
-                    <span class="material-symbols-outlined" style="font-size: 20px;">save</span>
+                    <span class="material-symbols-outlined text-xl">save</span>
                     변경된 모든 규칙 저장하기
                 </button>
             </div>
 
             <!-- Writing Section -->
-            <div style="margin-bottom: 4rem;">
-                <h3 style="font-size: 1.5rem; font-weight: 900; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.75rem; color: var(--primary);">
-                    <span class="material-symbols-outlined" style="font-size: 32px;">edit_note</span> 
+            <div class="mb-16">
+                <h3 class="settings-heading">
+                    <span class="material-symbols-outlined text-[32px]">edit_note</span> 
                     1. AI 글쓰기 스타일 지침 (Writing Style)
                 </h3>
-                <div class="grid grid-cols-2 gap-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <div class="grid grid-cols-2 gap-8 grid-2col-fixed">
                     <div class="card">
-                        <label style="font-weight: 800; display: block; margin-bottom: 1rem; font-size: 1.1rem;">SEO 저널 글쓰기 스타일</label>
-                        <p style="font-size: 0.85rem; color: var(--on-surface-variant); margin-bottom: 1.5rem;">롱폼 블로그 글의 톤앤매너, 전문성 수준, 문체(예: ~해요, ~합니다) 등을 정의합니다.</p>
-                        <textarea id="setting-prompt-seo" style="width: 100%; height: 250px; padding: 1.25rem; border-radius: 1rem; border: 1px solid var(--outline); font-size: 0.95rem; line-height: 1.6;"></textarea>
+                        <label class="font-extrabold block mb-4 text-lg">SEO 저널 글쓰기 스타일</label>
+                        <p class="rules-desc">롱폼 블로그 글의 톤앤매너, 전문성 수준, 문체(예: ~해요, ~합니다) 등을 정의합니다.</p>
+                        <textarea id="setting-prompt-seo" class="rules-textarea"></textarea>
                     </div>
                     <div class="card">
-                        <label style="font-weight: 800; display: block; margin-bottom: 1rem; font-size: 1.1rem;">AEO 지식인 답변 스타일</label>
-                        <p style="font-size: 0.85rem; color: var(--on-surface-variant); margin-bottom: 1.5rem;">질문에 대한 명쾌한 답변 방식, 전문가적인 권위, 답변의 핵심 요약 방식을 정의합니다.</p>
-                        <textarea id="setting-prompt-aeo" style="width: 100%; height: 250px; padding: 1.25rem; border-radius: 1rem; border: 1px solid var(--outline); font-size: 0.95rem; line-height: 1.6;"></textarea>
+                        <label class="font-extrabold block mb-4 text-lg">AEO 지식인 답변 스타일</label>
+                        <p class="rules-desc">질문에 대한 명쾌한 답변 방식, 전문가적인 권위, 답변의 핵심 요약 방식을 정의합니다.</p>
+                        <textarea id="setting-prompt-aeo" class="rules-textarea"></textarea>
                     </div>
                 </div>
             </div>
 
             <!-- Image Section -->
             <div>
-                <h3 style="font-size: 1.5rem; font-weight: 900; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.75rem; color: var(--secondary);">
-                    <span class="material-symbols-outlined" style="font-size: 32px;">image_search</span> 
+            <div>
+                <h3 class="settings-heading-sec">
+                    <span class="material-symbols-outlined text-[32px]">image_search</span> 
                     2. AI 이미지 생성 세부 지침 (Image Specs)
                 </h3>
-                <div class="grid grid-cols-2 gap-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <div class="grid grid-cols-2 gap-8 grid-2col-fixed">
                     <div class="card">
-                        <label style="font-weight: 800; display: block; margin-bottom: 1rem; font-size: 1.1rem;">저널용 이미지 묘사 가이드</label>
-                        <p style="font-size: 0.85rem; color: var(--on-surface-variant); margin-bottom: 1.5rem;">이미지에 포함될 피사체의 특징, 배경 분위기, 색감 등에 대한 영문/한글 지침입니다.</p>
-                        <textarea id="setting-prompt-img-seo" style="width: 100%; height: 200px; padding: 1.25rem; border-radius: 1rem; border: 1px solid var(--outline); font-size: 0.95rem; line-height: 1.6;"></textarea>
+                        <label class="font-extrabold block mb-4 text-lg">저널용 이미지 묘사 가이드</label>
+                        <p class="rules-desc">이미지에 포함될 피사체의 특징, 배경 분위기, 색감 등에 대한 영문/한글 지침입니다.</p>
+                        <textarea id="setting-prompt-img-seo" class="rules-textarea height-200"></textarea>
                     </div>
                     <div class="card">
-                        <label style="font-weight: 800; display: block; margin-bottom: 1rem; font-size: 1.1rem;">지식인용 시각자료 가이드</label>
-                        <p style="font-size: 0.85rem; color: var(--on-surface-variant); margin-bottom: 1.5rem;">인포그래픽, 다이어그램 요소, 정보 전달을 위한 시각적 구성 방식을 정의합니다.</p>
-                        <textarea id="setting-prompt-img-aeo" style="width: 100%; height: 200px; padding: 1.25rem; border-radius: 1rem; border: 1px solid var(--outline); font-size: 0.95rem; line-height: 1.6;"></textarea>
+                        <label class="font-extrabold block mb-4 text-lg">지식인용 시각자료 가이드</label>
+                        <p class="rules-desc">인포그래픽, 다이어그램 요소, 정보 전달을 위한 시각적 구성 방식을 정의합니다.</p>
+                        <textarea id="setting-prompt-img-aeo" class="rules-textarea height-200"></textarea>
                     </div>
                 </div>
+            </div>
             </div>
         </div>
 
@@ -444,7 +488,7 @@
 
             <div class="card">
                 <div class="mb-12">
-                    <h3 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem; color: var(--primary);">
+                    <h3 class="text-xl font-extrabold mb-8 flex items-center gap-2 text-primary">
                         <span class="material-symbols-outlined">description</span> 텍스트 생성 (LLM) 엔진 설정
                     </h3>
                     <div class="input-group">
@@ -459,11 +503,11 @@
                 </div>
 
                 <div class="mb-12">
-                    <h3 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 2rem; display: flex; align-items: center; gap: 0.5rem; color: var(--primary);">
+                    <h3 class="text-xl font-extrabold mb-8 flex items-center gap-2 text-primary">
                         <span class="material-symbols-outlined">image</span> 이미지 생성 (Image AI) 모델 설정
                     </h3>
                     
-                    <div class="grid grid-cols-2 gap-8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                    <div class="grid grid-cols-2 gap-8 grid-2col-fixed mb-8">
                         <div class="input-group">
                             <label>SEO 저널 이미지 모델</label>
                             <select id="setting-img-seo">
@@ -484,14 +528,14 @@
                         </div>
                     </div>
 
-                    <p style="font-size: 0.85rem; color: var(--on-surface-variant); margin-top: 1rem;">
+                    <p class="small-hint mb-0 mt-4">
                         * 자동 발행 시에는 각 글의 유형(SEO/AEO)에 설정된 이미지 모델이 그대로 사용됩니다. 이미지 스타일은 고품질 실사(Photorealistic)로 고정 적용됩니다.
                     </p>
                 </div>
 
-                <div style="margin-top: 3rem;">
-                    <button onclick="saveSettings()" class="btn-primary w-full p-6 text-xl" style="width: 100%;">시스템 설정 저장하기</button>
-                    <p id="settings-status" style="margin-top: 1rem; text-align: center; font-weight: bold; color: var(--primary); display: none;">설정이 저장되었습니다.</p>
+                <div class="mt-12">
+                    <button onclick="saveSettings()" class="btn-primary w-full p-6 text-xl">시스템 설정 저장하기</button>
+                    <p id="settings-status" class="mt-4 text-center font-bold text-primary hidden">설정이 저장되었습니다.</p>
                 </div>
             </div>
         </div>
@@ -501,10 +545,10 @@
     <div class="modal-overlay" id="edit-modal">
         <div class="modal">
             <h2 class="font-serif text-2xl mb-4">포스트 수정 (HTML Raw)</h2>
-            <textarea id="update-editor" rows="15" style="width: 100%; box-sizing:border-box; margin-bottom:1rem; padding:1rem; border-radius:1rem; border:1px solid var(--outline);"></textarea>
-            <div style="display:flex; gap:1rem; justify-content:flex-end;">
-                <button onclick="closeEditModal()" style="padding:1rem 2rem; background:#ccc; border:none; border-radius:0.5rem; cursor:pointer; font-weight:bold;">취소</button>
-                <button id="update-btn" onclick="submitEdit()" style="padding:1rem 2rem; background:var(--primary); color:white; border:none; border-radius:0.5rem; cursor:pointer; font-weight:bold;">수정 저장</button>
+            <textarea id="update-editor" rows="15" class="modal-textarea"></textarea>
+            <div class="flex gap-4 justify-end">
+                <button onclick="closeEditModal()" class="px-8 py-4 bg-slate-200 border-none rounded-lg cursor-pointer font-bold">취소</button>
+                <button id="update-btn" onclick="submitEdit()" class="px-8 py-4 bg-moon-600 text-white border-none rounded-lg cursor-pointer font-bold">수정 저장</button>
             </div>
         </div>
     </div>
@@ -634,10 +678,8 @@
             function addLog(msg, color = 'var(--on-surface)') {
                 const now = new Date().toLocaleTimeString();
                 const div = document.createElement('div');
-                div.style.marginBottom = '0.5rem';
-                div.style.fontSize = '0.85rem';
-                div.style.fontFamily = 'monospace';
-                div.innerHTML = `<span style="color:var(--primary); opacity:0.6;">[${now}]</span> <span style="color:${color}">${msg}</span>`;
+                div.className = 'log-item';
+                div.innerHTML = `<span class="log-time">[${now}]</span> <span style="color:${color}">${msg}</span>`;
                 logList.appendChild(div);
                 logList.scrollTop = logList.scrollHeight;
             }
@@ -736,7 +778,7 @@
                     if (ytPreview) {
                         if (data.draft.youtubeId) {
                             ytPreview.innerHTML = `
-                                <div class="video-section" style="margin-top: 0; padding-top: 0; border-top: none;">
+                                <div class="yt-preview-box">
                                     <h4 class="font-serif text-lg mb-4">🎬 AI 추천 영상 미리보기</h4>
                                     <div class="video-container">
                                         <iframe src="https://www.youtube.com/embed/${data.draft.youtubeId}" frameborder="0" allowfullscreen></iframe>
@@ -744,7 +786,7 @@
                                 </div>
                             `;
                         } else {
-                            ytPreview.innerHTML = '<p style="color:var(--on-surface-variant); font-size: 0.9rem;">관련 영상을 자동으로 찾지 못했습니다. 필요시 수동으로 ID를 입력해 주세요.</p>';
+                            ytPreview.innerHTML = '<div class="yt-preview-box"><p class="yt-preview-hint">관련 영상을 자동으로 찾지 못했습니다. 필요시 수동으로 ID를 입력해 주세요.</p></div>';
                         }
                     }
 
@@ -763,6 +805,120 @@
                 clearTimeout(timeoutId);
                 btn.disabled = false; 
                 btn.textContent = '검수용 콘텐츠 초안 생성하기'; 
+            }
+        }
+
+        async function quickPublish(type) {
+            const btn = document.getElementById(type + '-gen-btn');
+            const logConsole = document.getElementById(type + '-log-console');
+            const logList = document.getElementById(type + '-log-list');
+            const resultZone = document.getElementById(type + '-result-zone');
+            
+            logConsole.style.display = 'block';
+            logList.innerHTML = '';
+            resultZone.style.display = 'none';
+            resultZone.innerHTML = '';
+            
+            function addLog(msg, color = 'var(--on-surface)') {
+                const now = new Date().toLocaleTimeString();
+                const div = document.createElement('div');
+                div.className = 'log-item';
+                div.innerHTML = `<span class="log-time">[${now}]</span> <span style="color:${color}">${msg}</span>`;
+                logList.appendChild(div);
+                logList.scrollTop = logList.scrollHeight;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'AI 프로세스 시작 중...';
+            addLog('🚀 AI 통합 발행 프로세스 시작...', 'var(--primary)');
+
+            const payload = {
+                type,
+                keyword: val(type + '-keyword'),
+                title: type === 'seo' ? val('seo-title') : val('aeo-question'),
+                slug: val(type + '-slug'),
+                subKeywords: type === 'seo' ? val('seo-sub-kw') : '',
+                sourceName: type === 'seo' ? val('seo-source-name') : '',
+                sourceUrl: type === 'seo' ? val('seo-source-url') : '',
+                category: val(type + '-category'),
+                youtubeId: val(type + '-youtube-id')
+            };
+
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => { controller.abort(); addLog('❌ 시간 초과로 중단되었습니다.', 'red'); }, 180000);
+
+            try {
+                addLog('⚙️ [1/2] 콘텐츠 생성 중...', '#9cdcfe');
+                const res = await fetch('/admin/api/generate-' + (type === 'seo' ? 'journal' : 'knowledge'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                    signal: controller.signal
+                });
+                
+                const reader = res.body.getReader();
+                const decoder = new TextDecoder();
+                let fullData = '';
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    const chunk = decoder.decode(value, { stream: true });
+                    const lines = chunk.split('\n');
+                    for (const line of lines) {
+                        if (!line.trim()) continue;
+                        if (line.startsWith('LOG:')) addLog(line.substring(4), '#569cd6');
+                        else fullData += line;
+                    }
+                }
+
+                const genData = JSON.parse(fullData);
+                if(!genData.success) throw new Error(genData.error);
+                
+                addLog('✅ 콘텐츠 생성 완료 (이미지 포함).', '#4ade80');
+                addLog('⚙️ [2/2] 실서버 배포 프로세스 가동...', '#9cdcfe');
+
+                const publishPayload = {
+                    ...genData.draft,
+                    type,
+                    finalHtml: genData.draft.html,
+                    isFinal: true,
+                    publishDate: new Date(new Date().getTime() + 9 * 60 * 60 * 1000).toISOString().split('T')[0],
+                    schema: genData.draft.schema,
+                    youtubeId: genData.draft.youtubeId
+                };
+
+                const pRes = await fetch('/admin/api/generate-' + (type === 'seo' ? 'journal' : 'knowledge'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(publishPayload),
+                    signal: controller.signal
+                });
+                const pData = await pRes.json();
+                
+                if(pData.success) {
+                    addLog(`🎉 발행 완벽 완료! 경로: ${pData.path}`, '#4ade80');
+                    resultZone.style.display = 'block';
+                    resultZone.innerHTML = `
+                        <div class="result-success-card">
+                            <h3 class="result-card-title">✅ 콘텐츠 발행 성공!</h3>
+                            <p class="result-card-desc">내용이 실서버에 즉시 반영되었습니다.</p>
+                            <div class="flex gap-4">
+                                <a href="${pData.path}" target="_blank" rel="noopener" class="btn-primary p-4 px-8 text-white no-underline">지금 바로 확인하기</a>
+                                <button onclick="switchPage('manage')" class="p-4 px-8 rounded-xl font-bold bg-white border border-slate-200 cursor-pointer">포스트 목록 보기</button>
+                            </div>
+                        </div>
+                    `;
+                    window.scrollTo({ top: resultZone.offsetTop - 100, behavior: 'smooth' });
+                } else {
+                    throw new Error(pData.error);
+                }
+            } catch(e) {
+                addLog('❌ 오류 발생: ' + e.message, '#f87171');
+                alert('발행 에러: ' + e.message);
+            } finally {
+                clearTimeout(timeoutId);
+                btn.disabled = false;
+                btn.textContent = type === 'seo' ? 'AI 콘텐츠 즉시 발행하기' : 'AI 답변 즉시 발행하기';
             }
         }
 
@@ -824,18 +980,18 @@
 
                 return `
                 <tr>
-                    <td style="padding-left: 2rem;">
-                        <a href="${p.url}" target="_blank" class="font-bold hover:text-primary transition">${p.title}</a>
-                        <div style="font-size: 0.75rem; color: var(--outline);">${p.url}</div>
+                    <td class="table-cell-title">
+                        <a href="${p.url}" target="_blank" rel="noopener" class="font-bold hover:text-primary transition">${p.title}</a>
+                        <div class="text-[0.7rem] text-slate-400">${p.url}</div>
                     </td>
-                    <td><span class="px-2 py-1 bg-surface-container-high rounded text-xs" style="font-weight: 800; font-size: 0.7rem;">${p.type === 'journal' ? '임산부 저널' : '임산부 지식인'}</span> ${p.category}</td>
+                    <td><span class="px-2 py-1 bg-slate-100 rounded text-[0.7rem] font-black">${p.type === 'journal' ? '임산부 저널' : '임산부 지식인'}</span> ${p.category}</td>
                     <td>
                         ${isScheduled ? '<span class="px-2 py-1 bg-amber-50 text-amber-600 rounded-lg text-xs font-bold border border-amber-100">발행 예약</span>' : '<span class="px-2 py-1 bg-green-50 text-green-600 rounded-lg text-xs font-bold border border-green-100">발행 완료</span>'}
                     </td>
                     <td><span class="text-sm ${isScheduled ? 'text-amber-600 font-bold' : 'text-slate-500'}">${p.date}</span></td>
-                    <td style="padding-right: 2rem; text-align: right;">
-                        <button onclick="openEditModal('${p.url}')" class="text-primary" style="margin-right:1rem;">수정</button>
-                        <button onclick="deletePost('${p.url}', '${p.type}')" class="text-error">삭제</button>
+                    <td class="table-cell-actions">
+                        <button onclick="openEditModal('${p.url}')" class="btn-edit-link">수정</button>
+                        <button onclick="deletePost('${p.url}', '${p.type}')" class="text-error bg-transparent border-none cursor-pointer">삭제</button>
                     </td>
                 </tr>
             `}).join('');
@@ -948,14 +1104,14 @@
                 
                 if(data.success) {
                     resultsList.innerHTML = data.results.map(r => `
-                        <div class="p-4 ${r.status === 'success' ? 'bg-green-50' : 'bg-red-50'} rounded-xl border ${r.status === 'success' ? 'border-green-100' : 'border-red-100'} flex justify-between items-center">
+                        <div class="auto-res-item ${r.status === 'success' ? 'auto-res-success' : 'auto-res-fail'}">
                             <div>
                                 <div class="font-bold">${r.keyword}</div>
                                 <div class="text-sm ${r.status === 'success' ? 'text-green-600' : 'text-red-600'}">
                                     ${r.status === 'success' ? '발행 성공: ' + r.title : '실패: ' + r.error}
                                 </div>
                             </div>
-                            ${r.status === 'success' ? `<a href="${r.path}" target="_blank" class="px-3 py-1 bg-white border border-green-200 rounded-lg text-xs font-bold text-green-700">보기</a>` : ''}
+                            ${r.status === 'success' ? `<a href="${r.path}" target="_blank" rel="noopener" class="px-3 py-1 bg-white border border-green-200 rounded-lg text-xs font-bold text-green-700 no-underline">보기</a>` : ''}
                         </div>
                     `).join('');
                 } else {
