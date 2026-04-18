@@ -262,8 +262,26 @@ async function generateContentHandler(request, env) {
         date: publishDate,
         rich_content: finalHtml,
         content: finalHtml,
-        faq_content: (faqs || []).map(f => `<div class="faq-item"><strong>Q: ${f.q}</strong><p>A: ${f.a}</p></div>`).join(''),
-        faq_section: (faqs && faqs.length) ? `<section class="p-10 bg-slate-50 rounded-3xl mt-20"><h3>FAQ</h3>${faqs.map(f => `<p><b>${f.q}</b><br>${f.a}</p>`).join('')}</section>` : "",
+        faq_content: (faqs || []).map(f => `
+          <div class="faq-item bg-white p-8 rounded-2xl border border-slate-100 shadow-sm mb-6">
+            <h4 class="text-lg font-bold text-slate-900 mb-3 flex items-start gap-3">
+              <span class="text-moon-600">Q.</span> ${f.q}
+            </h4>
+            <p class="text-slate-600 leading-relaxed pl-8">
+              ${f.a}
+            </p>
+          </div>`).join(''),
+        faq_section: (faqs && faqs.length) ? `
+          <section class="mt-24 p-8 lg:p-16 bg-slate-50 rounded-[3rem] border border-slate-100">
+            <h3 class="text-3xl font-serif font-black mb-10 text-slate-900">도움이 되는 질문 (FAQ)</h3>
+            <div class="space-y-4">
+              ${faqs.map(f => `
+                <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+                  <h4 class="text-lg font-bold text-slate-900 mb-3 flex gap-3 text-moon-600">Q. <span class="text-slate-900">${f.q}</span></h4>
+                  <p class="text-slate-600 leading-relaxed pl-8">${f.a}</p>
+                </div>`).join('')}
+            </div>
+          </section>` : "",
         og_image: payload.image || "",
         slug: finalSlug,
         json_ld: JSON.stringify(schema || {})

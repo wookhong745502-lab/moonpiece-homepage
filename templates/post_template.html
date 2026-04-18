@@ -14,121 +14,127 @@
     <meta property="og:url" content="https://www.moonpiece.co.kr/knowledge/{{slug}}.html">
     <link rel="canonical" href="https://www.moonpiece.co.kr/knowledge/{{slug}}.html">
 
-    <!-- Fonts & Icons -->
-    <link rel="stylesheet" href="../styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700;900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap">
-
-    <style>
-        .post-container { max-width: 850px; margin-left: auto; margin-right: auto; }
-        .hero-img { width: 100%; height: auto; border-radius: 2rem; margin-bottom: 3rem; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
-        .aeo-summary-title { font-size: 1.25rem; font-weight: 800; color: var(--moon-600); margin: 0 0 1.5rem 0; padding: 0; border: none; }
-        .category-label { font-size: 0.9rem; color: var(--moon-600); font-weight: 800; margin-bottom: 1.5rem; letter-spacing: 0.2em; text-transform: uppercase; }
-        .post-h1 { font-size: 3.5rem; line-height: 1.2; word-break: keep-all; font-weight: 900; }
-        .meta-text { color: #64748b; font-size: 0.95rem; }
-        .meta-dot { color: #cbd5e1; font-size: 0.95rem; }
-        .prescription-card { border: 1px solid var(--outline-variant); border-radius: 2.5rem; }
-        .prescription-h4 { font-weight: 900; font-size: 1.6rem; margin-bottom: 2rem; color: var(--on-surface); }
-        .prescription-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-        .prescription-item-h { font-weight: 800; font-size: 1.2rem; color: var(--primary); }
-        .prescription-item-p { font-size: 0.9rem; color: var(--on-surface-variant); line-height: 1.5; }
-        .icon-back { font-size: 1.25rem; }
-        .icon-prescription { font-size: 2.5rem; }
-
-        @media (max-width: 768px) {
-            .post-h1 { font-size: 2.25rem; }
-            .prescription-grid { grid-template-columns: 1fr; }
+    <!-- Styles & Fonts -->
+    <link rel="stylesheet" href="../styles.css?v=1.6">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        moon: { 50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 500: '#8b5cf6', 600: '#7c3aed', 900: '#4c1d95' }
+                    },
+                    fontFamily: { serif: ['Noto Serif KR', 'serif'], sans: ['Manrope', 'sans-serif'] }
+                }
+            }
         }
+    </script>
+    <style>
+        .knowledge-rich-content h2 { font-family: 'Noto Serif KR', serif; font-size: 2rem; font-weight: 900; margin-top: 3rem; margin-bottom: 1.5rem; color: #1e293b; line-height: 1.3; }
+        .knowledge-rich-content h3 { font-family: 'Noto Serif KR', serif; font-size: 1.5rem; font-weight: 800; margin-top: 2.5rem; margin-bottom: 1rem; color: var(--moon-600); }
+        .knowledge-rich-content p { font-size: 1.125rem; line-height: 1.8; color: #475569; margin-bottom: 1.5rem; word-break: keep-all; }
+        .knowledge-rich-content ul, .knowledge-rich-content ol { margin-bottom: 1.5rem; padding-left: 1.5rem; }
+        .knowledge-rich-content li { font-size: 1.125rem; line-height: 1.8; color: #475569; margin-bottom: 0.5rem; }
+        .knowledge-rich-content strong { color: #0f172a; font-weight: 700; }
+        .hero-img { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 2rem; margin-bottom: 3rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15); }
     </style>
 </head>
-<body>
+<body class="bg-slate-50 text-slate-900 font-sans pt-20">
     <!-- Top Navigation -->
-    <nav class="nav-bar">
-        <div class="nav-mp-container">
-            <a href="../index.html" class="logo font-serif">Moonpiece</a>
-            <div class="nav-links">
-                <a href="../brand.html" class="nav-link">문피스의 약속</a>
-                <a href="../review.html" class="nav-link">엄마들의 이야기</a>
-                <a href="../journal.html" class="nav-link">임산부 저널</a>
-                <a href="../knowledge.html" class="nav-link active">임산부 지식인</a>
+    <nav class="nav-bar fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md border-b border-slate-100 z-[1000]">
+        <div class="nav-mp-container mp-container flex justify-between items-center h-20">
+            <a href="../index.html" class="logo text-2xl font-black text-moon-600 font-serif no-underline">Moonpiece</a>
+            <div class="nav-links hidden lg:flex items-center gap-10">
+                <a href="../brand.html" class="nav-link text-slate-600 hover:text-moon-600 font-semibold transition-colors no-underline">문피스의 약속</a>
+                <a href="../review.html" class="nav-link text-slate-600 hover:text-moon-600 font-semibold transition-colors no-underline">엄마들의 이야기</a>
+                <a href="../journal.html" class="nav-link text-slate-600 hover:text-moon-600 font-semibold transition-colors no-underline">임산부 저널</a>
+                <a href="../knowledge.html" class="nav-link text-moon-600 font-bold transition-colors no-underline border-b-2 border-moon-600 pb-1">임산부 지식인</a>
             </div>
             <div class="flex items-center gap-4">
-                <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" rel="noopener" class="btn-primary mobile-hidden">구매하기</a>
-                <button class="hamburger-btn" id="menu-toggle" aria-label="메뉴 열기" title="메뉴 열기">
-                    <span></span><span></span><span></span>
+                <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" rel="noopener" class="btn-primary hidden sm:flex px-6 py-2.5 rounded-full bg-moon-600 text-white font-bold hover:bg-moon-700 transition-all no-underline">구매하기</a>
+                <button class="hamburger-btn lg:hidden outline-none" id="menu-toggle" aria-label="메뉴 열기" title="메뉴 열기">
+                    <span class="block w-6 h-0.5 bg-slate-900 mb-1.5 transition-all"></span>
+                    <span class="block w-6 h-0.5 bg-slate-900 mb-1.5 transition-all"></span>
+                    <span class="block w-6 h-0.5 bg-slate-900 transition-all"></span>
                 </button>
             </div>
         </div>
     </nav>
 
     <!-- Mobile Navigation Overlay -->
-    <div class="nav-overlay" id="overlay"></div>
-    <div class="mobile-nav" id="mobile-menu">
-        <a href="../brand.html" class="nav-link">문피스의 약속</a>
-        <a href="../review.html" class="nav-link">엄마들의 이야기</a>
-        <a href="../journal.html" class="nav-link">임산부 저널</a>
-        <a href="../knowledge.html" class="nav-link active">임산부 지식인</a>
-        <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" class="btn-primary text-center mt-8">구매하기</a>
+    <div class="nav-overlay fixed inset-0 bg-slate-900/50 z-[1040] opacity-0 invisible transition-all duration-300" id="overlay"></div>
+    <div class="mobile-nav fixed top-0 right-[-100%] w-[280px] h-full bg-white z-[1050] shadow-2xl p-10 flex flex-col gap-6 transition-all duration-500 ease-in-out" id="mobile-menu">
+        <div class="flex justify-end mb-4">
+            <button id="close-menu" class="text-slate-400 hover:text-slate-900">
+                <span class="material-symbols-outlined text-3xl">close</span>
+            </button>
+        </div>
+        <a href="../brand.html" class="text-lg font-bold text-slate-900 border-b border-slate-50 pb-4 no-underline">문피스의 약속</a>
+        <a href="../review.html" class="text-lg font-bold text-slate-900 border-b border-slate-50 pb-4 no-underline">엄마들의 이야기</a>
+        <a href="../journal.html" class="text-lg font-bold text-slate-900 border-b border-slate-50 pb-4 no-underline">임산부 저널</a>
+        <a href="../knowledge.html" class="text-lg font-bold text-moon-600 border-b border-slate-50 pb-4 no-underline">임산부 지식인</a>
+        <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" rel="noopener" class="btn-primary mt-6 text-center py-4 rounded-xl bg-moon-600 text-white font-bold no-underline">구매하기</a>
     </div>
 
-    <!-- Article Content -->
-    <article class="py-32">
-        <div class="mp-container post-container">
-            <a href="../knowledge.html" class="back-link mb-12">
-                <span class="material-symbols-outlined icon-back">arrow_back</span>
-                지식인 목록으로 돌아가기
+    <!-- Article Header -->
+    <header class="pt-24 pb-12 bg-white border-b border-slate-100">
+        <div class="mp-container max-w-4xl">
+            <a href="../knowledge.html" class="text-moon-600 font-bold flex items-center gap-2 mb-8 text-sm no-underline hover:translate-x-[-4px] transition-transform">
+                <span class="material-symbols-outlined text-sm">west</span> 지식인 목록으로 돌아가기
             </a>
+            <span class="inline-block px-4 py-1.5 bg-moon-50 text-moon-600 rounded-full text-xs font-bold mb-6 tracking-widest uppercase">{{category}}</span>
+            <h1 class="text-4xl lg:text-5xl font-serif text-slate-900 mb-8 leading-[1.2] font-black break-keep">
+                <span class="text-moon-500 mr-2 italic underline decoration-moon-100 decoration-8 underline-offset-8">Q.</span> {{title}}
+            </h1>
+            <div class="flex items-center gap-4 text-slate-400 text-sm">
+                <span class="font-bold text-slate-600 italic">Moonpiece AI Expert Answer</span>
+                <span>•</span>
+                <span>{{publish_date}}</span>
+            </div>
+        </div>
+    </header>
 
-            <!-- AEO: Direct Answer Summary -->
-            <div class="aeo-summary-box mb-16">
-                <h2 class="aeo-summary-title">💡 AI 핵심 답변 요약</h2>
-                <div class="leading-relaxed text-slate-700">
+    <!-- Main Content -->
+    <main class="pb-32 bg-slate-50/50">
+        <div class="mp-container max-w-4xl pt-16">
+            <!-- AI Expert Response Box -->
+            <div class="bg-white rounded-[2.5rem] p-8 lg:p-12 mb-16 shadow-xl shadow-moon-100/50 border border-moon-100 relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-8 opacity-5">
+                    <span class="material-symbols-outlined text-8xl">verified_user</span>
+                </div>
+                <h2 class="text-xl lg:text-2xl font-serif font-black mb-6 flex items-center gap-2 text-moon-600">
+                    <span class="material-symbols-outlined">auto_awesome</span> 전문가 핵심 답변 리포트
+                </h2>
+                <div class="text-lg text-slate-700 leading-relaxed font-bold italic border-l-4 border-moon-500 pl-6">
                     {{summary}}
                 </div>
             </div>
 
-            <div class="category-label">{{category}}</div>
-            <h1 class="font-serif mb-8 post-h1">{{title}}</h1>
-            
-            <div class="flex items-center gap-4 mb-16 pb-8 border-b border-slate-100">
-                <span class="meta-text">에디터: 문피스 수면연구소</span>
-                <span class="meta-dot">·</span>
-                <span class="meta-text">게시일: {{publish_date}}</span>
-            </div>
-
             <!-- Hero Image -->
-            <img src="{{og_image}}" alt="{{title}}" class="hero-img">
+            <img src="{{og_image}}" alt="{{title}}" class="hero-img" onerror="this.style.display='none'">
 
-            <!-- Main Content Area -->
-            <div class="journal-content-rich">
-                {{rich_content}}
+            <!-- Rich Content Card -->
+            <div class="bg-white rounded-[2.5rem] p-8 lg:p-16 shadow-sm border border-slate-100 mb-16">
+                <div class="knowledge-rich-content">
+                    {{rich_content}}
+                </div>
             </div>
-            
+
             <!-- FAQ Section -->
             {{faq_section}}
 
-            <!-- Internal SEO Links -->
-            <div class="card p-12 mt-20 surface-container-low shadow-md prescription-card">
-                <h4 class="prescription-h4">🌙 엄마의 밤을 위한 문피스 처방전</h4>
-                <div class="prescription-grid">
-                    <a href="../brand.html" class="flex flex-col gap-4 p-8 surface-container-high rounded-3xl transition hover:shadow-lg no-underline group">
-                        <span class="material-symbols-outlined text-primary icon-prescription">verified</span>
-                        <div>
-                            <span class="prescription-item-h block mb-2">문피스의 약속</span>
-                            <span class="prescription-item-p">문피스 바디필로우의 인체공학적 설계가 궁금하다면?</span>
-                        </div>
-                    </a>
-                    <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" rel="noopener" class="flex flex-col gap-4 p-8 surface-container-high rounded-3xl transition hover:shadow-lg no-underline group">
-                        <span class="material-symbols-outlined text-primary icon-prescription">shopping_bag</span>
-                        <div>
-                            <span class="prescription-item-h block mb-2">구매하러 가기</span>
-                            <span class="prescription-item-p">임산부 수면 과학의 결정체, 네이버 스마트스토어 공식몰</span>
-                        </div>
-                    </a>
+            <!-- CTA Section -->
+            <div class="mt-24 bg-gradient-to-br from-moon-600 to-moon-900 rounded-[3rem] p-12 lg:p-20 text-center text-white relative shadow-2xl overflow-hidden">
+                <h3 class="text-3xl lg:text-4xl font-serif font-black mb-8">궁금증이 해결되셨나요?</h3>
+                <p class="text-moon-100 text-lg mb-12 max-w-xl mx-auto opacity-90 leading-relaxed">숙면의 고민, 문피스가 기술로 해결합니다.<br>지금 20만 엄마들이 선택한 편안함을 소유하세요.</p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                    <a href="https://smartstore.naver.com/moonwalk00/products/2416019050" target="_blank" rel="noopener" class="inline-block px-12 py-5 bg-white text-moon-900 rounded-full font-black text-xl shadow-xl hover:scale-105 transition-all no-underline">공식몰 바로가기</a>
+                    <a href="../knowledge.html" class="inline-block px-12 py-5 border border-white/30 text-white rounded-full font-black text-xl hover:bg-white/10 transition-all no-underline">다른 지식 더보기</a>
                 </div>
             </div>
         </div>
-    </article>
+    </main>
 
     <!-- Footer -->
     <footer class="bg-white pt-24 pb-12 border-t border-slate-100">
@@ -148,10 +154,10 @@
             <div>
                 <h4 class="font-bold text-slate-900 mb-6 uppercase tracking-wider text-xs">Menu</h4>
                 <ul class="space-y-4 text-sm text-slate-500 list-none p-0">
-                    <li><a href="../brand.html" class="hover:text-moon-600 transition-colors">문피스의 약속</a></li>
-                    <li><a href="../review.html" class="hover:text-moon-600 transition-colors">엄마들의 이야기</a></li>
-                    <li><a href="../journal.html" class="hover:text-moon-600 transition-colors">임산부 저널</a></li>
-                    <li><a href="../knowledge.html" class="hover:text-moon-600 transition-colors">임산부 지식인</a></li>
+                    <li><a href="../brand.html" class="hover:text-moon-600 transition-colors no-underline">문피스의 약속</a></li>
+                    <li><a href="../review.html" class="hover:text-moon-600 transition-colors no-underline">엄마들의 이야기</a></li>
+                    <li><a href="../journal.html" class="hover:text-moon-600 transition-colors no-underline">임산부 저널</a></li>
+                    <li><a href="../knowledge.html" class="hover:text-moon-600 transition-colors no-underline">임산부 지식인</a></li>
                 </ul>
             </div>
             <div>
@@ -177,31 +183,29 @@
                 © 2024 Moonpiece. All rights reserved.
             </div>
             <div class="flex gap-6 text-xs font-bold text-slate-500">
-                <a href="../terms.html" class="hover:text-moon-600">이용약관</a>
-                <a href="../privacy.html" class="hover:text-moon-600">개인정보처리방침</a>
+                <a href="../terms.html" class="hover:text-moon-600 no-underline">이용약관</a>
+                <a href="../privacy.html" class="hover:text-moon-600 no-underline">개인정보처리방침</a>
             </div>
         </div>
     </footer>
 
-    <!-- Script -->
     <script>
         const menuToggle = document.getElementById('menu-toggle');
+        const closeMenu = document.getElementById('close-menu');
         const mobileMenu = document.getElementById('mobile-menu');
         const overlay = document.getElementById('overlay');
 
-        menuToggle.addEventListener('click', () => {
-            const isActive = mobileMenu.classList.toggle('active');
-            menuToggle.classList.toggle('active');
-            overlay.classList.toggle('active');
-            document.body.style.overflow = isActive ? 'hidden' : 'auto';
-        });
+        const toggleMenu = () => {
+            mobileMenu.classList.toggle('right-[-100%]');
+            mobileMenu.classList.toggle('right-0');
+            overlay.classList.toggle('invisible');
+            overlay.classList.toggle('opacity-0');
+            document.body.classList.toggle('overflow-hidden');
+        };
 
-        overlay.addEventListener('click', () => {
-            mobileMenu.classList.remove('active');
-            menuToggle.classList.remove('active');
-            overlay.classList.remove('active');
-            document.body.style.overflow = 'auto';
-        });
+        menuToggle.addEventListener('click', toggleMenu);
+        closeMenu?.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
     </script>
 </body>
 </html>
