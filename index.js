@@ -461,10 +461,57 @@ async function generateContentHandler(request, env, type) {
     - Consistency: Ensure FAQs exactly match the body content.
     - Length: Body must be professional and deep.`;
 
-    const rawResponse = await aiCall(universalPrompt, env);
-    const data = parseAIJson(rawResponse);
+    const [rawResponse, imageResponses] = await Promise.all([
+      (async () => {
+        console.log(`[AI] Starting text generation for: ${keyword}`);
+        const start = Date.now();
+        const res = await aiCall(universalPrompt, env);
+        console.log(`[AI] Text generation finished in ${Date.now() - start}ms`);
+        return res;
+      })(),
+      (async () => {
+        if (!isSEO) return []; 
+        console.log(`[AI] Starting parallel image generation for: ${keyword}`);
+        const start = Date.now();
+        const imgBasePrompt = settings.imgSeoPrompt || `Professional high-quality photography, premium maternal vibes.`;
+        const imgPrompts = [
+          `${imgBasePrompt} for ${keyword}, hero wide angle, ${selectedStyle}.`,
+          `${imgBasePrompt} for ${keyword}, detailed close-up, ${selectedStyle}.`,
+          `${imgBasePrompt} for ${keyword}, contextual lifestyle, ${selectedStyle}.`,
+          `${imgBasePrompt} for ${keyword}, comforting warm atmosphere, ${selectedStyle}.`
+        ];
+        const negPrompt = "deformed, ugly, disfigured, bad anatomy, text, watermark, low resolution, blurry faces, mutated, extra limbs";
+        
+        try {
+          const results = await Promise.all(imgPrompts.map(async (p, i) => {
+            try {
+              console.log(`[AI] Generating image ${i+1}...`);
+              return await env.AI.run(imgModel, { 
+                prompt: p, 
+                negative_prompt: negPrompt,
+                num_steps: 20
+              });
+            } catch (err) {
+              console.error(`[AI] Image ${i+1} failed: ${err.message}`);
+              return null;
+            }
+          }));
+          console.log(`[AI] Image generation batch finished in ${Date.now() - start}ms`);
+          return results;
+        } catch (e) {
+          console.error("[AI] Critical error in image generation batch:", e.message);
+          return Array(4).fill(null);
+        }
+      })()
+    ]);
 
-    let youtubeId = null; // Forced NULL to prevent lag
+    console.log("[AI] Parsing AI JSON response...");
+    const data = parseAIJson(rawResponse);
+    if (!data || !data.html) {
+      console.error("[AI] Error: AI returned invalid or empty JSON content.");
+      throw new Error("AI content generation failed to produce valid content. Please try a different keyword.");
+    }
+    let youtubeId = null; 
     let html = (data.html || "").replace(/```html|```/g, "").trim();
     const faqs = data.faqs || [];
     const scoreData = { score: data.score || 95, feedback: data.feedback || "AI 분석 완료" };
@@ -473,25 +520,6 @@ async function generateContentHandler(request, env, type) {
     let heroImagePath = "";
 
     if (isSEO) {
-      const imgBasePrompt = settings.imgSeoPrompt || `Professional high-quality photography, premium maternal vibes.`;
-      const imgPrompts = [
-        `${imgBasePrompt} for ${keyword}, hero wide angle, ${selectedStyle}.`,
-        `${imgBasePrompt} for ${keyword}, detailed close-up, ${selectedStyle}.`,
-        `${imgBasePrompt} for ${keyword}, contextual lifestyle, ${selectedStyle}.`,
-        `${imgBasePrompt} for ${keyword}, comforting warm atmosphere, ${selectedStyle}.`
-      ];
-      const negPrompt = "deformed, ugly, disfigured, bad anatomy, text, watermark, low resolution, blurry faces, mutated, extra limbs";
-      
-      let imageResponses;
-      try {
-        imageResponses = await Promise.all(imgPrompts.map(p => 
-          env.AI.run(imgModel, { prompt: p, negative_prompt: negPrompt })
-        ));
-      } catch (e) {
-        console.warn("AI Image Generation failed:", e.message);
-        imageResponses = Array(4).fill(null);
-      }
-      
       const heroImageKey = `assets/${type}/${rawSlug}-${imgId}-hero.png`;
       if (imageResponses[0]) {
         await env.JOURNAL_BUCKET.put(heroImageKey, imageResponses[0], { httpMetadata: { contentType: "image/png" } });
@@ -538,12 +566,16 @@ async function generateContentHandler(request, env, type) {
         captionText = iMatch[3] ? iMatch[3].trim() : "";
       }
 
+      let imageResponse;
       try {
         imageResponse = await env.AI.run(imgModel, {
           prompt: `Professional high-quality ${imgStyle}, ${aiPrompt}. ${selectedStyle}, no text.`,
           negative_prompt: "deformed, ugly, bad anatomy, text, watermark"
         });
-      } catch (e) { imageResponse = null; }
+      } catch (e) { 
+        console.error("AEO Image Generation failed:", e.message);
+        imageResponse = null; 
+      }
 
       if (imageResponse) {
         const imageKey = `assets/${type}/${rawSlug}-${imgId}.png`;
