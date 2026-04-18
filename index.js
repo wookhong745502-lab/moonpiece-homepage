@@ -356,13 +356,13 @@ async function generateContentHandler(request, env) {
       const settings = settingsObj ? JSON.parse(await settingsObj.text()) : {};
       const imgModel = (isSEO ? settings.imgSeo : settings.imgAeo) || "@cf/bytedance/stable-diffusion-xl-lightning";
       const selectedStyle = style || settings.defaultStyle || "Professional photography";
-      const negPrompt = "ugly, deformed, disfigured eyes, bad hands, distorted face, blurry, low quality, watermark, text, error, horror, creepy, unnatural skin, bad anatomy, extra fingers, missing fingers, fused fingers, too many fingers, three fingers, six fingers, seven fingers, mutated hands, malformed hands, poorly drawn hands, long fingers, broken fingers, overlapping fingers, cloned fingers, disjointed fingers, floating limbs, disconnected limbs, gross proportions, malformed limbs";
+      const negPrompt = "bare skin, nude, naked, swimsuit, cleavage, exposed body, bare feet, toes, nsfw, ugly, deformed, disfigured eyes, bad hands, distorted face, blurry, low quality, watermark, text, error, horror, creepy, unnatural skin, bad anatomy, extra fingers, missing fingers, fused fingers, too many fingers, three fingers, six fingers, seven fingers, mutated hands, malformed hands, poorly drawn hands, long fingers, broken fingers, overlapping fingers, cloned fingers, disjointed fingers, floating limbs, disconnected limbs, gross proportions, malformed limbs";
 
       await log(`🚀 AI 프로세스 가동: ${keyword}`);
 
       let englishKeyword = keyword;
       try {
-        englishKeyword = await aiCall(`Translate exactly "${keyword}" into a short, descriptive English phrase for image generation (max 10 words). ONLY return the English text. Example: "beautiful pregnant woman", "pregnancy pillow", "lower back pain relief".`, env, "You are a translator.");
+        englishKeyword = await aiCall(`Translate exactly "${keyword}" into a short, descriptive English phrase for image generation (max 10 words). ONLY return the English text. Focus on objects, fully-clothed people, or cozy settings. Example: "pregnant woman fully clothed in cozy room", "maternity pillow on bed", "stretching exercises". DO NOT use anatomical or skin terms.`, env, "You are a translator.");
         englishKeyword = englishKeyword.trim().replace(/['"]/g, '');
         await log(`🗣️ 이미지 변환: ${englishKeyword}`);
       } catch (e) {}
@@ -378,13 +378,13 @@ async function generateContentHandler(request, env) {
           if (isSEO) {
             log(`🎨 이미지 4개 병렬 생성 중 (네거티브 프롬프트 적용)...`);
             return Promise.all([0,1,2,3].map(i => env.AI.run(imgModel, { 
-              prompt: `Photo of ${englishKeyword}, premium photography, highly detailed, realistic skin, perfect anatomy, ${selectedStyle}`,
+              prompt: `Photo of ${englishKeyword}, modest, fully clothed, elegant high-end catalog style, premium photography, highly detailed, perfect composition, ${selectedStyle}`,
               negative_prompt: negPrompt
             }).then(r => { log(`🖼️ 이미지 ${i+1} 완료`); return r; })));
           }
           log(`🎨 대표 이미지 생성 중 (네거티브 프롬프트 적용)...`);
           return [await env.AI.run(imgModel, { 
-            prompt: `Illustration of ${englishKeyword}, informative infographic style, clean design, premium aesthetic, ${selectedStyle}`,
+            prompt: `Illustration of ${englishKeyword}, modest, highly refined, informative infographic style, clean design, premium aesthetic, ${selectedStyle}`,
             negative_prompt: negPrompt
           })];
         })()
