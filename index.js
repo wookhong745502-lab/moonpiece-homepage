@@ -195,6 +195,41 @@ export default {
         return new Response(JSON.stringify(combined.sort((a,b)=>new Date(b.date)-new Date(a.date))));
       }
 
+      if (url.pathname === "/admin/api/posts/delete" && request.method === "POST") {
+        const { url: postUrl, type } = await request.json();
+        const key = postUrl.startsWith('/') ? postUrl.slice(1) : postUrl;
+        await env.JOURNAL_BUCKET.delete(key);
+        
+        const listKey = type === 'journal' ? "journal/list.json" : "knowledge/list.json";
+        let list = await safeGetJson(listKey, env);
+        list = list.filter(p => p.url !== postUrl);
+        await env.JOURNAL_BUCKET.put(listKey, JSON.stringify(list));
+        return new Response(JSON.stringify({ success: true }), { headers: { "Content-Type": "application/json" } });
+      }
+
+      if (url.pathname === "/admin/api/posts/raw" && request.method === "POST") {
+        const { url: postUrl } = await request.json();
+        const key = postUrl.startsWith('/') ? postUrl.slice(1) : postUrl;
+        const obj = await env.JOURNAL_BUCKET.get(key);
+        if (obj) {
+          return new Response(JSON.stringify({ success: true, html: await obj.text() }), { headers: { "Content-Type": "application/json" } });
+        }
+        return new Response(JSON.stringify({ success: false, error: "Not found" }), { headers: { "Content-Type": "application/json" } });
+      }
+
+      if (url.pathname === "/admin/api/posts/update" && request.method === "POST") {
+        const { url: postUrl, html } = await request.json();
+        const key = postUrl.startsWith('/') ? postUrl.slice(1) : postUrl;
+        await env.JOURNAL_BUCKET.put(key, html, { httpMetadata: { contentType: "text/html" } });
+        return new Response(JSON.stringify({ success: true }), { headers: { "Content-Type": "application/json" } });
+      }
+
+      if (url.pathname === "/admin/api/migrate/clear-all" && request.method === "POST") {
+        await env.JOURNAL_BUCKET.put("journal/list.json", "[]");
+        await env.JOURNAL_BUCKET.put("knowledge/list.json", "[]");
+        return new Response(JSON.stringify({ success: true }), { headers: { "Content-Type": "application/json" } });
+      }
+
       if (url.pathname.startsWith("/journal/") || url.pathname.startsWith("/knowledge/") || url.pathname.startsWith("/assets/")) {
         const key = decodeURIComponent(url.pathname.slice(1));
         const obj = await env.JOURNAL_BUCKET.get(key);
