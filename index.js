@@ -360,7 +360,17 @@ async function generateContentHandler(request, env) {
 
       await log(`🚀 AI 프로세스 가동: ${keyword}`);
 
-      const universalPrompt = `You are a premium Korean content architect. Write a deep article for "${keyword}". Return JSON: {"html": "...", "faqs": [{"q": "...", "a": "..."}], "summary": "3-line summary"}. Use {{IMG_1}}, {{IMG_2}}, {{IMG_3}} markers in HTML. IMPORTANT: Ensure all anatomical details in images are perfect. Avoid horror or distorted visuals. Style: ${selectedStyle}.`;
+      let englishKeyword = keyword;
+      try {
+        englishKeyword = await aiCall(`Translate exactly "${keyword}" into a short, descriptive English phrase for image generation (max 10 words). ONLY return the English text. Example: "beautiful pregnant woman", "pregnancy pillow", "lower back pain relief".`, env, "You are a translator.");
+        englishKeyword = englishKeyword.trim().replace(/['"]/g, '');
+        await log(`🗣️ 이미지 변환: ${englishKeyword}`);
+      } catch (e) {}
+
+      let universalPrompt = `You are a premium Korean content architect. Write a deep article for "${keyword}". Return JSON: {"html": "...", "faqs": [{"q": "...", "a": "..."}], "summary": "3-line summary"}. Use {{IMG_1}}, {{IMG_2}}, {{IMG_3}} markers in HTML. IMPORTANT: Ensure all anatomical details in images are perfect. Avoid horror or distorted visuals. Style: ${selectedStyle}.`;
+      if (!isSEO) {
+          universalPrompt = universalPrompt.replace('(첫 번째 문맥 최적 위치에 이미지 마크다운 템플릿 1개 삽입)', '').replace('EXCEPT for the image markdown block', '');
+      }
 
       const [textRes, imgRes] = await Promise.all([
         aiCall(universalPrompt, env).then(r => { log(`✅ 텍스트 생성 전송 완료`); return r; }),
@@ -368,13 +378,13 @@ async function generateContentHandler(request, env) {
           if (isSEO) {
             log(`🎨 이미지 4개 병렬 생성 중 (네거티브 프롬프트 적용)...`);
             return Promise.all([0,1,2,3].map(i => env.AI.run(imgModel, { 
-              prompt: `${keyword} premium photography, highly detailed, realistic skin, perfect anatomy, ${selectedStyle}`,
+              prompt: `Photo of ${englishKeyword}, premium photography, highly detailed, realistic skin, perfect anatomy, ${selectedStyle}`,
               negative_prompt: negPrompt
             }).then(r => { log(`🖼️ 이미지 ${i+1} 완료`); return r; })));
           }
           log(`🎨 대표 이미지 생성 중 (네거티브 프롬프트 적용)...`);
           return [await env.AI.run(imgModel, { 
-            prompt: `${keyword} informative infographic style, clean design, premium aesthetic, ${selectedStyle}`,
+            prompt: `Illustration of ${englishKeyword}, informative infographic style, clean design, premium aesthetic, ${selectedStyle}`,
             negative_prompt: negPrompt
           })];
         })()
@@ -413,7 +423,6 @@ async function generateContentHandler(request, env) {
         if (imgRes[0]) {
           await env.JOURNAL_BUCKET.put(aeoKey, imgRes[0], { httpMetadata: { contentType: "image/png" } });
           heroPath = `/${aeoKey}`;
-          draftHtml = `<img src="${heroPath}" class="w-full rounded-2xl mb-8">` + draftHtml;
         }
       }
 
