@@ -263,8 +263,11 @@
                 article.className = 'bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all border border-slate-50 group cursor-pointer';
                 article.onclick = () => location.href = post.url;
                 article.innerHTML = `
-                    <div class="aspect-video bg-moon-100 relative overflow-hidden">
-                        <img src="${post.image}" alt="${post.title}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                    <div class="aspect-video bg-moon-100 relative overflow-hidden flex items-center justify-center">
+                        <img src="${post.image || post.og_image || '/assets/default-post.png'}" 
+                             alt="${post.title}" 
+                             onerror="this.src='https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=800'; this.onerror=null;"
+                             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
                         <div class="absolute top-4 left-4 px-3 py-1 bg-white/90 backdrop-blur rounded-full text-xs font-bold text-moon-600 shadow-sm">${post.categoryName}</div>
                     </div>
                     <div class="p-8">
