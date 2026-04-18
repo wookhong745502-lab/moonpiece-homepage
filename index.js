@@ -196,7 +196,7 @@ export default {
       }
 
       if (url.pathname.startsWith("/journal/") || url.pathname.startsWith("/knowledge/") || url.pathname.startsWith("/assets/")) {
-        const key = url.pathname.slice(1);
+        const key = decodeURIComponent(url.pathname.slice(1));
         const obj = await env.JOURNAL_BUCKET.get(key);
         if (obj) {
           const h = new Headers();
