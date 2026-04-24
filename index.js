@@ -107,11 +107,12 @@ async function aiCall(prompt, env, system = "You are an elite Korean content arc
 
   if (textEngine === "gemini" && env.GEMINI_API_KEY) {
     const geminiKey = env.GEMINI_API_KEY.trim();
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`, {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        contents: [ { role: "user", parts: [{ text: `${system}\n\n${prompt}` }] } ],
+        contents: [ { role: "user", parts: [{ text: prompt }] } ],
+        system_instruction: { parts: [{ text: system }] },
         generationConfig: { temperature: 0.7 }
       })
     });
@@ -135,11 +136,12 @@ async function aiCall(prompt, env, system = "You are an elite Korean content arc
     // Retry with Gemini as fallback if DeepSeek fails (e.g. 402 out of balance)
     if (env.GEMINI_API_KEY) {
         const geminiKey = env.GEMINI_API_KEY.trim();
-        const fallbackRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`, {
+        const fallbackRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            contents: [ { role: "user", parts: [{ text: `${system}\n\n${prompt}` }] } ],
+            contents: [ { role: "user", parts: [{ text: prompt }] } ],
+            system_instruction: { parts: [{ text: system }] },
             generationConfig: { temperature: 0.7 }
           })
         });
