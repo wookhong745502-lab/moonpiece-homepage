@@ -34,6 +34,11 @@ async function safeGetJson(key, env) {
 
 function parseAIJson(raw) {
   if (!raw) return {};
+  if (typeof raw !== 'string') {
+    console.error("parseAIJson: raw is not a string", raw);
+    if (typeof raw === 'object') return raw; // 이미 객체라면 그대로 반환
+    return {};
+  }
   let cleaned = raw.trim();
   
   // 1. Try direct parse after removing markdown blocks
@@ -101,7 +106,9 @@ async function aiCall(prompt, env, system = "You are an elite Korean content arc
         temperature: 0.6,
         max_tokens: 4096 // Ensure enough room for deep content
       });
-      return response.response || response.choices?.[0]?.message?.content || "";
+      let result = response.response || response.choices?.[0]?.message?.content || response;
+      if (typeof result !== "string") result = JSON.stringify(result);
+      return result;
     } catch (e) { console.error("Workers AI error:", e.message); }
   }
 
@@ -116,7 +123,10 @@ async function aiCall(prompt, env, system = "You are an elite Korean content arc
         generationConfig: { temperature: 0.7 }
       })
     });
-    if (!res.ok) throw new Error(`Gemini API error: ${res.status}`);
+    if (!res.ok) {
+        const detail = await res.text();
+        throw new Error(`Gemini API error: ${res.status} - ${detail}`);
+    }
     const data = await res.json();
     return data.candidates[0].content.parts[0].text;
   }
@@ -193,6 +203,7 @@ export default {
 
       if (url.pathname === "/admin/api/suggest" && request.method === "POST") {
         const { type, keyword } = await request.json();
+        console.log(`[Suggest] Type: ${type}, Keyword: ${keyword}`);
         let prompt = "";
         switch(type) {
           case "title": prompt = `Keyword: ${keyword}. Suggest one powerful SEO title in Korean.`; break;
@@ -305,7 +316,7 @@ export default {
 
       return await getAssetFromKV({ request, waitUntil: ctx.waitUntil.bind(ctx) }, { ASSET_NAMESPACE: env.__STATIC_CONTENT, ASSET_MANIFEST: assetManifest });
     } catch (e) {
-      return new Response(e.message, { status: 500 });
+      return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: { "Content-Type": "application/json" } });
     }
   }
 };
