@@ -350,7 +350,7 @@ async function renderTemplate(templateName, data, env) {
 
 async function generateContentHandler(request, env) {
   const payload = await request.json();
-  const { isFinal, type, keyword, title, slug: requestedSlug, finalHtml, style, category, summary, youtubeId, faqs, schema } = payload;
+  const { isFinal, type, keyword, title, slug: requestedSlug, finalHtml, style, category, summary, youtubeId, faqs, schema, sourceName, sourceUrl } = payload;
   const isSEO = type === 'seo';
 
   // --- FINAL PUBLISH MODE (Direct JSON Response) ---
@@ -392,7 +392,17 @@ async function generateContentHandler(request, env) {
           </section>` : "",
         og_image: payload.image || "",
         slug: finalSlug,
-        json_ld: JSON.stringify(schema || {})
+        json_ld: JSON.stringify(schema || {}),
+        source_name: sourceName || "",
+        source_url: sourceUrl || "",
+        source_section: (sourceName && sourceUrl) ? `
+          <div class="mt-16 p-6 bg-slate-50 rounded-2xl border border-slate-100 flex items-center gap-4">
+            <span class="material-symbols-outlined text-moon-600">verified_user</span>
+            <div class="text-sm">
+              <span class="text-slate-400 block mb-1">본 콘텐츠는 아래의 공신력 있는 정보를 바탕으로 작성되었습니다.</span>
+              <a href="${sourceUrl}" target="_blank" rel="noopener" class="font-bold text-slate-900 hover:text-moon-600 transition-colors">${sourceName}</a>
+            </div>
+          </div>` : ""
       };
 
       const finalOutput = await renderTemplate(isSEO ? "journal_template.html" : "post_template.html", templateData, env);
