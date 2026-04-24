@@ -542,7 +542,7 @@ Rules for JSON:
           for (let i = 0; i <= actualImgCount; i++) {
             const prompt = isSEO 
               ? `Photo of Korean ${englishKeyword}, modest, fully clothed, elegant high-end style, premium photography, highly detailed, ${selectedStyle}`
-              : `Clean informative infographic of Korean ${englishKeyword}, white background, premium minimalist design, vector style, highly readable, informative charts, ${selectedStyle}`;
+              : `Clean informative infographic of Korean ${englishKeyword}, white background, premium minimalist design, vector style, highly readable, informative charts, ${selectedStyle}. IMPORTANT: Any text inside the infographic must ONLY use Korean, English, or Numbers.`;
             
             imgPromises.push(env.AI.run(imgModel, { 
               prompt,
