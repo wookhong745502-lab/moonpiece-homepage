@@ -213,6 +213,10 @@ export default {
           case "keywords": prompt = `Keyword: ${keyword}. List 10 sub-keywords (comma separated).`; break;
           case "source": prompt = `Keyword: ${keyword}. Translate this keyword into English and Japanese to find a world-class prestigious medical/academic source (e.g., Mayo Clinic, Harvard Medical, NIH, WHO, University of Tokyo Hospital, Lancet). Suggest one global authority. Return ONLY a JSON object: {"name": "Institution Name (Translated to Korean)", "url": "https://..."}.`; break;
           case "question": prompt = `Keyword: ${keyword}. Suggest a natural user question in Korean ONLY. No English.`; break;
+          case "youtube": {
+            const ytId = await getAiRecommendedYoutubeId(keyword, env);
+            return new Response(JSON.stringify({ result: ytId || "" }), { headers: { "Content-Type": "application/json" } });
+          }
         }
         let result = await aiCall(prompt, env);
         result = result.trim();

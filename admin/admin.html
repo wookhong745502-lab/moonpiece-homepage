@@ -655,6 +655,7 @@
                     body: JSON.stringify({ type, keyword: kw })
                 });
                 const data = await res.json();
+                if (!res.ok) throw new Error(data.error || `서버 에러 (${res.status})`);
                 if(type === 'source') {
                     try {
                         const s = JSON.parse(data.result);
@@ -668,13 +669,21 @@
                     document.getElementById(context + '-sub-kw').value = data.result;
                 } else if(type === 'question') {
                     document.getElementById(context + '-question').value = data.result;
+                } else if(type === 'youtube') {
+                    const ytInput = document.getElementById(context + '-youtube-id');
+                    const ytLink = document.getElementById(context + '-yt-link');
+                    if(ytInput) ytInput.value = data.result || '';
+                    if(ytLink) {
+                        ytLink.href = data.result ? `https://youtube.com/watch?v=${data.result}` : '#';
+                        ytLink.textContent = data.result ? '영상 확인하기' : '관련 영상 없음';
+                    }
                 } else {
                     const targetEl = document.getElementById(context + '-' + type);
                     if(targetEl) targetEl.value = data.result;
                 }
             } catch(e) { 
                 console.error('AI Suggest Error:', e);
-                alert('추천 로직 중 에러가 발생했습니다. 콘솔을 확인하세요.');
+                alert(`추천 로직 중 에러가 발생했습니다:\n${e.message || e}\n\n콘솔(F12)에서 상세 내용을 확인해 주세요.`);
             }
         }
 
@@ -683,6 +692,7 @@
             await suggest('slug', 'seo');
             await suggest('keywords', 'seo');
             await suggest('source', 'seo');
+            await suggest('youtube', 'seo');
         }
 
         async function autoFillAEO() {
