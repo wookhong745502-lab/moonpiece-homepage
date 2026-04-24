@@ -699,8 +699,13 @@
         }
 
         async function autoFillAEO() {
-            await suggest('question', 'aeo');
-            await suggest('slug', 'aeo');
+            const kw = val('aeo-keyword');
+            if(!kw) return alert('메인 키워드를 먼저 입력해주세요.');
+            await Promise.allSettled([
+                suggest('question', 'aeo'),
+                suggest('slug', 'aeo'),
+                suggest('youtube', 'aeo')
+            ]);
         }
 
         function val(id) {
