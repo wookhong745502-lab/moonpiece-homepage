@@ -210,7 +210,7 @@ export default {
           case "slug": prompt = `Keyword: ${keyword}. Suggest a short, English URL slug. ONLY return the slug string itself, no other text, quotes, or explanation.`; break;
           case "keywords": prompt = `Keyword: ${keyword}. List 10 sub-keywords (comma separated).`; break;
           case "source": prompt = `Keyword: ${keyword}. Suggest one medical source. JSON: {"name": "", "url": ""}.`; break;
-          case "question": prompt = `Keyword: ${keyword}. Suggest a natural user question.`; break;
+          case "question": prompt = `Keyword: ${keyword}. Suggest a natural user question in Korean ONLY. No English.`; break;
         }
         let result = await aiCall(prompt, env);
         result = result.trim();
