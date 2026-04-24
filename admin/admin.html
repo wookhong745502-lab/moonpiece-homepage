@@ -143,6 +143,7 @@
         .auto-res-fail { background: #fef2f2; border-color: #fee2e2; }
         .btn-secondary-full { background: var(--secondary); color: white; width: 100%; padding: 1.5rem; }
         .height-200 { height: 200px; }
+        .input-style { padding: 1rem; border-radius: 1rem; border: 1px solid #e2e8f0; font-size: 1rem; font-weight: bold; box-sizing: border-box; }
     </style>
 </head>
 <body>
@@ -484,12 +485,12 @@
                     <div class="card">
                         <label class="font-extrabold block mb-4 text-lg">SEO 저널 본문 이미지 개수</label>
                         <p class="rules-desc">저널 본문 문단 사이에 자동으로 배치될 서브 이미지의 개수입니다. (표지 1장 제외, 0~3장 설정 가능)</p>
-                        <input type="number" id="setting-img-count" class="input-style w-full mt-4" min="0" max="3" value="3" style="padding: 1rem; border-radius: 1rem; border: 1px solid #e2e8f0; font-size: 1rem; font-weight: bold;">
+                        <input type="number" id="setting-img-count" class="input-style w-full mt-4" min="0" max="3" value="3">
                     </div>
                     <div class="card">
                         <label class="font-extrabold block mb-4 text-lg">글 하단 섹션 FAQ(자주 묻는 질문) 개수</label>
                         <p class="rules-desc">독자 체류 시간을 극대화하기 위해 글 하단에 붙는 Q&A 블록의 생성 개수입니다. (0~5개 설정 가능)</p>
-                        <input type="number" id="setting-faq-count" class="input-style w-full mt-4" min="0" max="5" value="3" style="padding: 1rem; border-radius: 1rem; border: 1px solid #e2e8f0; font-size: 1rem; font-weight: bold;">
+                        <input type="number" id="setting-faq-count" class="input-style w-full mt-4" min="0" max="5" value="3">
                     </div>
                 </div>
             </div>
