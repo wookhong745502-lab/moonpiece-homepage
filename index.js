@@ -209,7 +209,7 @@ export default {
           case "title": prompt = `Keyword: ${keyword}. Suggest one powerful SEO title in Korean.`; break;
           case "slug": prompt = `Keyword: ${keyword}. Suggest a short, English URL slug. ONLY return the slug string itself, no other text, quotes, or explanation.`; break;
           case "keywords": prompt = `Keyword: ${keyword}. List 10 sub-keywords (comma separated).`; break;
-          case "source": prompt = `Keyword: ${keyword}. Suggest one highly authoritative medical source (e.g., University Hospital, Medical Society, NIH, WHO, or peer-reviewed paper). Return ONLY a JSON object: {"name": "Authoritative Source Name", "url": "https://..."}. Ensure the URL is real and relevant.`; break;
+          case "source": prompt = `Keyword: ${keyword}. Translate this keyword into English and Japanese to find a world-class prestigious medical/academic source (e.g., Mayo Clinic, Harvard Medical, NIH, WHO, University of Tokyo Hospital, Lancet). Suggest one global authority. Return ONLY a JSON object: {"name": "Institution Name (Translated to Korean)", "url": "https://..."}.`; break;
           case "question": prompt = `Keyword: ${keyword}. Suggest a natural user question in Korean ONLY. No English.`; break;
         }
         let result = await aiCall(prompt, env);
