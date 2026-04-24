@@ -405,6 +405,7 @@ async function generateContentHandler(request, env) {
           </div>` : ""
       };
 
+      console.log(`[Publish] sourceName="${sourceName}" sourceUrl="${sourceUrl}"`);
       const finalOutput = await renderTemplate(isSEO ? "journal_template.html" : "post_template.html", templateData, env);
       await env.JOURNAL_BUCKET.put(targetKey, finalOutput, { httpMetadata: { contentType: "text/html" } });
 
@@ -452,6 +453,28 @@ async function generateContentHandler(request, env) {
         englishKeyword = englishKeyword.trim().replace(/['"]/g, '');
         await log(`🗣️ 이미지 변환: ${englishKeyword}`);
       } catch (e) {}
+
+      // 출처가 없을 경우 AI가 자동으로 신뢰도 높은 출처 생성
+      let finalSourceName = payload.sourceName || "";
+      let finalSourceUrl = payload.sourceUrl || "";
+      if (!finalSourceName || !finalSourceUrl) {
+        try {
+          await log(`🔍 신뢰도 출처 자동 검색 중...`);
+          const sourceRaw = await aiCall(
+            `Keyword: ${keyword}. Translate this keyword into English and Japanese to find a world-class prestigious medical/academic source (e.g., Mayo Clinic, Harvard Medical, NIH, WHO, University of Tokyo Hospital, Lancet). Suggest one global authority. Return ONLY a JSON object: {"name": "Institution Name (Translated to Korean)", "url": "https://..."}.`,
+            env
+          );
+          const cleanedSrc = sourceRaw.replace(/\`\`\`json|\`\`\`/g, '').trim();
+          const srcObj = JSON.parse(cleanedSrc);
+          if (srcObj.name && srcObj.url) {
+            finalSourceName = srcObj.name;
+            finalSourceUrl = srcObj.url;
+            await log(`✅ 출처 자동 생성: ${finalSourceName}`);
+          }
+        } catch (e) {
+          await log(`⚠️ 출처 자동 검색 실패: ${e.message}`);
+        }
+      }
 
       let markers = [];
       for(let i=1; i<=imgSeoCount; i++) markers.push(`{{IMG_${i}}}`);
@@ -554,6 +577,8 @@ Rules for JSON:
         youtubeId: recYoutubeId, 
         type,
         slug: requestedSlug || slugBase,
+        sourceName: finalSourceName,
+        sourceUrl: finalSourceUrl,
         schema: { "@context": "https://schema.org", "@type": "Article", "headline": title, "image": heroPath, "author": { "@type": "Organization", "name": "Moonpiece" } }
       };
       
