@@ -656,17 +656,26 @@
                 });
                 const data = await res.json();
                 if(type === 'source') {
-                    const s = JSON.parse(data.result);
-                    document.getElementById(context + '-source-name').value = s.name;
-                    document.getElementById(context + '-source-url').value = s.url;
+                    try {
+                        const s = JSON.parse(data.result);
+                        document.getElementById(context + '-source-name').value = s.name;
+                        document.getElementById(context + '-source-url').value = s.url;
+                    } catch(err) {
+                        console.error('Source JSON Error:', data.result);
+                        document.getElementById(context + '-source-name').value = data.result;
+                    }
                 } else if(type === 'keywords') {
                     document.getElementById(context + '-sub-kw').value = data.result;
                 } else if(type === 'question') {
                     document.getElementById(context + '-question').value = data.result;
                 } else {
-                    document.getElementById(context + '-' + type).value = data.result;
+                    const targetEl = document.getElementById(context + '-' + type);
+                    if(targetEl) targetEl.value = data.result;
                 }
-            } catch(e) { console.error(e); }
+            } catch(e) { 
+                console.error('AI Suggest Error:', e);
+                alert('추천 로직 중 에러가 발생했습니다. 콘솔을 확인하세요.');
+            }
         }
 
         async function autoFillSEO() {

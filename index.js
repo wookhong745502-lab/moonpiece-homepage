@@ -202,7 +202,13 @@ export default {
           case "question": prompt = `Keyword: ${keyword}. Suggest a natural user question.`; break;
         }
         let result = await aiCall(prompt, env);
-        result = result.trim().replace(/['"“”]/g, ""); 
+        result = result.trim();
+        if (type === "source") {
+          // Clean up potential markdown blocks for JSON parsing
+          result = result.replace(/```json|```/g, "").trim();
+        } else {
+          result = result.replace(/['"“”]/g, ""); 
+        }
         if (type === "slug") result = generateSlug(result); 
         return new Response(JSON.stringify({ result }), { headers: { "Content-Type": "application/json" } });
       }
