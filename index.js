@@ -77,12 +77,20 @@ function generateSlug(text) {
 
 async function getAiRecommendedYoutubeId(keyword, env) {
   try {
-    const aiResponse = await aiCall(`Recommendation task: Find one real, authoritative Korean YouTube video ID (exactly 11 characters) about "${keyword}". It must be a real video that currently exists. Return ONLY the 11-char video ID string, nothing else. If you cannot find one, return "NONE".`, env);
-    const cleaned = aiResponse.trim();
-    if (cleaned === "NONE" || cleaned.length < 11) return null;
-    const match = cleaned.match(/[a-zA-Z0-9_-]{11}/);
-    return match ? match[0] : null;
+    const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(keyword)}`;
+    const res = await fetch(searchUrl, {
+      headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" }
+    });
+    const html = await res.text();
+    const match = html.match(/"videoId":"([a-zA-Z0-9_-]{11})"/);
+    if (match && match[1]) {
+      console.log(`[YouTube] Found video ID: ${match[1]} for keyword: ${keyword}`);
+      return match[1];
+    }
+    console.log(`[YouTube] No video found for keyword: ${keyword}`);
+    return null;
   } catch (e) {
+    console.error("[YouTube] Search error:", e.message);
     return null;
   }
 }
