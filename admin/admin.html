@@ -682,17 +682,20 @@
                     if(targetEl) targetEl.value = data.result;
                 }
             } catch(e) { 
-                console.error('AI Suggest Error:', e);
-                alert(`추천 로직 중 에러가 발생했습니다:\n${e.message || e}\n\n콘솔(F12)에서 상세 내용을 확인해 주세요.`);
+                console.error('AI Suggest Error (' + type + '):', e);
             }
         }
 
         async function autoFillSEO() {
-            await suggest('title', 'seo');
-            await suggest('slug', 'seo');
-            await suggest('keywords', 'seo');
-            await suggest('source', 'seo');
-            await suggest('youtube', 'seo');
+            const kw = val('seo-keyword');
+            if(!kw) return alert('메인 키워드를 먼저 입력해주세요.');
+            await Promise.allSettled([
+                suggest('title', 'seo'),
+                suggest('slug', 'seo'),
+                suggest('keywords', 'seo'),
+                suggest('source', 'seo'),
+                suggest('youtube', 'seo')
+            ]);
         }
 
         async function autoFillAEO() {
