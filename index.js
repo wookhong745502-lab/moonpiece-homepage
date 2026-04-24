@@ -531,26 +531,19 @@ Rules for JSON:
 2. The "html" field must contain ONLY the HTML tags and text, properly escaped for a JSON string.
 3. DO NOT use markdown code blocks (like \`\`\`json) in your response if possible, just return the raw JSON.
 4. DO NOT add any conversational text before or after the JSON.`;
-
+      await log(`🚀 텍스트 및 이미지 ${imgSeoCount + 1}개 병렬 생성 중...`);
       const [textRes, imgRes] = await Promise.all([
         aiCall(universalPrompt, env, "You are a specialized content JSON generator.").then(r => { log(`✅ 텍스트 생성 전송 완료`); return r; }),
         (async () => {
-          if (isSEO) {
-            log(`🎨 이미지 ${imgSeoCount + 1}개 병렬 생성 중 (네거티브 프롬프트 적용)...`);
-            const promises = [];
-            for (let i = 0; i <= imgSeoCount; i++) {
-                promises.push(env.AI.run(imgModel, { 
-                  prompt: `Photo of Korean ${englishKeyword}, modest, fully clothed, elegant high-end catalog style, premium photography, highly detailed, perfect composition, ${selectedStyle}`,
-                  negative_prompt: negPrompt
-                }).then(r => { log(`🖼️ 이미지 ${i+1} 완료`); return r; }));
-            }
-            return Promise.all(promises);
+          const imgPromises = [];
+          const imgStyle = isSEO ? selectedStyle : (selectedStyle + ", informative infographic style, clean design");
+          for (let i = 0; i <= imgSeoCount; i++) {
+            imgPromises.push(env.AI.run(imgModel, { 
+              prompt: `Photo of Korean ${englishKeyword}, modest, fully clothed, elegant high-end style, premium photography, highly detailed, ${imgStyle}`,
+              negative_prompt: negPrompt
+            }).then(r => { log(`🖼️ 이미지 ${i+1} 완료`); return r; }));
           }
-          log(`🎨 대표 이미지 생성 중 (네거티브 프롬프트 적용)...`);
-          return [await env.AI.run(imgModel, { 
-            prompt: `Illustration of Korean ${englishKeyword}, modest, highly refined, informative infographic style, clean design, premium aesthetic, ${selectedStyle}`,
-            negative_prompt: negPrompt
-          })];
+          return Promise.all(imgPromises);
         })()
       ]);
 
@@ -560,33 +553,27 @@ Rules for JSON:
       const slugBase = generateSlug(title);
       let heroPath = "";
       let gallery = [];
+      const assetDir = isSEO ? "journal" : "knowledge";
 
-      if (isSEO) {
-        // Hero Image
-        if (imgRes[0]) {
-          const heroKey = `assets/journal/${slugBase}-${timeStamp}-hero.png`;
-          await env.JOURNAL_BUCKET.put(heroKey, imgRes[0], { httpMetadata: { contentType: "image/png" } });
-          heroPath = `/${heroKey}`;
-        }
-        // Body Images
-        for(let j=1; j<=imgSeoCount; j++) {
-          if (imgRes[j]) {
-            const bKey = `assets/journal/${slugBase}-${timeStamp}-${j}.png`;
-            await env.JOURNAL_BUCKET.put(bKey, imgRes[j], { httpMetadata: { contentType: "image/png" } });
-            const imgTag = `<img src="/${bKey}" style="width:100%; border-radius:1rem; margin:2rem 0;" alt="${keyword} ${j}">`;
-            gallery.push(`/${bKey}`);
-            if (draftHtml.includes(`{{IMG_${j}}}`)) {
-              draftHtml = draftHtml.replace(`{{IMG_${j}}}`, imgTag);
-            } else {
-              draftHtml += `\n\n${imgTag}`;
-            }
+      // Hero Image (imgRes[0])
+      if (imgRes[0]) {
+        const heroKey = `assets/${assetDir}/${slugBase}-${timeStamp}-hero.png`;
+        await env.JOURNAL_BUCKET.put(heroKey, imgRes[0], { httpMetadata: { contentType: "image/png" } });
+        heroPath = `/${heroKey}`;
+      }
+
+      // Body Images (imgRes[1] ~ imgRes[imgSeoCount])
+      for(let j=1; j<=imgSeoCount; j++) {
+        if (imgRes[j]) {
+          const bKey = `assets/${assetDir}/${slugBase}-${timeStamp}-${j}.png`;
+          await env.JOURNAL_BUCKET.put(bKey, imgRes[j], { httpMetadata: { contentType: "image/png" } });
+          const imgTag = `<img src="/${bKey}" style="width:100%; border-radius:1rem; margin:2rem 0;" alt="${keyword} ${j}">`;
+          gallery.push(`/${bKey}`);
+          if (draftHtml.includes(`{{IMG_${j}}}`)) {
+            draftHtml = draftHtml.replace(`{{IMG_${j}}}`, imgTag);
+          } else {
+            draftHtml += `\n\n${imgTag}`;
           }
-        }
-      } else {
-        const aeoKey = `assets/knowledge/${slugBase}-${timeStamp}.png`;
-        if (imgRes[0]) {
-          await env.JOURNAL_BUCKET.put(aeoKey, imgRes[0], { httpMetadata: { contentType: "image/png" } });
-          heroPath = `/${aeoKey}`;
         }
       }
 
