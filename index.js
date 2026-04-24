@@ -438,7 +438,7 @@ async function generateContentHandler(request, env) {
 
       let englishKeyword = keyword;
       try {
-        englishKeyword = await aiCall(`Translate exactly "${keyword}" into a short, descriptive English phrase for image generation (max 10 words). ONLY return the English text. Focus on objects, fully-clothed people, or cozy settings. Example: "pregnant woman fully clothed in cozy room", "maternity pillow on bed", "stretching exercises". DO NOT use anatomical or skin terms.`, env, "You are a translator.");
+        englishKeyword = await aiCall(`Translate exactly "${keyword}" into a short, descriptive English phrase for image generation. IMPORTANT: If the keyword refers to a person, ALWAYS include "Korean person" or "Korean woman". Example: "Korean pregnant woman fully clothed in cozy room". ONLY return the English text.`, env, "You are a translator.");
         englishKeyword = englishKeyword.trim().replace(/['"]/g, '');
         await log(`🗣️ 이미지 변환: ${englishKeyword}`);
       } catch (e) {}
@@ -484,7 +484,7 @@ Rules for JSON:
             const promises = [];
             for (let i = 0; i <= imgSeoCount; i++) {
                 promises.push(env.AI.run(imgModel, { 
-                  prompt: `Photo of ${englishKeyword}, modest, fully clothed, elegant high-end catalog style, premium photography, highly detailed, perfect composition, ${selectedStyle}`,
+                  prompt: `Photo of Korean ${englishKeyword}, modest, fully clothed, elegant high-end catalog style, premium photography, highly detailed, perfect composition, ${selectedStyle}`,
                   negative_prompt: negPrompt
                 }).then(r => { log(`🖼️ 이미지 ${i+1} 완료`); return r; }));
             }
@@ -492,7 +492,7 @@ Rules for JSON:
           }
           log(`🎨 대표 이미지 생성 중 (네거티브 프롬프트 적용)...`);
           return [await env.AI.run(imgModel, { 
-            prompt: `Illustration of ${englishKeyword}, modest, highly refined, informative infographic style, clean design, premium aesthetic, ${selectedStyle}`,
+            prompt: `Illustration of Korean ${englishKeyword}, modest, highly refined, informative infographic style, clean design, premium aesthetic, ${selectedStyle}`,
             negative_prompt: negPrompt
           })];
         })()
