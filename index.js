@@ -34,14 +34,26 @@ async function safeGetJson(key, env) {
 
 function parseAIJson(raw) {
   if (!raw) return {};
+  let cleaned = raw.trim();
+  
+  // 1. Try direct parse after removing markdown blocks
   try {
-    const cleaned = raw.replace(/```json|```/g, "").trim();
-    return JSON.parse(cleaned);
+    const direct = cleaned.replace(/```json|```/g, "").trim();
+    return JSON.parse(direct);
   } catch (e) {
-    const start = Math.min(raw.indexOf('{') === -1 ? Infinity : raw.indexOf('{'), raw.indexOf('[') === -1 ? Infinity : raw.indexOf('['));
-    const end = Math.max(raw.lastIndexOf('}') === -1 ? -1 : raw.lastIndexOf('}'), raw.lastIndexOf(']') === -1 ? -1 : raw.lastIndexOf(']'));
-    if (start !== Infinity && end !== -1 && start < end) {
-      try { return JSON.parse(raw.substring(start, end + 1)); } catch(err) { return {}; }
+    // 2. Try to find the first '{' and last '}'
+    const start = cleaned.indexOf('{');
+    const end = cleaned.lastIndexOf('}');
+    
+    if (start !== -1 && end !== -1 && start < end) {
+      const jsonCandidate = cleaned.substring(start, end + 1);
+      try {
+        return JSON.parse(jsonCandidate);
+      } catch (err) {
+        // 3. Last resort: if nested structures exist or extra text, try to find a valid JSON block
+        // (This is a bit more complex, but usually the substring approach covers 99% of cases)
+        console.error("JSON block extraction failed", err.message);
+      }
     }
     return {};
   }
@@ -86,12 +98,29 @@ async function aiCall(prompt, env, system = "You are an elite Korean content arc
     try {
       const response = await env.AI.run(textEngine, {
         messages: [{ role: "system", content: system }, { role: "user", content: prompt }],
-        temperature: 0.9
+        temperature: 0.6,
+        max_tokens: 4096 // Ensure enough room for deep content
       });
       return response.response || response.choices?.[0]?.message?.content || "";
     } catch (e) { console.error("Workers AI error:", e.message); }
   }
 
+  if (textEngine === "gemini" && env.GEMINI_API_KEY) {
+    const geminiKey = env.GEMINI_API_KEY.trim();
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [ { role: "user", parts: [{ text: `${system}\n\n${prompt}` }] } ],
+        generationConfig: { temperature: 0.7 }
+      })
+    });
+    if (!res.ok) throw new Error(`Gemini API error: ${res.status}`);
+    const data = await res.json();
+    return data.candidates[0].content.parts[0].text;
+  }
+
+  // Default to DeepSeek (or if explicitly selected)
   const res = await fetch("https://api.deepseek.com/chat/completions", {
     method: "POST",
     headers: { "Content-Type": "application/json", "Authorization": `Bearer ${env.DEEPSEEK_API_KEY}` },
@@ -101,7 +130,30 @@ async function aiCall(prompt, env, system = "You are an elite Korean content arc
       temperature: 0.7
     })
   });
-  if (!res.ok) throw new Error(`DeepSeek API error: ${res.status}`);
+  
+  if (!res.ok) {
+    // Retry with Gemini as fallback if DeepSeek fails (e.g. 402 out of balance)
+    if (env.GEMINI_API_KEY) {
+        const geminiKey = env.GEMINI_API_KEY.trim();
+        const fallbackRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [ { role: "user", parts: [{ text: `${system}\n\n${prompt}` }] } ],
+            generationConfig: { temperature: 0.7 }
+          })
+        });
+        if (fallbackRes.ok) {
+          const fallbackData = await fallbackRes.json();
+          return fallbackData.candidates[0].content.parts[0].text;
+        } else {
+            const errText = await fallbackRes.text();
+            throw new Error(`DeepSeek API error: ${res.status}, Gemini Fallback error: ${fallbackRes.status} - ${errText}`);
+        }
+    }
+    throw new Error(`DeepSeek API error: ${res.status}`);
+  }
+  
   const data = await res.json();
   return data.choices[0].message.content;
 }
@@ -142,13 +194,15 @@ export default {
         let prompt = "";
         switch(type) {
           case "title": prompt = `Keyword: ${keyword}. Suggest one powerful SEO title in Korean.`; break;
-          case "slug": prompt = `Keyword: ${keyword}. Convert to short URL slug (English).`; break;
+          case "slug": prompt = `Keyword: ${keyword}. Suggest a short, English URL slug. ONLY return the slug string itself, no other text, quotes, or explanation.`; break;
           case "keywords": prompt = `Keyword: ${keyword}. List 10 sub-keywords (comma separated).`; break;
           case "source": prompt = `Keyword: ${keyword}. Suggest one medical source. JSON: {"name": "", "url": ""}.`; break;
           case "question": prompt = `Keyword: ${keyword}. Suggest a natural user question.`; break;
         }
-        const result = await aiCall(prompt, env);
-        return new Response(JSON.stringify({ result: result.trim() }), { headers: { "Content-Type": "application/json" } });
+        let result = await aiCall(prompt, env);
+        result = result.trim().replace(/['"“”]/g, ""); 
+        if (type === "slug") result = generateSlug(result); 
+        return new Response(JSON.stringify({ result }), { headers: { "Content-Type": "application/json" } });
       }
 
       if (url.pathname === "/admin/api/generate-journal" || url.pathname === "/admin/api/generate-knowledge") {
@@ -253,7 +307,7 @@ export default {
 async function resolveUniqueSlug(type, requestedSlug, env) {
   const listKey = type === 'seo' ? "journal/list.json" : "knowledge/list.json";
   const list = await safeGetJson(listKey, env);
-  let slug = requestedSlug || "untitled";
+  let slug = generateSlug(requestedSlug || "untitled");
   let finalSlug = slug;
   let counter = 1;
   while (list.some(item => (item.slug === finalSlug || item.url?.includes(`/${finalSlug}.html`)))) {
@@ -373,14 +427,38 @@ async function generateContentHandler(request, env) {
       let markers = [];
       for(let i=1; i<=imgSeoCount; i++) markers.push(`{{IMG_${i}}}`);
       const markersText = markers.length > 0 ? `Use ${markers.join(', ')} markers in HTML sequentially between paragraphs.` : `Do NOT use any IMG markers.`;
-      
-      let universalPrompt = `You are a premium Korean content architect. Write a deep article for "${keyword}". Return JSON: {"html": "raw HTML string", "faqs": [Exactly ${faqCount} items with {"q": "...", "a": "..."}], "summary": "3-line summary"}. ${markersText} IMPORTANT: Ensure all anatomical details in images are perfect. Avoid horror or distorted visuals. Style: ${selectedStyle}.`;
-      if (!isSEO) {
-          universalPrompt = universalPrompt.replace('(첫 번째 문맥 최적 위치에 이미지 마크다운 템플릿 1개 삽입)', '').replace('EXCEPT for the image markdown block', '');
+
+      let basePrompt = isSEO ? settings.seoPrompt : settings.aeoPrompt;
+      if (!basePrompt) {
+        basePrompt = isSEO ? 
+          `Write a highly professional, empathetic, and strictly formatted SEO blog post about "{{keyword}}". Title: "{{title}}". Target sub-keywords: {{subKeywords}}. \n\nCRITICAL REQUIREMENT: The output MUST exceed 2,000 Korean characters. Explain in profound detail with minimum 5 sections.\nUse exactly <article class="post-content">, <h2>, <h3>, <p>, <ul>, <strong> tags.` :
+          `Write an elite-level AEO-optimized expert answer about "{{keyword}}". Title/Question: "{{title}}". \n\nCRITICAL REQUIREMENT: The output MUST exceed 1,500 characters. Return ONLY raw HTML for the body.`;
       }
 
+      // Fill placeholders in user-defined prompt
+      basePrompt = basePrompt
+        .replace(/{{keyword}}/g, keyword)
+        .replace(/{{title}}/g, title)
+        .replace(/{{subKeywords}}/g, payload.subKeywords || "");
+
+      const universalPrompt = `${basePrompt}
+
+CRITICAL: Your entire response must be a single, valid JSON object. 
+The JSON must have this exact structure:
+{
+  "html": "The full article body content in HTML format. ${markersText}",
+  "faqs": [{"q": "Question text", "a": "Answer text"}],
+  "summary": "3-line summary of the content"
+}
+
+Rules for JSON:
+1. The "faqs" array must contain exactly ${faqCount} items.
+2. The "html" field must contain ONLY the HTML tags and text, properly escaped for a JSON string.
+3. DO NOT use markdown code blocks (like \`\`\`json) in your response if possible, just return the raw JSON.
+4. DO NOT add any conversational text before or after the JSON.`;
+
       const [textRes, imgRes] = await Promise.all([
-        aiCall(universalPrompt, env).then(r => { log(`✅ 텍스트 생성 전송 완료`); return r; }),
+        aiCall(universalPrompt, env, "You are a specialized content JSON generator.").then(r => { log(`✅ 텍스트 생성 전송 완료`); return r; }),
         (async () => {
           if (isSEO) {
             log(`🎨 이미지 ${imgSeoCount + 1}개 병렬 생성 중 (네거티브 프롬프트 적용)...`);
