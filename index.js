@@ -77,11 +77,13 @@ function generateSlug(text) {
 
 async function getAiRecommendedYoutubeId(keyword, env) {
   try {
-    const aiResponse = await aiCall(`Recommendation task: Find one real, authoritative YouTube video ID (11 chars) for the topic "${keyword}". Return ONLY the 11-char ID.`, env);
-    const cleaned = aiResponse.trim().match(/[a-zA-Z0-9_-]{11}/);
-    return cleaned ? cleaned[0] : "dQw4w9WgXcQ";
+    const aiResponse = await aiCall(`Recommendation task: Find one real, authoritative Korean YouTube video ID (exactly 11 characters) about "${keyword}". It must be a real video that currently exists. Return ONLY the 11-char video ID string, nothing else. If you cannot find one, return "NONE".`, env);
+    const cleaned = aiResponse.trim();
+    if (cleaned === "NONE" || cleaned.length < 11) return null;
+    const match = cleaned.match(/[a-zA-Z0-9_-]{11}/);
+    return match ? match[0] : null;
   } catch (e) {
-    return "dQw4w9WgXcQ";
+    return null;
   }
 }
 
@@ -401,6 +403,15 @@ async function generateContentHandler(request, env) {
             <div class="text-sm">
               <span class="text-slate-400 block mb-1">본 콘텐츠는 아래의 공신력 있는 정보를 바탕으로 작성되었습니다.</span>
               <a href="${sourceUrl}" target="_blank" rel="noopener" class="font-bold text-slate-900 hover:text-moon-600 transition-colors">${sourceName}</a>
+            </div>
+          </div>` : "",
+        youtube_section: youtubeId ? `
+          <div class="mt-16">
+            <h3 class="text-2xl font-serif font-black mb-6 flex items-center gap-3 text-slate-900">
+              <span class="material-symbols-outlined text-red-500">play_circle</span> 관련 영상으로 더 알아보기
+            </h3>
+            <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:1.5rem;box-shadow:0 25px 50px -12px rgba(0,0,0,0.15);">
+              <iframe src="https://www.youtube.com/embed/${youtubeId}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
             </div>
           </div>` : ""
       };
