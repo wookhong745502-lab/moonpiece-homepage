@@ -499,15 +499,17 @@ async function generateContentHandler(request, env) {
         }
       }
 
+      const actualImgCount = isSEO ? imgSeoCount : 1; // AEO는 총 2장(0:대표, 1:본문)
+
       let markers = [];
-      for(let i=1; i<=imgSeoCount; i++) markers.push(`{{IMG_${i}}}`);
+      for(let i=1; i<=actualImgCount; i++) markers.push(`{{IMG_${i}}}`);
       const markersText = markers.length > 0 ? `Use ${markers.join(', ')} markers in HTML sequentially between paragraphs.` : `Do NOT use any IMG markers.`;
 
       let basePrompt = isSEO ? settings.seoPrompt : settings.aeoPrompt;
       if (!basePrompt) {
         basePrompt = isSEO ? 
           `Write a highly professional, empathetic, and strictly formatted SEO blog post about "{{keyword}}". Title: "{{title}}". Target sub-keywords: {{subKeywords}}. \n\nCRITICAL REQUIREMENT: The output MUST exceed 2,000 Korean characters. Explain in profound detail with minimum 5 sections.\nUse exactly <article class="post-content">, <h2>, <h3>, <p>, <ul>, <strong> tags.` :
-          `Write an elite-level AEO-optimized expert answer about "{{keyword}}". Title/Question: "{{title}}". \n\nCRITICAL REQUIREMENT: The output MUST exceed 1,500 characters. Return ONLY raw HTML for the body.`;
+          `Write an elite-level AEO-optimized expert answer about "{{keyword}}". Title/Question: "{{title}}". \n\nCRITICAL REQUIREMENT: The output MUST exceed 1,500 characters. You MUST include a detailed comparison table or a summary table using HTML <table> tags. Return ONLY raw HTML for the body.`;
       }
 
       // Fill placeholders in user-defined prompt
@@ -531,15 +533,19 @@ Rules for JSON:
 2. The "html" field must contain ONLY the HTML tags and text, properly escaped for a JSON string.
 3. DO NOT use markdown code blocks (like \`\`\`json) in your response if possible, just return the raw JSON.
 4. DO NOT add any conversational text before or after the JSON.`;
-      await log(`🚀 텍스트 및 이미지 ${imgSeoCount + 1}개 병렬 생성 중...`);
+
+      await log(`🚀 텍스트 및 이미지 ${actualImgCount + 1}개 병렬 생성 중...`);
       const [textRes, imgRes] = await Promise.all([
         aiCall(universalPrompt, env, "You are a specialized content JSON generator.").then(r => { log(`✅ 텍스트 생성 전송 완료`); return r; }),
         (async () => {
           const imgPromises = [];
-          const imgStyle = isSEO ? selectedStyle : (selectedStyle + ", informative infographic style, clean design");
-          for (let i = 0; i <= imgSeoCount; i++) {
+          for (let i = 0; i <= actualImgCount; i++) {
+            const prompt = isSEO 
+              ? `Photo of Korean ${englishKeyword}, modest, fully clothed, elegant high-end style, premium photography, highly detailed, ${selectedStyle}`
+              : `Clean informative infographic of Korean ${englishKeyword}, white background, premium minimalist design, vector style, highly readable, informative charts, ${selectedStyle}`;
+            
             imgPromises.push(env.AI.run(imgModel, { 
-              prompt: `Photo of Korean ${englishKeyword}, modest, fully clothed, elegant high-end style, premium photography, highly detailed, ${imgStyle}`,
+              prompt,
               negative_prompt: negPrompt
             }).then(r => { log(`🖼️ 이미지 ${i+1} 완료`); return r; }));
           }
@@ -552,7 +558,6 @@ Rules for JSON:
       const timeStamp = Date.now();
       const slugBase = generateSlug(title);
       let heroPath = "";
-      let gallery = [];
       const assetDir = isSEO ? "journal" : "knowledge";
 
       // Hero Image (imgRes[0])
@@ -562,13 +567,12 @@ Rules for JSON:
         heroPath = `/${heroKey}`;
       }
 
-      // Body Images (imgRes[1] ~ imgRes[imgSeoCount])
-      for(let j=1; j<=imgSeoCount; j++) {
+      // Body Images (imgRes[1] ~ imgRes[actualImgCount])
+      for(let j=1; j<=actualImgCount; j++) {
         if (imgRes[j]) {
           const bKey = `assets/${assetDir}/${slugBase}-${timeStamp}-${j}.png`;
           await env.JOURNAL_BUCKET.put(bKey, imgRes[j], { httpMetadata: { contentType: "image/png" } });
           const imgTag = `<img src="/${bKey}" style="width:100%; border-radius:1rem; margin:2rem 0;" alt="${keyword} ${j}">`;
-          gallery.push(`/${bKey}`);
           if (draftHtml.includes(`{{IMG_${j}}}`)) {
             draftHtml = draftHtml.replace(`{{IMG_${j}}}`, imgTag);
           } else {
