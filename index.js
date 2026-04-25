@@ -305,9 +305,29 @@ export default {
       }
 
       if (url.pathname === "/admin/api/posts/update" && request.method === "POST") {
-        const { url: postUrl, html } = await request.json();
+        const { url: postUrl, html, title, desc, image, type } = await request.json();
         const key = postUrl.startsWith('/') ? postUrl.slice(1) : postUrl;
         await env.JOURNAL_BUCKET.put(key, html, { httpMetadata: { contentType: "text/html" } });
+        
+        // Update list.json if type is provided
+        if (type) {
+            const listKey = type === 'knowledge' ? "knowledge/list.json" : "journal/list.json";
+            let list = await safeGetJson(listKey, env);
+            let updated = false;
+            list = list.map(p => {
+                if (p.url === postUrl || p.url === '/' + key || '/' + p.url === postUrl || '/' + p.url === '/' + key) {
+                    updated = true;
+                    if (title) p.title = title;
+                    if (desc) p.desc = desc;
+                    if (image) p.image = image;
+                }
+                return p;
+            });
+            if (updated) {
+                await env.JOURNAL_BUCKET.put(listKey, JSON.stringify(list));
+            }
+        }
+        
         return new Response(JSON.stringify({ success: true }), { headers: { "Content-Type": "application/json" } });
       }
 

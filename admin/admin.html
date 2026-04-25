@@ -1247,21 +1247,36 @@
 
             try {
                 // Apply Meta Data Updates
+                // Apply Meta Data Updates
                 const titleNode = currentEditDoc.querySelector('title');
-                if(titleNode) titleNode.textContent = document.getElementById('edit-meta-title').value;
+                const titleVal = document.getElementById('edit-meta-title').value;
+                if(titleNode) titleNode.textContent = titleVal;
 
                 const descNode = currentEditDoc.querySelector('meta[name="description"]');
-                if(descNode) descNode.setAttribute('content', document.getElementById('edit-meta-desc').value);
+                const descVal = document.getElementById('edit-meta-desc').value;
+                if(descNode) descNode.setAttribute('content', descVal);
+
+                const ogTitleNode = currentEditDoc.querySelector('meta[property="og:title"]');
+                if(ogTitleNode) ogTitleNode.setAttribute('content', titleVal);
+
+                const ogDescNode = currentEditDoc.querySelector('meta[property="og:description"]');
+                if(ogDescNode) ogDescNode.setAttribute('content', descVal);
 
                 const h1Node = currentEditDoc.querySelector('.article-main-heading') || currentEditDoc.querySelector('h1');
                 if(h1Node) h1Node.textContent = document.getElementById('edit-main-h1').value;
 
                 // Hero Image Update
                 const heroImgNode = currentEditDoc.querySelector('.hero-img');
+                let heroSrcVal = "";
                 if (heroImgNode) {
                     const srcInput = document.getElementById('edit-block-hero-src');
                     const altInput = document.getElementById('edit-block-hero-alt');
-                    if(srcInput) heroImgNode.setAttribute('src', srcInput.value);
+                    if(srcInput) {
+                        heroSrcVal = srcInput.value;
+                        heroImgNode.setAttribute('src', heroSrcVal);
+                        const ogImageNode = currentEditDoc.querySelector('meta[property="og:image"]');
+                        if (ogImageNode) ogImageNode.setAttribute('content', heroSrcVal);
+                    }
                     if(altInput) heroImgNode.setAttribute('alt', altInput.value);
                 }
 
@@ -1295,11 +1310,19 @@
 
                 // Serialize complete HTML
                 const finalHtml = "<!DOCTYPE html>\n" + currentEditDoc.documentElement.outerHTML;
+                const postType = editTargetUrl.includes('/knowledge/') ? 'knowledge' : 'journal';
 
                 const res = await fetch('/admin/api/posts/update', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url: editTargetUrl, html: finalHtml })
+                    body: JSON.stringify({ 
+                        url: editTargetUrl, 
+                        html: finalHtml,
+                        title: titleVal,
+                        desc: descVal,
+                        image: heroSrcVal,
+                        type: postType
+                    })
                 });
                 
                 const data = await res.json();
