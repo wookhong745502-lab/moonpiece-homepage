@@ -145,6 +145,7 @@
         .height-200 { height: 200px; }
         .input-style { padding: 1rem; border-radius: 1rem; border: 1px solid #e2e8f0; font-size: 1rem; font-weight: bold; box-sizing: border-box; }
         .h-full { height: 100%; }
+        .col-span-full { grid-column: span 2; }
     </style>
 </head>
 <body>
@@ -355,14 +356,14 @@
                 </div>
 
                 <div class="grid grid-cols-2 gap-8 grid-2col-fixed">
-                    <div class="input-group" style="display:none;">
+                    <div class="input-group hidden">
                         <label>발행 유형</label>
                         <select id="auto-type">
                             <option value="seo">SEO 저널 (롱폼)</option>
                             <option value="aeo">AEO 지식인 (답변형)</option>
                         </select>
                     </div>
-                    <div class="input-group" id="auto-interval-group" style="grid-column: span 2;">
+                    <div class="input-group col-span-full" id="auto-interval-group">
                         <label>발행 간격 (시간 단위)</label>
                         <div class="flex items-center gap-2">
                             <input type="number" id="auto-interval" value="24" min="1">
