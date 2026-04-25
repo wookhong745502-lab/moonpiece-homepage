@@ -348,8 +348,8 @@
             <div class="card">
                 <div class="input-group">
                     <label>발행할 주제 목록 (한 줄에 하나씩 제목/키워드 입력)</label>
-                    <textarea id="auto-keywords" rows="10" placeholder="예:&#10;임산부 불면증 해결&#10;임신 초기 영양제 추천&#10;바디필로우 선택 기준&#10;..."></textarea>
-                    <p class="small-hint">입력한 순서대로 지정된 간격에 맞춰 발행됩니다. (입력 안하면 AI가 자동 생성)</p>
+                    <textarea id="auto-keywords" rows="8" placeholder="예:&#10;임산부 불면증 해결&#10;임신 초기 영양제 추천&#10;바디필로우 선택 기준&#10;..."></textarea>
+                    <p class="small-hint">입력한 순서대로 지정된 간격에 맞춰 발행됩니다.</p>
                 </div>
 
                 <div class="grid grid-cols-2 gap-8 grid-2col-fixed">
@@ -369,16 +369,29 @@
                     </div>
                 </div>
 
-                <p class="info-box mb-8">
-                    <span class="material-symbols-outlined align-middle text-lg">info</span> 이미지 모델 및 스타일 설정은 <strong>API 설정</strong> 메뉴에서 통합 관리됩니다.
-                </p>
-
-                <button id="auto-gen-btn" class="btn-primary w-full p-6 text-xl" onclick="runAutoPublish()">대량 자동 예약 발행 시작하기</button>
+                <button id="auto-prepare-btn" class="btn-primary w-full p-6 text-xl bg-slate-800" onclick="prepareAutoPublish()">스케줄 확인 및 발행 준비하기</button>
             </div>
 
+            <!-- Schedule Queue Preview -->
+            <div id="auto-queue-zone" class="card hidden">
+                <div class="flex-center-between mb-6">
+                    <h3 class="font-serif text-2xl">발행 예정 스케줄 (Review)</h3>
+                    <span id="queue-count" class="ai-badge">0개 대기 중</span>
+                </div>
+                <div id="auto-queue-list" class="flex flex-col gap-3 mb-8"></div>
+                
+                <div class="flex gap-4">
+                    <button id="auto-gen-btn" class="btn-primary flex-1 p-6 text-xl" onclick="runAutoPublish()">대량 자동 발행 시작하기</button>
+                    <button id="auto-stop-btn" class="btn-primary bg-red-600 hidden p-6 text-xl" onclick="stopAutoPublish()">중단하기</button>
+                </div>
+            </div>
+
+            <!-- Execution Logs -->
             <div id="auto-results-zone" class="card hidden">
-                <h3 class="font-serif text-2xl mb-4">자동 발행 결과</h3>
-                <div id="auto-results-list" class="flex flex-col gap-4"></div>
+                <h3 class="font-serif text-2xl mb-4">발행 프로세스 로그</h3>
+                <div id="auto-log-console" class="ai-console height-200">
+                    <div id="auto-log-list" class="log-list" style="height: 100%;"></div>
+                </div>
             </div>
         </div>
 
@@ -1372,89 +1385,147 @@
             window.location.href = '/admin/login.html';
         }
 
-        async function runAutoPublish() {
-            const type = document.getElementById('auto-type').value;
+        let autoQueue = [];
+        let stopRequested = false;
+
+        function prepareAutoPublish() {
             const kwRaw = document.getElementById('auto-keywords').value;
             const keywords = kwRaw.split('\n').map(k => k.trim()).filter(k => k.length > 0);
             const intervalHours = parseInt(document.getElementById('auto-interval').value) || 24;
-            let currentPublishDate = new Date(); // 시작일 제거: '지금'부터 시작
-            
-            if (keywords.length === 0) return alert('발행할 주제를 최소 하나 이상 입력해주세요.');
-            if (!confirm(`${keywords.length}개의 주제에 대해 대량 자동 발행을 시작하시겠습니까?\n(각 문서 생성에 약 1분 정도 소요됩니다.)`)) return;
+            let currentPublishDate = new Date();
 
-            const btn = document.getElementById('auto-gen-btn');
-            btn.disabled = true;
-            btn.textContent = '대량 자동 발행 진행 중...';
-            
-            const resultsZone = document.getElementById('auto-results-zone');
-            const resultsList = document.getElementById('auto-results-list');
-            resultsZone.style.display = 'block';
-            resultsList.innerHTML = '';
-            
-            for (let i = 0; i < keywords.length; i++) {
-                const keyword = keywords[i];
-                const dateStr = currentPublishDate.toISOString().split('T')[0];
-                
-                // Add "Processing" item
-                const itemDiv = document.createElement('div');
-                itemDiv.className = 'auto-res-item bg-slate-50 border-slate-200';
-                itemDiv.id = `auto-item-${i}`;
-                itemDiv.innerHTML = `
-                    <div>
-                        <div class="font-bold">${keyword}</div>
-                        <div class="text-sm text-slate-500">진행 중 (발행일: ${dateStr})...</div>
+            if (keywords.length === 0) return alert('발행할 주제를 최소 하나 이상 입력해주세요.');
+
+            autoQueue = keywords.map((keyword, index) => {
+                const date = new Date(currentPublishDate);
+                const task = {
+                    keyword,
+                    publishDate: date.toISOString().split('T')[0],
+                    status: 'pending'
+                };
+                currentPublishDate.setHours(currentPublishDate.getHours() + intervalHours);
+                return task;
+            });
+
+            renderAutoQueue();
+            document.getElementById('auto-queue-zone').style.display = 'block';
+            document.getElementById('auto-queue-zone').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function renderAutoQueue() {
+            const list = document.getElementById('auto-queue-list');
+            const count = document.getElementById('queue-count');
+            list.innerHTML = '';
+            count.textContent = `${autoQueue.length}개 대기 중`;
+
+            autoQueue.forEach((task, index) => {
+                const div = document.createElement('div');
+                div.className = `auto-res-item bg-white border-slate-200 flex items-center justify-between p-4 rounded-xl border ${task.status === 'success' ? 'auto-res-success' : task.status === 'fail' ? 'auto-res-fail' : ''}`;
+                div.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-500">${index + 1}</div>
+                        <div>
+                            <div class="font-bold">${task.keyword}</div>
+                            <div class="text-xs text-slate-500">발행 예정일: ${task.publishDate}</div>
+                        </div>
                     </div>
+                    ${task.status === 'pending' ? `<button onclick="removeTask(${index})" class="text-error flex items-center gap-1 text-sm"><span class="material-symbols-outlined text-sm">cancel</span> 제외</button>` : ''}
+                    ${task.status === 'success' ? `<span class="text-green-600 font-bold text-sm">발행 완료</span>` : ''}
+                    ${task.status === 'processing' ? `<span class="text-primary font-bold text-sm animate-pulse">생성 중...</span>` : ''}
                 `;
-                resultsList.appendChild(itemDiv);
-                resultsList.scrollTop = resultsList.scrollHeight;
+                list.appendChild(div);
+            });
+        }
+
+        function removeTask(index) {
+            autoQueue.splice(index, 1);
+            renderAutoQueue();
+        }
+
+        async function runAutoPublish() {
+            if (autoQueue.length === 0) return alert('대기 중인 주제가 없습니다.');
+            
+            const type = document.getElementById('auto-type').value;
+            const category = ""; // 자동 분류
+            
+            const btn = document.getElementById('auto-gen-btn');
+            const stopBtn = document.getElementById('auto-stop-btn');
+            const resultsZone = document.getElementById('auto-results-zone');
+            const logList = document.getElementById('auto-log-list');
+
+            if (!confirm(`${autoQueue.length}개의 주제에 대해 최종 발행을 시작하시겠습니까?`)) return;
+
+            btn.disabled = true;
+            btn.textContent = '대량 발행 진행 중...';
+            stopBtn.style.display = 'block';
+            resultsZone.style.display = 'block';
+            logList.innerHTML = '';
+            stopRequested = false;
+
+            function addLog(msg, color = '#d4d4d4') {
+                const now = new Date().toLocaleTimeString();
+                const div = document.createElement('div');
+                div.className = 'log-item';
+                div.innerHTML = `<span class="log-time">[${now}]</span> <span style="color:${color}">${msg}</span>`;
+                logList.appendChild(div);
+                logList.scrollTop = logList.scrollHeight;
+            }
+
+            addLog('🚀 대량 자동 발행 엔진 가동 시작...', 'var(--primary)');
+
+            for (let i = 0; i < autoQueue.length; i++) {
+                if (stopRequested) {
+                    addLog('🛑 사용자에 의해 발행 프로세스가 중단되었습니다.', '#ef4444');
+                    break;
+                }
+
+                const task = autoQueue[i];
+                if (task.status === 'success') continue;
+
+                task.status = 'processing';
+                renderAutoQueue();
+                addLog(`📄 [${i+1}/${autoQueue.length}] "${task.keyword}" 생성 요청 중...`);
 
                 try {
                     const endpoint = type === 'seo' ? '/admin/api/generate-journal' : '/admin/api/generate-knowledge';
-                    const payload = {
-                        type,
-                        keyword,
-                        // category를 보내지 않음 -> 서버에서 자동 분류 적용
-                        isFinal: true, 
-                        publishDate: dateStr,
-                    };
-
                     const res = await fetch(endpoint, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
+                        body: JSON.stringify({
+                            type,
+                            keyword: task.keyword,
+                            isFinal: true,
+                            publishDate: task.publishDate
+                        })
                     });
                     const data = await res.json();
 
                     if (data.success) {
-                        itemDiv.className = 'auto-res-item auto-res-success';
-                        itemDiv.innerHTML = `
-                            <div>
-                                <div class="font-bold">${keyword}</div>
-                                <div class="text-sm text-green-600">발행 성공 (일자: ${dateStr})</div>
-                            </div>
-                            <a href="${data.path}" target="_blank" rel="noopener" class="px-3 py-1 bg-white border border-green-200 rounded-lg text-xs font-bold text-green-700 no-underline">보기</a>
-                        `;
+                        task.status = 'success';
+                        addLog(`✅ "${task.keyword}" 발행 성공! (Path: ${data.path})`, '#22c55e');
                     } else {
                         throw new Error(data.error || '알 수 없는 에러');
                     }
                 } catch (e) {
-                    itemDiv.className = 'auto-res-item auto-res-fail';
-                    itemDiv.innerHTML = `
-                        <div>
-                            <div class="font-bold">${keyword}</div>
-                            <div class="text-sm text-red-600">실패: ${e.message}</div>
-                        </div>
-                    `;
+                    task.status = 'fail';
+                    addLog(`❌ "${task.keyword}" 실패: ${e.message}`, '#ef4444');
                 }
-
-                // Increment date for next item
-                currentPublishDate.setHours(currentPublishDate.getHours() + intervalHours);
+                renderAutoQueue();
             }
 
             btn.disabled = false;
             btn.textContent = '대량 자동 발행 시작하기';
-            alert('모든 작업이 완료되었습니다.');
+            stopBtn.style.display = 'none';
+            addLog('🏁 모든 작업이 완료되었습니다.', 'var(--primary)');
+            alert('대량 발행 프로세스가 종료되었습니다.');
             loadPosts();
+        }
+
+        function stopAutoPublish() {
+            if (confirm('현재 진행 중인 문서 생성만 완료하고 나머지는 중단하시겠습니까?')) {
+                stopRequested = true;
+                document.getElementById('auto-stop-btn').textContent = '중단 요청됨...';
+            }
         }
 
         // Init
