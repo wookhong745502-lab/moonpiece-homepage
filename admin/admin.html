@@ -420,9 +420,9 @@
             <div class="flex-center-between mb-8">
                 <h1 class="font-serif text-4xl">포스트 관리</h1>
                 <div class="flex gap-4">
-                    <button onclick="filterPosts('all')" class="btn-primary py-2 px-6 text-sm bg-slate-800" id="filter-all">전체보기</button>
-                    <button onclick="filterPosts('journal')" class="btn-primary py-2 px-6 text-sm bg-blue-600" id="filter-journal">임산부 저널 (SEO)</button>
-                    <button onclick="filterPosts('knowledge')" class="btn-primary py-2 px-6 text-sm bg-purple-600" id="filter-knowledge">AEO 지식인</button>
+                    <button onclick="filterPosts('all')" class="btn-primary py-2 px-6 text-sm bg-slate-800" id="filter-all">전체보기 (<span id="count-all">0</span>)</button>
+                    <button onclick="filterPosts('journal')" class="btn-primary py-2 px-6 text-sm bg-blue-600" id="filter-journal">임산부 저널 (<span id="count-journal">0</span>)</button>
+                    <button onclick="filterPosts('knowledge')" class="btn-primary py-2 px-6 text-sm bg-purple-600" id="filter-knowledge">AEO 지식인 (<span id="count-knowledge">0</span>)</button>
                     <button onclick="migrateClear()" class="btn-primary bg-red-600 border-none ml-8 text-sm">모든 데이터 초기화</button>
                 </div>
             </div>
@@ -1085,6 +1085,11 @@
             let totalScheduled = posts.length - totalPublished;
             document.getElementById('stat-total').textContent = totalPublished;
             document.getElementById('stat-scheduled').textContent = totalScheduled;
+            
+            // Update Type Counts
+            document.getElementById('count-all').textContent = posts.length;
+            document.getElementById('count-journal').textContent = posts.filter(p => p.type === 'journal').length;
+            document.getElementById('count-knowledge').textContent = posts.filter(p => p.type === 'knowledge' || p.type === 'aeo').length;
         }
 
         function filterPosts(type) {
