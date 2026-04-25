@@ -754,6 +754,4 @@ Rules for JSON:
   return new Response(readable, { headers: { "Content-Type": "application/json" } });
 }
 
-async function autoPublishHandler(request, env) {
-  return new Response(JSON.stringify({ success: true, message: "Auto-publish placeholder" }));
-}
+
