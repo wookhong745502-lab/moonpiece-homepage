@@ -118,6 +118,7 @@ function parseAIJson(raw) {
 }
 
 function generateSlug(text) {
+  if (!text) return "post-" + Date.now();
   return text
     .toString()
     .toLowerCase()
@@ -495,21 +496,65 @@ async function generateContentHandler(request, env) {
   // --- FINAL PUBLISH MODE (Direct JSON Response) ---
   if (isFinal) {
     try {
-      const finalSlug = await resolveUniqueSlug(type, requestedSlug || generateSlug(title), env);
-      const publishDate = new Date(new Date().getTime() + 9 * 60 * 60 * 1000).toISOString().split('T')[0];
+      let finalTitle = title;
+      if (!finalTitle && keyword) {
+         finalTitle = await aiCall(`Suggest one powerful SEO title for keyword: ${keyword}`, env);
+         finalTitle = finalTitle.trim().replace(/['"]/g, '');
+      }
+      
+      let finalSummary = summary;
+      let finalBody = finalHtml;
+      let finalFaqs = faqs || [];
+      let finalSchema = schema || {};
+      let finalHero = payload.image || "";
+      let finalYoutubeId = youtubeId;
+
+      // 만약 본문이 비어있다면 (대량 자동 발행 시), AI가 전체를 생성
+      if (!finalBody && keyword) {
+          const settingsObj = await env.JOURNAL_BUCKET.get("config/settings.json");
+          const settings = settingsObj ? JSON.parse(await settingsObj.text()) : {};
+          const isSEO = type === 'seo';
+          
+          let basePrompt = isSEO ? settings.seoPrompt : settings.aeoPrompt;
+          const faqCount = settings.faqCount || 3;
+          
+          const genPrompt = `${basePrompt}
+          Keyword: ${keyword}, Title: ${finalTitle}.
+          Return ONLY a valid JSON object:
+          {
+            "html": "The full article body content in HTML format.",
+            "faqs": [{"q": "...", "a": "..."}],
+            "summary": "3-line summary"
+          }`;
+          
+          const aiRes = await aiCall(genPrompt, env, "You are a content generator.");
+          const data = parseAIJson(aiRes);
+          finalBody = data.html || "";
+          finalFaqs = data.faqs || [];
+          finalSummary = data.summary || "";
+          
+          // AI 추천 유튜브 ID
+          if (!finalYoutubeId) finalYoutubeId = await getAiRecommendedYoutubeId(keyword, env);
+          
+          // 스키마 기본 생성
+          finalSchema = { "@context": "https://schema.org", "@type": "Article", "headline": finalTitle, "author": { "@type": "Organization", "name": "Moonpiece" } };
+      }
+
+      const finalSlug = await resolveUniqueSlug(type, requestedSlug || generateSlug(finalTitle), env);
+      const publishDate = payload.publishDate || new Date(new Date().getTime() + 9 * 60 * 60 * 1000).toISOString().split('T')[0];
       const targetKey = isSEO ? `journal/${finalSlug}.html` : `knowledge/${finalSlug}.html`;
       
       const templateData = {
-        title,
-        description: summary || "",
-        desc: summary || "",
-        summary: summary || "",
+        title: finalTitle,
+        description: finalSummary || "",
+        desc: finalSummary || "",
+        summary: finalSummary || "",
         category: category || classifyCategory(keyword),
         publish_date: publishDate,
         date: publishDate,
-        rich_content: finalHtml,
-        content: finalHtml,
-        faq_content: (faqs || []).map(f => `
+        rich_content: finalBody,
+        content: finalBody,
+        faq_content: (finalFaqs || []).map(f => `
           <div class="faq-item bg-white p-8 rounded-2xl border border-slate-100 shadow-sm mb-6">
             <h4 class="text-lg font-bold text-slate-900 mb-3 flex items-start gap-3">
               <span class="text-moon-600">Q.</span> ${f.q}
@@ -518,20 +563,20 @@ async function generateContentHandler(request, env) {
               ${f.a}
             </p>
           </div>`).join(''),
-        faq_section: (faqs && faqs.length) ? `
+        faq_section: (finalFaqs && finalFaqs.length) ? `
           <section class="mt-24 p-8 lg:p-16 bg-slate-50 rounded-[3rem] border border-slate-100">
             <h3 class="text-3xl font-serif font-black mb-10 text-slate-900">도움이 되는 질문 (FAQ)</h3>
             <div class="space-y-4">
-              ${faqs.map(f => `
+              ${finalFaqs.map(f => `
                 <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
                   <h4 class="text-lg font-bold text-slate-900 mb-3 flex gap-3 text-moon-600">Q. <span class="text-slate-900">${f.q}</span></h4>
                   <p class="text-slate-600 leading-relaxed pl-8">${f.a}</p>
                 </div>`).join('')}
             </div>
           </section>` : "",
-        og_image: payload.image || "",
+        og_image: finalHero || "",
         slug: finalSlug,
-        json_ld: JSON.stringify(schema || {}),
+        json_ld: JSON.stringify(finalSchema || {}),
         source_name: sourceName || "",
         source_url: sourceUrl || "",
         source_section: (sourceName && sourceUrl) ? `
@@ -542,13 +587,13 @@ async function generateContentHandler(request, env) {
               <a href="${sourceUrl}" target="_blank" rel="noopener" class="font-bold text-slate-900 hover:text-moon-600 transition-colors">${sourceName}</a>
             </div>
           </div>` : "",
-        youtube_section: youtubeId ? `
+        youtube_section: finalYoutubeId ? `
           <div class="mt-16">
             <h3 class="text-2xl font-serif font-black mb-6 flex items-center gap-3 text-slate-900">
               <span class="material-symbols-outlined text-red-500">play_circle</span> 관련 영상으로 더 알아보기
             </h3>
             <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:1.5rem;box-shadow:0 25px 50px -12px rgba(0,0,0,0.15);">
-              <iframe src="https://www.youtube.com/embed/${youtubeId}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+              <iframe src="https://www.youtube.com/embed/${finalYoutubeId}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
             </div>
           </div>` : ""
       };
@@ -560,12 +605,12 @@ async function generateContentHandler(request, env) {
       const listKey = isSEO ? "journal/list.json" : "knowledge/list.json";
       await atomicUpdateList(listKey, env, (list) => {
         list.push({
-          title,
-          desc: summary || "",
+          title: finalTitle,
+          desc: finalSummary || "",
           url: `/${targetKey}`,
           date: publishDate,
           category: templateData.category,
-          image: payload.image,
+          image: finalHero,
           slug: finalSlug
         });
         return list;
