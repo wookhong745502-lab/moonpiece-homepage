@@ -463,6 +463,163 @@ export default {
 
 // --- Core Logic ---
 
+async function performAiGeneration(payload, env, logger = null) {
+  const { type, keyword, title: inputTitle, style } = payload;
+  const isSEO = type === 'seo';
+  const isAEO = !isSEO;
+  
+  const log = async (msg) => { if (logger) await logger(msg); };
+
+  const settingsObj = await env.JOURNAL_BUCKET.get("config/settings.json");
+  const settings = settingsObj ? JSON.parse(await settingsObj.text()) : {};
+  const imgModel = (isSEO ? settings.imgSeo : settings.imgAeo) || "@cf/bytedance/stable-diffusion-xl-lightning";
+  const selectedStyle = style || settings.defaultStyle || "Professional photography";
+  const defaultNeg = "bare skin, nsfw, low quality, watermark, text, error, blurry, bad anatomy, bad hands";
+  const negPrompt = settings.negPrompt || defaultNeg;
+  const imgSeoCount = settings.imgCount !== undefined ? parseInt(settings.imgCount) : 3;
+  const faqCount = settings.faqCount !== undefined ? parseInt(settings.faqCount) : 3;
+
+  await log(`🚀 AI 프로세스 가동: ${keyword}`);
+
+  // 1. 제목 생성 (없을 경우)
+  let finalTitle = inputTitle;
+  if (!finalTitle) {
+    finalTitle = await aiCall(`Suggest one powerful ${isSEO ? 'SEO' : 'AEO'} title for keyword: ${keyword}`, env);
+    finalTitle = finalTitle.trim().replace(/['"]/g, '');
+  }
+  await log(`📌 제목 확정: ${finalTitle}`);
+
+  // 2. 이미지용 영어 변환
+  let englishKeyword = keyword;
+  try {
+    englishKeyword = await aiCall(`Translate exactly "${keyword}" into a short, descriptive English phrase for image generation. 
+    CRITICAL SAFETY: Ensure the phrase is extremely modest and professional. 
+    ALWAYS include "Korean person" and "fully clothed". 
+    AVOID words like "pregnancy", "breast", "belly", "body" if they might be sensitive. 
+    Example for "임산부": "Korean woman fully clothed in a premium living room". 
+    ONLY return the English text.`, env, "You are a translator.");
+    englishKeyword = englishKeyword.trim().replace(/['"]/g, '');
+    await log(`🗣️ 이미지 변환: ${englishKeyword}`);
+  } catch (e) {}
+
+  // 3. 출처 자동 검색
+  let finalSourceName = payload.sourceName || "";
+  let finalSourceUrl = payload.sourceUrl || "";
+  if (!finalSourceName || !finalSourceUrl) {
+    try {
+      await log(`🔍 신뢰도 출처 자동 검색 중...`);
+      const sourceRaw = await aiCall(
+        `Keyword: ${keyword}. Suggest one world-class prestigious medical/academic authority (e.g., Mayo Clinic, Harvard, WHO, etc.). Return ONLY JSON: {"name": "Name in Korean", "url": "https://..."}.`,
+        env
+      );
+      const cleanedSrc = sourceRaw.replace(/\`\`\`json|\`\`\`/g, '').trim();
+      const srcObj = JSON.parse(cleanedSrc);
+      if (srcObj.name && srcObj.url) {
+        finalSourceName = srcObj.name;
+        finalSourceUrl = srcObj.url;
+        await log(`✅ 출처 생성: ${finalSourceName}`);
+      }
+    } catch (e) {
+      await log(`⚠️ 출처 검색 실패: ${e.message}`);
+    }
+  }
+
+  // 4. 이미지 마커 준비
+  const actualImgCount = isSEO ? imgSeoCount : 1; 
+  let markers = [];
+  for(let i=1; i<=actualImgCount; i++) markers.push(`{{IMG_${i}}}`);
+  const markersText = markers.length > 0 ? `Use ${markers.join(', ')} markers in HTML sequentially between paragraphs.` : `Do NOT use any IMG markers.`;
+
+  // 5. 프롬프트 구성
+  let basePrompt = isSEO ? settings.seoPrompt : settings.aeoPrompt;
+  if (!basePrompt) {
+    basePrompt = isSEO ? 
+      `Write a highly professional, empathetic, and strictly formatted SEO blog post about "{{keyword}}". Title: "{{title}}". \n\nCRITICAL: The output MUST exceed 2,000 Korean characters. Explain in profound detail.\nUse exactly <article class="post-content">, <h2>, <h3>, <p>, <ul>, <strong> tags.` :
+      `Write an elite-level AEO expert answer about "{{keyword}}". Title/Question: "{{title}}". \n\nCRITICAL: The output MUST exceed 1,500 characters. You MUST include a detailed comparison table or summary table using HTML <table> tags. Return ONLY raw HTML for the body.`;
+  }
+  basePrompt = basePrompt.replace(/{{keyword}}/g, keyword).replace(/{{title}}/g, finalTitle).replace(/{{subKeywords}}/g, payload.subKeywords || "");
+
+  const universalPrompt = `${basePrompt}
+  CRITICAL: Your response must be a single JSON object:
+  {
+    "html": "The full article body content in HTML format. ${markersText}",
+    "faqs": [{"q": "...", "a": "..."}],
+    "summary": "3-line summary"
+  }
+  Rules: ${faqCount} FAQs, HTML field ONLY with tags, properly escaped JSON.`;
+
+  // 6. 텍스트 및 이미지 병렬 생성
+  await log(`🚀 텍스트 및 이미지 ${actualImgCount + 1}개 병렬 생성 중...`);
+  const [textRes, imgRes] = await Promise.all([
+    aiCall(universalPrompt, env, "You are a specialized content JSON generator.").then(r => { log(`✅ 텍스트 생성 완료`); return r; }),
+    (async () => {
+      const imgPromises = [];
+      for (let i = 0; i <= actualImgCount; i++) {
+        const prompt = isSEO 
+          ? `Photo of Korean ${englishKeyword}, modest, fully clothed, elegant high-end style, premium photography, highly detailed, ${selectedStyle}`
+          : `Clean informative infographic of Korean ${englishKeyword}, white background, premium minimalist design, vector style, highly readable, informative charts, ${selectedStyle}. Korean/English/Numbers only.`;
+        
+        const generateImg = async (p, retried = false) => {
+          try {
+            return await env.AI.run(imgModel, { prompt: p, negative_prompt: negPrompt });
+          } catch (e) {
+            if (e.message.includes("3030") && !retried) {
+              const safePrompt = isSEO ? `A Korean woman sitting comfortably, fully clothed, high-end interior, soft lighting` : `Clean infographic of Korean mother, soft colors, minimalist design, no text`;
+              return await generateImg(safePrompt, true);
+            }
+            return null;
+          }
+        };
+        imgPromises.push(generateImg(prompt).then(r => { 
+          if (r) log(`🖼️ 이미지 ${i+1} 완료`); 
+          return r; 
+        }));
+      }
+      return Promise.all(imgPromises);
+    })()
+  ]);
+
+  // 7. 결과 조립
+  const data = parseAIJson(textRes);
+  let draftHtml = data.html || "";
+  const timeStamp = Date.now();
+  const slugBase = generateSlug(finalTitle);
+  let heroPath = "";
+  const assetDir = isSEO ? "journal" : "knowledge";
+
+  if (imgRes[0]) {
+    const heroKey = `assets/${assetDir}/${slugBase}-${timeStamp}-hero.png`;
+    await env.JOURNAL_BUCKET.put(heroKey, imgRes[0], { httpMetadata: { contentType: "image/png" } });
+    heroPath = `/${heroKey}`;
+  }
+
+  for(let j=1; j<=actualImgCount; j++) {
+    if (imgRes[j]) {
+      const bKey = `assets/${assetDir}/${slugBase}-${timeStamp}-${j}.png`;
+      await env.JOURNAL_BUCKET.put(bKey, imgRes[j], { httpMetadata: { contentType: "image/png" } });
+      const imgTag = `<img src="/${bKey}" style="width:100%; border-radius:1rem; margin:2rem 0;" alt="${keyword} ${j}">`;
+      if (draftHtml.includes(`{{IMG_${j}}}`)) draftHtml = draftHtml.replace(`{{IMG_${j}}}`, imgTag);
+      else draftHtml += `\n\n${imgTag}`;
+    }
+  }
+
+  const recYoutubeId = await getAiRecommendedYoutubeId(keyword, env);
+  
+  return { 
+    title: finalTitle, 
+    html: draftHtml, 
+    faqs: data.faqs || [], 
+    summary: data.summary || "",
+    image: heroPath, 
+    youtubeId: recYoutubeId, 
+    type,
+    slug: payload.slug || slugBase,
+    sourceName: finalSourceName,
+    sourceUrl: finalSourceUrl,
+    schema: { "@context": "https://schema.org", "@type": "Article", "headline": finalTitle, "image": heroPath, "author": { "@type": "Organization", "name": "Moonpiece" } }
+  };
+}
+
 async function resolveUniqueSlug(type, requestedSlug, env) {
   const listKey = type === 'seo' ? "journal/list.json" : "knowledge/list.json";
   const list = await safeGetJson(listKey, env);
@@ -490,129 +647,77 @@ async function renderTemplate(templateName, data, env) {
 
 async function generateContentHandler(request, env) {
   const payload = await request.json();
-  const { isFinal, type, keyword, title, slug: requestedSlug, finalHtml, style, category, summary, youtubeId, faqs, schema, sourceName, sourceUrl } = payload;
+  const { isFinal, type, keyword } = payload;
   const isSEO = type === 'seo';
 
-  // --- FINAL PUBLISH MODE (Direct JSON Response) ---
   if (isFinal) {
     try {
-      let finalTitle = title;
-      if (!finalTitle && keyword) {
-         finalTitle = await aiCall(`Suggest one powerful SEO title for keyword: ${keyword}`, env);
-         finalTitle = finalTitle.trim().replace(/['"]/g, '');
-      }
-      
-      let finalSummary = summary;
-      let finalBody = finalHtml;
-      let finalFaqs = faqs || [];
-      let finalSchema = schema || {};
-      let finalHero = payload.image || "";
-      let finalYoutubeId = youtubeId;
-
-      // 만약 본문이 비어있다면 (대량 자동 발행 시), AI가 전체를 생성
-      if (!finalBody && keyword) {
-          const settingsObj = await env.JOURNAL_BUCKET.get("config/settings.json");
-          const settings = settingsObj ? JSON.parse(await settingsObj.text()) : {};
-          const isSEO = type === 'seo';
-          
-          let basePrompt = isSEO ? settings.seoPrompt : settings.aeoPrompt;
-          const faqCount = settings.faqCount || 3;
-          
-          const genPrompt = `${basePrompt}
-          Keyword: ${keyword}, Title: ${finalTitle}.
-          Return ONLY a valid JSON object:
-          {
-            "html": "The full article body content in HTML format.",
-            "faqs": [{"q": "...", "a": "..."}],
-            "summary": "3-line summary"
-          }`;
-          
-          const aiRes = await aiCall(genPrompt, env, "You are a content generator.");
-          const data = parseAIJson(aiRes);
-          finalBody = data.html || "";
-          finalFaqs = data.faqs || [];
-          finalSummary = data.summary || "";
-          
-          // AI 추천 유튜브 ID
-          if (!finalYoutubeId) finalYoutubeId = await getAiRecommendedYoutubeId(keyword, env);
-          
-          // 스키마 기본 생성
-          finalSchema = { "@context": "https://schema.org", "@type": "Article", "headline": finalTitle, "author": { "@type": "Organization", "name": "Moonpiece" } };
+      // 대량 발행 또는 직접 발행 시, 본문이 없으면 생성 로직 수행
+      let draft = payload;
+      if (!payload.finalHtml && keyword) {
+          draft = await performAiGeneration(payload, env);
       }
 
-      const finalSlug = await resolveUniqueSlug(type, requestedSlug || generateSlug(finalTitle), env);
+      const finalSlug = await resolveUniqueSlug(type, draft.slug, env);
       const publishDate = payload.publishDate || new Date(new Date().getTime() + 9 * 60 * 60 * 1000).toISOString().split('T')[0];
       const targetKey = isSEO ? `journal/${finalSlug}.html` : `knowledge/${finalSlug}.html`;
       
       const templateData = {
-        title: finalTitle,
-        description: finalSummary || "",
-        desc: finalSummary || "",
-        summary: finalSummary || "",
-        category: category || classifyCategory(keyword),
+        title: draft.title,
+        description: draft.summary || "",
+        desc: draft.summary || "",
+        summary: draft.summary || "",
+        category: payload.category || classifyCategory(keyword),
         publish_date: publishDate,
         date: publishDate,
-        rich_content: finalBody,
-        content: finalBody,
-        faq_content: (finalFaqs || []).map(f => `
+        rich_content: draft.html || draft.finalHtml,
+        content: draft.html || draft.finalHtml,
+        faq_content: (draft.faqs || []).map(f => `
           <div class="faq-item bg-white p-8 rounded-2xl border border-slate-100 shadow-sm mb-6">
-            <h4 class="text-lg font-bold text-slate-900 mb-3 flex items-start gap-3">
-              <span class="text-moon-600">Q.</span> ${f.q}
-            </h4>
-            <p class="text-slate-600 leading-relaxed pl-8">
-              ${f.a}
-            </p>
+            <h4 class="text-lg font-bold text-slate-900 mb-3 flex items-start gap-3"><span class="text-moon-600">Q.</span> ${f.q}</h4>
+            <p class="text-slate-600 leading-relaxed pl-8">${f.a}</p>
           </div>`).join(''),
-        faq_section: (finalFaqs && finalFaqs.length) ? `
+        faq_section: (draft.faqs && draft.faqs.length) ? `
           <section class="mt-24 p-8 lg:p-16 bg-slate-50 rounded-[3rem] border border-slate-100">
             <h3 class="text-3xl font-serif font-black mb-10 text-slate-900">도움이 되는 질문 (FAQ)</h3>
             <div class="space-y-4">
-              ${finalFaqs.map(f => `
+              ${draft.faqs.map(f => `
                 <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
                   <h4 class="text-lg font-bold text-slate-900 mb-3 flex gap-3 text-moon-600">Q. <span class="text-slate-900">${f.q}</span></h4>
                   <p class="text-slate-600 leading-relaxed pl-8">${f.a}</p>
                 </div>`).join('')}
             </div>
           </section>` : "",
-        og_image: finalHero || "",
+        og_image: draft.image || "",
         slug: finalSlug,
-        json_ld: JSON.stringify(finalSchema || {}),
-        source_name: sourceName || "",
-        source_url: sourceUrl || "",
-        source_section: (sourceName && sourceUrl) ? `
+        json_ld: JSON.stringify(draft.schema || {}),
+        source_name: draft.sourceName || "",
+        source_url: draft.sourceUrl || "",
+        source_section: (draft.sourceName && draft.sourceUrl) ? `
           <div class="mt-16 p-6 bg-slate-50 rounded-2xl border border-slate-100 flex items-center gap-4">
             <span class="material-symbols-outlined text-moon-600">verified_user</span>
             <div class="text-sm">
-              <span class="text-slate-400 block mb-1">본 콘텐츠는 아래의 공신력 있는 정보를 바탕으로 작성되었습니다.</span>
-              <a href="${sourceUrl}" target="_blank" rel="noopener" class="font-bold text-slate-900 hover:text-moon-600 transition-colors">${sourceName}</a>
+              <span class="text-slate-400 block mb-1">본 콘텐츠는 아래의 정보를 바탕으로 작성되었습니다.</span>
+              <a href="${draft.sourceUrl}" target="_blank" rel="noopener" class="font-bold text-slate-900 hover:text-moon-600">${draft.sourceName}</a>
             </div>
           </div>` : "",
-        youtube_section: finalYoutubeId ? `
+        youtube_section: draft.youtubeId ? `
           <div class="mt-16">
             <h3 class="text-2xl font-serif font-black mb-6 flex items-center gap-3 text-slate-900">
-              <span class="material-symbols-outlined text-red-500">play_circle</span> 관련 영상으로 더 알아보기
+              <span class="material-symbols-outlined text-red-500">play_circle</span> 관련 영상
             </h3>
-            <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:1.5rem;box-shadow:0 25px 50px -12px rgba(0,0,0,0.15);">
-              <iframe src="https://www.youtube.com/embed/${finalYoutubeId}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:1.5rem;">
+              <iframe src="https://www.youtube.com/embed/${draft.youtubeId}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allowfullscreen></iframe>
             </div>
           </div>` : ""
       };
 
-      console.log(`[Publish] sourceName="${sourceName}" sourceUrl="${sourceUrl}"`);
       const finalOutput = await renderTemplate(isSEO ? "journal_template.html" : "post_template.html", templateData, env);
       await env.JOURNAL_BUCKET.put(targetKey, finalOutput, { httpMetadata: { contentType: "text/html" } });
 
       const listKey = isSEO ? "journal/list.json" : "knowledge/list.json";
       await atomicUpdateList(listKey, env, (list) => {
-        list.push({
-          title: finalTitle,
-          desc: finalSummary || "",
-          url: `/${targetKey}`,
-          date: publishDate,
-          category: templateData.category,
-          image: finalHero,
-          slug: finalSlug
-        });
+        list.push({ title: draft.title, desc: draft.summary, url: `/${targetKey}`, date: publishDate, category: templateData.category, image: draft.image, slug: finalSlug });
         return list;
       });
 
@@ -626,170 +731,12 @@ async function generateContentHandler(request, env) {
   const { readable, writable } = new TransformStream();
   const writer = writable.getWriter();
   const encoder = new TextEncoder();
-  const log = async (msg) => { await writer.write(encoder.encode(`LOG:${msg}\n`)); };
-
+  
   (async () => {
     try {
-      const settingsObj = await env.JOURNAL_BUCKET.get("config/settings.json");
-      const settings = settingsObj ? JSON.parse(await settingsObj.text()) : {};
-      const imgModel = (isSEO ? settings.imgSeo : settings.imgAeo) || "@cf/bytedance/stable-diffusion-xl-lightning";
-      const selectedStyle = style || settings.defaultStyle || "Professional photography";
-      const defaultNeg = "bare skin, nsfw, low quality, watermark, text, error, blurry, bad anatomy, bad hands";
-      const negPrompt = settings.negPrompt || defaultNeg;
-      const imgSeoCount = settings.imgCount !== undefined ? parseInt(settings.imgCount) : 3;
-      const faqCount = settings.faqCount !== undefined ? parseInt(settings.faqCount) : 3;
-
-      await log(`🚀 AI 프로세 가동: ${keyword}`);
-
-      let englishKeyword = keyword;
-      try {
-        englishKeyword = await aiCall(`Translate exactly "${keyword}" into a short, descriptive English phrase for image generation. 
-        CRITICAL SAFETY: Ensure the phrase is extremely modest and professional. 
-        ALWAYS include "Korean person" and "fully clothed". 
-        AVOID words like "pregnancy", "breast", "belly", "body" if they might be sensitive. 
-        Example for "임산부": "Korean woman fully clothed in a premium living room". 
-        ONLY return the English text.`, env, "You are a translator.");
-        englishKeyword = englishKeyword.trim().replace(/['"]/g, '');
-        await log(`🗣️ 이미지 변환: ${englishKeyword}`);
-      } catch (e) {}
-
-      // 출처가 없을 경우 AI가 자동으로 신뢰도 높은 출처 생성
-      let finalSourceName = payload.sourceName || "";
-      let finalSourceUrl = payload.sourceUrl || "";
-      if (!finalSourceName || !finalSourceUrl) {
-        try {
-          await log(`🔍 신뢰도 출처 자동 검색 중...`);
-          const sourceRaw = await aiCall(
-            `Keyword: ${keyword}. Translate this keyword into English and Japanese to find a world-class prestigious medical/academic source (e.g., Mayo Clinic, Harvard Medical, NIH, WHO, University of Tokyo Hospital, Lancet). Suggest one global authority. Return ONLY a JSON object: {"name": "Institution Name (Translated to Korean)", "url": "https://..."}.`,
-            env
-          );
-          const cleanedSrc = sourceRaw.replace(/\`\`\`json|\`\`\`/g, '').trim();
-          const srcObj = JSON.parse(cleanedSrc);
-          if (srcObj.name && srcObj.url) {
-            finalSourceName = srcObj.name;
-            finalSourceUrl = srcObj.url;
-            await log(`✅ 출처 자동 생성: ${finalSourceName}`);
-          }
-        } catch (e) {
-          await log(`⚠️ 출처 자동 검색 실패: ${e.message}`);
-        }
-      }
-
-      const actualImgCount = isSEO ? imgSeoCount : 1; // AEO는 총 2장(0:대표, 1:본문)
-
-      let markers = [];
-      for(let i=1; i<=actualImgCount; i++) markers.push(`{{IMG_${i}}}`);
-      const markersText = markers.length > 0 ? `Use ${markers.join(', ')} markers in HTML sequentially between paragraphs.` : `Do NOT use any IMG markers.`;
-
-      let basePrompt = isSEO ? settings.seoPrompt : settings.aeoPrompt;
-      if (!basePrompt) {
-        basePrompt = isSEO ? 
-          `Write a highly professional, empathetic, and strictly formatted SEO blog post about "{{keyword}}". Title: "{{title}}". Target sub-keywords: {{subKeywords}}. \n\nCRITICAL REQUIREMENT: The output MUST exceed 2,000 Korean characters. Explain in profound detail with minimum 5 sections.\nUse exactly <article class="post-content">, <h2>, <h3>, <p>, <ul>, <strong> tags.` :
-          `Write an elite-level AEO-optimized expert answer about "{{keyword}}". Title/Question: "{{title}}". \n\nCRITICAL REQUIREMENT: The output MUST exceed 1,500 characters. You MUST include a detailed comparison table or a summary table using HTML <table> tags. Return ONLY raw HTML for the body.`;
-      }
-
-      // Fill placeholders in user-defined prompt
-      basePrompt = basePrompt
-        .replace(/{{keyword}}/g, keyword)
-        .replace(/{{title}}/g, title)
-        .replace(/{{subKeywords}}/g, payload.subKeywords || "");
-
-      const universalPrompt = `${basePrompt}
-
-CRITICAL: Your entire response must be a single, valid JSON object. 
-The JSON must have this exact structure:
-{
-  "html": "The full article body content in HTML format. ${markersText}",
-  "faqs": [{"q": "Question text", "a": "Answer text"}],
-  "summary": "3-line summary of the content"
-}
-
-Rules for JSON:
-1. The "faqs" array must contain exactly ${faqCount} items.
-2. The "html" field must contain ONLY the HTML tags and text, properly escaped for a JSON string.
-3. DO NOT use markdown code blocks (like \`\`\`json) in your response if possible, just return the raw JSON.
-4. DO NOT add any conversational text before or after the JSON.`;
-
-      await log(`🚀 텍스트 및 이미지 ${actualImgCount + 1}개 병렬 생성 중...`);
-      const [textRes, imgRes] = await Promise.all([
-        aiCall(universalPrompt, env, "You are a specialized content JSON generator.").then(r => { log(`✅ 텍스트 생성 전송 완료`); return r; }),
-        (async () => {
-          const imgPromises = [];
-          for (let i = 0; i <= actualImgCount; i++) {
-            const prompt = isSEO 
-              ? `Photo of Korean ${englishKeyword}, modest, fully clothed, elegant high-end style, premium photography, highly detailed, ${selectedStyle}`
-              : `Clean informative infographic of Korean ${englishKeyword}, white background, premium minimalist design, vector style, highly readable, informative charts, ${selectedStyle}. IMPORTANT: Any text inside the infographic must ONLY use Korean, English, or Numbers.`;
-            
-            const generateImg = async (p, retried = false) => {
-              try {
-                return await env.AI.run(imgModel, { prompt: p, negative_prompt: negPrompt });
-              } catch (e) {
-                if (e.message.includes("3030") && !retried) {
-                  console.warn(`[NSFW Filter Hit] Retrying with safer prompt: ${p}`);
-                  const safePrompt = isSEO 
-                    ? `A Korean woman sitting comfortably, fully clothed, high-end interior, soft lighting, professional photography`
-                    : `Clean infographic of Korean mother, soft colors, minimalist design, no text, premium vector style`;
-                  return await generateImg(safePrompt, true);
-                }
-                console.error(`[Image Gen Error] ${e.message}`);
-                return null;
-              }
-            };
-
-            imgPromises.push(generateImg(prompt).then(r => { 
-              if (r) log(`🖼️ 이미지 ${i+1} 완료`); 
-              else log(`⚠️ 이미지 ${i+1} 생성 실패 (보안 필터 등)`);
-              return r; 
-            }));
-          }
-          return Promise.all(imgPromises);
-        })()
-      ]);
-
-      const data = parseAIJson(textRes);
-      let draftHtml = data.html || "";
-      const timeStamp = Date.now();
-      const slugBase = generateSlug(title);
-      let heroPath = "";
-      const assetDir = isSEO ? "journal" : "knowledge";
-
-      // Hero Image (imgRes[0])
-      if (imgRes[0]) {
-        const heroKey = `assets/${assetDir}/${slugBase}-${timeStamp}-hero.png`;
-        await env.JOURNAL_BUCKET.put(heroKey, imgRes[0], { httpMetadata: { contentType: "image/png" } });
-        heroPath = `/${heroKey}`;
-      }
-
-      // Body Images (imgRes[1] ~ imgRes[actualImgCount])
-      for(let j=1; j<=actualImgCount; j++) {
-        if (imgRes[j]) {
-          const bKey = `assets/${assetDir}/${slugBase}-${timeStamp}-${j}.png`;
-          await env.JOURNAL_BUCKET.put(bKey, imgRes[j], { httpMetadata: { contentType: "image/png" } });
-          const imgTag = `<img src="/${bKey}" style="width:100%; border-radius:1rem; margin:2rem 0;" alt="${keyword} ${j}">`;
-          if (draftHtml.includes(`{{IMG_${j}}}`)) {
-            draftHtml = draftHtml.replace(`{{IMG_${j}}}`, imgTag);
-          } else {
-            draftHtml += `\n\n${imgTag}`;
-          }
-        }
-      }
-
-      const recYoutubeId = await getAiRecommendedYoutubeId(keyword, env);
-      const draft = { 
-        title, 
-        html: draftHtml, 
-        faqs: data.faqs || [], 
-        summary: data.summary || "",
-        image: heroPath, 
-        youtubeId: recYoutubeId, 
-        type,
-        slug: requestedSlug || slugBase,
-        sourceName: finalSourceName,
-        sourceUrl: finalSourceUrl,
-        schema: { "@context": "https://schema.org", "@type": "Article", "headline": title, "image": heroPath, "author": { "@type": "Organization", "name": "Moonpiece" } }
-      };
-      
-      await log(`✨ 모든 작업 완료!`);
+      const draft = await performAiGeneration(payload, env, async (msg) => {
+        await writer.write(encoder.encode(`LOG:${msg}\n`));
+      });
       await writer.write(encoder.encode(JSON.stringify({ success: true, draft })));
     } catch (e) {
       await writer.write(encoder.encode(JSON.stringify({ success: false, error: e.message })));

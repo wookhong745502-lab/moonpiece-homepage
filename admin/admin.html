@@ -1446,8 +1446,6 @@
             if (autoQueue.length === 0) return alert('대기 중인 주제가 없습니다.');
             
             const type = document.getElementById('auto-type').value;
-            const category = ""; // 자동 분류
-            
             const btn = document.getElementById('auto-gen-btn');
             const stopBtn = document.getElementById('auto-stop-btn');
             const resultsZone = document.getElementById('auto-results-zone');
@@ -1484,27 +1482,56 @@
 
                 task.status = 'processing';
                 renderAutoQueue();
-                addLog(`📄 [${i+1}/${autoQueue.length}] "${task.keyword}" 생성 요청 중...`);
+                addLog(`📄 [${i+1}/${autoQueue.length}] "${task.keyword}" 작업 시작...`, 'white');
 
                 try {
                     const endpoint = type === 'seo' ? '/admin/api/generate-journal' : '/admin/api/generate-knowledge';
+                    
+                    // 1. Streaming Generation (to get logs and draft)
                     const res = await fetch(endpoint, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ type, keyword: task.keyword }) // isFinal 없이 호출하여 스트리밍 생성
+                    });
+
+                    const reader = res.body.getReader();
+                    const decoder = new TextDecoder();
+                    let draft = null;
+
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+                        const chunk = decoder.decode(value);
+                        const lines = chunk.split('\n');
+                        for (const line of lines) {
+                            if (line.startsWith('LOG:')) {
+                                addLog(`  - ${line.slice(4)}`);
+                            } else if (line.trim().startsWith('{')) {
+                                try { draft = JSON.parse(line); } catch(e) {}
+                            }
+                        }
+                    }
+
+                    if (!draft || !draft.success) throw new Error(draft?.error || '생성 실패');
+
+                    // 2. Final Publish
+                    addLog(`  - 💾 서버 저장 및 발행 중...`);
+                    const pubRes = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            type,
-                            keyword: task.keyword,
+                            ...draft.draft,
                             isFinal: true,
                             publishDate: task.publishDate
                         })
                     });
-                    const data = await res.json();
+                    const pubData = await pubRes.json();
 
-                    if (data.success) {
+                    if (pubData.success) {
                         task.status = 'success';
-                        addLog(`✅ "${task.keyword}" 발행 성공! (Path: ${data.path})`, '#22c55e');
+                        addLog(`✅ "${task.keyword}" 발행 성공! (Path: ${pubData.path})`, '#22c55e');
                     } else {
-                        throw new Error(data.error || '알 수 없는 에러');
+                        throw new Error(pubData.error || '발행 실패');
                     }
                 } catch (e) {
                     task.status = 'fail';
