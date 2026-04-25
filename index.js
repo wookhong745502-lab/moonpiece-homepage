@@ -355,86 +355,64 @@ export default {
       if (url.pathname === "/admin/api/posts/delete" && request.method === "POST") {
         const { url: postUrl, type } = await request.json();
         const key = postUrl.startsWith('/') ? postUrl.slice(1) : postUrl;
-        
-        // 원자적 삭제 수행
         await env.JOURNAL_BUCKET.delete(key);
         const listKey = type === 'journal' ? "journal/list.json" : "knowledge/list.json";
-        
-        await atomicUpdateList(listKey, env, (list) => {
-          return list.filter(p => p.url !== postUrl && p.url !== '/' + postUrl);
-        });
-        
-        return new Response(JSON.stringify({ success: true }), { headers: { "Content-Type": "application/json" } });
+        await atomicUpdateList(listKey, env, (list) => list.filter(p => p.url !== postUrl && p.url !== '/' + postUrl));
+        return new Response(JSON.stringify({ success: true }));
       }
 
       if (url.pathname === "/admin/api/posts/raw" && request.method === "POST") {
         const { url: postUrl } = await request.json();
         const key = postUrl.startsWith('/') ? postUrl.slice(1) : postUrl;
         const obj = await env.JOURNAL_BUCKET.get(key);
-        if (obj) {
-          return new Response(JSON.stringify({ success: true, html: await obj.text() }), { headers: { "Content-Type": "application/json" } });
-        }
-        return new Response(JSON.stringify({ success: false, error: "Not found" }), { headers: { "Content-Type": "application/json" } });
+        if (obj) return new Response(JSON.stringify({ success: true, html: await obj.text() }));
+        return new Response(JSON.stringify({ success: false, error: "Not found" }));
       }
 
       if (url.pathname === "/admin/api/posts/update" && request.method === "POST") {
         const { url: postUrl, html, title, desc, image, type } = await request.json();
         const key = postUrl.startsWith('/') ? postUrl.slice(1) : postUrl;
         await env.JOURNAL_BUCKET.put(key, html, { httpMetadata: { contentType: "text/html" } });
-        
-        // 원자적 업데이트 수행
         if (type) {
             const listKey = type === 'knowledge' ? "knowledge/list.json" : "journal/list.json";
-            await atomicUpdateList(listKey, env, (list) => {
-              return list.map(p => {
-                  const isMatch = p.url === postUrl || p.url === '/' + key || '/' + p.url === postUrl || '/' + p.url === '/' + key;
-                  if (isMatch) {
-                      if (title) p.title = title;
-                      if (desc) p.desc = desc;
-                      if (image) p.image = image;
-                  }
-                  return p;
-              });
-            });
+            await atomicUpdateList(listKey, env, (list) => list.map(p => {
+              if (p.url === postUrl || p.url === '/' + key) {
+                  if (title) p.title = title;
+                  if (desc) p.desc = desc;
+                  if (image) p.image = image;
+              }
+              return p;
+            }));
         }
-        
-        return new Response(JSON.stringify({ success: true }), { headers: { "Content-Type": "application/json" } });
+        return new Response(JSON.stringify({ success: true }));
       }
 
-      if (url.pathname === "/admin/api/migrate/clear-all" && request.method === "POST") {
-        await env.JOURNAL_BUCKET.put("journal/list.json", "[]");
-        await env.JOURNAL_BUCKET.put("knowledge/list.json", "[]");
-        return new Response(JSON.stringify({ success: true }), { headers: { "Content-Type": "application/json" } });
+      if (url.pathname === "/admin/api/bulk/queue") {
+        if (request.method === "GET") {
+          const q = await env.JOURNAL_BUCKET.get("config/bulk_queue.json");
+          return new Response(q ? await q.text() : JSON.stringify({ active: false, items: [] }));
+        }
+        const data = await request.json();
+        await env.JOURNAL_BUCKET.put("config/bulk_queue.json", JSON.stringify(data));
+        return new Response(JSON.stringify({ success: true }));
       }
 
       if (url.pathname === "/admin/api/regenerate-image" && request.method === "POST") {
         try {
           const { alt, type } = await request.json();
-          if (!alt) throw new Error("ALT (Prompt) text is required");
-          
-          const settingsObj = await env.JOURNAL_BUCKET.get("config/settings.json");
-          const settings = settingsObj ? JSON.parse(await settingsObj.text()) : {};
-          const isSEO = type !== 'aeo';
-          const imgModel = (isSEO ? settings.imgSeo : settings.imgAeo) || "@cf/bytedance/stable-diffusion-xl-lightning";
-          const defaultNeg = "bare skin, nude, naked, swimsuit, cleavage, exposed body, bare feet, toes, nsfw, ugly, deformed, disfigured eyes, bad hands, distorted face, blurry, low quality, watermark, text, error, horror, creepy, unnatural skin, bad anatomy, extra fingers, missing fingers, fused fingers, too many fingers, three fingers, six fingers, seven fingers, mutated hands, malformed hands, poorly drawn hands, long fingers, broken fingers, overlapping fingers, cloned fingers, disjointed fingers, floating limbs, disconnected limbs, gross proportions, malformed limbs";
-          const negPrompt = settings.negPrompt || defaultNeg;
-
-          // AI Image Generation Call
-          const imgRes = await env.AI.run(imgModel, {
-            prompt: `High quality, ${alt}`,
-            negative_prompt: negPrompt
-          });
-
-          // Upload to R2 Bucket
-          const timeStamp = Date.now();
-          const assetDir = isSEO ? "journal" : "knowledge";
-          const newKey = `assets/${assetDir}/regen-${timeStamp}.png`;
+          const settings = await safeGetJson("config/settings.json", env);
+          const imgModel = (type === 'seo' ? settings.imgSeo : settings.imgAeo) || "@cf/bytedance/stable-diffusion-xl-lightning";
+          const imgRes = await env.AI.run(imgModel, { prompt: `High quality, ${alt}`, negative_prompt: settings.negPrompt });
+          const newKey = `assets/${type === 'seo' ? 'journal' : 'knowledge'}/regen-${Date.now()}.png`;
           await env.JOURNAL_BUCKET.put(newKey, imgRes, { httpMetadata: { contentType: "image/png" } });
+          return new Response(JSON.stringify({ success: true, url: `/${newKey}` }));
+        } catch(e) { return new Response(JSON.stringify({ success: false, error: e.message })); }
+      }
 
-          return new Response(JSON.stringify({ success: true, url: `/${newKey}` }), { headers: { "Content-Type": "application/json" } });
-        } catch(e) {
-          return new Response(JSON.stringify({ success: false, error: e.message }), { headers: { "Content-Type": "application/json" } });
-        }
+      if (url.pathname === "/admin/api/migrate/clear-all" && request.method === "POST") {
+        await env.JOURNAL_BUCKET.put("journal/list.json", "[]");
+        await env.JOURNAL_BUCKET.put("knowledge/list.json", "[]");
+        return new Response(JSON.stringify({ success: true }));
       }
 
       if (url.pathname.startsWith("/journal/") || url.pathname.startsWith("/knowledge/") || url.pathname.startsWith("/assets/")) {
@@ -444,12 +422,9 @@ export default {
           const h = new Headers();
           obj.writeHttpMetadata(h);
           h.set("Access-Control-Allow-Origin", "*");
-          
-          // 강제 캐시 무효화 헤더 추가 (Cloudflare Edge 캐싱 및 브라우저 캐싱 방지)
           h.set("Cache-Control", "no-cache, no-store, must-revalidate");
           h.set("Pragma", "no-cache");
           h.set("Expires", "0");
-
           return new Response(obj.body, { headers: h });
         }
       }
@@ -457,6 +432,71 @@ export default {
       return await getAssetFromKV({ request, waitUntil: ctx.waitUntil.bind(ctx) }, { ASSET_NAMESPACE: env.__STATIC_CONTENT, ASSET_MANIFEST: assetManifest });
     } catch (e) {
       return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: { "Content-Type": "application/json" } });
+    }
+  },
+
+  async scheduled(event, env, ctx) {
+    console.log("[Scheduled] Bulk publishing check...");
+    const queueObj = await env.JOURNAL_BUCKET.get("config/bulk_queue.json");
+    if (!queueObj) return;
+    
+    let queueData = JSON.parse(await queueObj.text());
+    if (!queueData.active || !queueData.items || queueData.items.length === 0) return;
+
+    const now = Date.now();
+    const lastRun = queueData.lastRun || 0;
+    const intervalMs = (queueData.intervalHours || 24) * 60 * 60 * 1000;
+
+    // Check if interval has passed
+    if (now - lastRun >= intervalMs) {
+      // Current date in KST (YYYY-MM-DD)
+      const kstDate = new Date(now + 9 * 60 * 60 * 1000).toISOString().split('T')[0];
+      
+      // Find the next pending item whose scheduled date has arrived
+      const itemIndex = queueData.items.findIndex(i => i.status === 'pending' && (!i.publishDate || i.publishDate <= kstDate));
+      
+      if (itemIndex === -1) {
+        // If everything is pending but for the future, just wait
+        return;
+      }
+
+      const task = queueData.items[itemIndex];
+      try {
+        const draft = await performAiGeneration({ type: queueData.type, keyword: task.keyword }, env);
+        const finalSlug = await resolveUniqueSlug(queueData.type, draft.slug, env);
+        const publishDate = task.publishDate || kstDate;
+        const isSEO = queueData.type === 'seo';
+        const targetKey = isSEO ? `journal/${finalSlug}.html` : `knowledge/${finalSlug}.html`;
+        
+        const templateData = {
+          title: draft.title, description: draft.summary, desc: draft.summary, summary: draft.summary,
+          category: classifyCategory(task.keyword), publish_date: publishDate, date: publishDate,
+          rich_content: draft.html, content: draft.html,
+          faq_content: (draft.faqs || []).map(f => `<div class="faq-item bg-white p-8 rounded-2xl border border-slate-100 shadow-sm mb-6"><h4 class="text-lg font-bold text-slate-900 mb-3 flex items-start gap-3"><span class="text-moon-600">Q.</span> ${f.q}</h4><p class="text-slate-600 leading-relaxed pl-8">${f.a}</p></div>`).join(''),
+          faq_section: (draft.faqs && draft.faqs.length) ? `<section class="mt-24 p-8 lg:p-16 bg-slate-50 rounded-[3rem] border border-slate-100"><h3 class="text-3xl font-serif font-black mb-10 text-slate-900">도움이 되는 질문 (FAQ)</h3><div class="space-y-4">${draft.faqs.map(f => `<div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm"><h4 class="text-lg font-bold text-slate-900 mb-3 flex gap-3 text-moon-600">Q. <span class="text-slate-900">${f.q}</span></h4><p class="text-slate-600 leading-relaxed pl-8">${f.a}</p></div>`).join('')}</div></section>` : "",
+          og_image: draft.image, slug: finalSlug, json_ld: JSON.stringify(draft.schema),
+          source_name: draft.sourceName, source_url: draft.sourceUrl,
+          source_section: (draft.sourceName && draft.sourceUrl) ? `<div class="mt-16 p-6 bg-slate-50 rounded-2xl border border-slate-100 flex items-center gap-4"><span class="material-symbols-outlined text-moon-600">verified_user</span><div class="text-sm"><span class="text-slate-400 block mb-1">본 콘텐츠는 아래의 정보를 바탕으로 작성되었습니다.</span><a href="${draft.sourceUrl}" target="_blank" rel="noopener" class="font-bold text-slate-900 hover:text-moon-600">${draft.sourceName}</a></div></div>` : "",
+          youtube_section: draft.youtubeId ? `<div class="mt-16"><h3 class="text-2xl font-serif font-black mb-6 flex items-center gap-3 text-slate-900"><span class="material-symbols-outlined text-red-500">play_circle</span> 관련 영상</h3><div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:1.5rem;"><iframe src="https://www.youtube.com/embed/${draft.youtubeId}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allowfullscreen></iframe></div></div>` : ""
+        };
+
+        const finalOutput = await renderTemplate(isSEO ? "journal_template.html" : "post_template.html", templateData, env);
+        await env.JOURNAL_BUCKET.put(targetKey, finalOutput, { httpMetadata: { contentType: "text/html" } });
+        await atomicUpdateList(isSEO ? "journal/list.json" : "knowledge/list.json", env, (list) => {
+          list.push({ title: draft.title, desc: draft.summary, url: `/${targetKey}`, date: publishDate, category: templateData.category, image: draft.image, slug: finalSlug });
+          return list;
+        });
+
+        task.status = 'success';
+        task.path = `/${targetKey}`;
+        queueData.lastRun = now;
+      } catch (e) {
+        console.error(`[Scheduled Error] ${task.keyword}:`, e.message);
+        task.status = 'fail';
+        task.error = e.message;
+        queueData.lastRun = now; 
+      }
+      await env.JOURNAL_BUCKET.put("config/bulk_queue.json", JSON.stringify(queueData));
     }
   }
 };
@@ -489,14 +529,30 @@ async function performAiGeneration(payload, env, logger = null) {
   }
   await log(`📌 제목 확정: ${finalTitle}`);
 
+
+  // 1.5. 영문 슬러그 생성 (SEO 규정 준수)
+  let generatedSlug = payload.slug;
+  if (!generatedSlug) {
+    try {
+      await log(`🔗 영문 슬러그 생성 중...`);
+      const slugPrompt = `Title: "${finalTitle}". Suggest a short, clean, professional English URL slug. 
+      CRITICAL: Use only lowercase a-z and hyphens. NO quotes, NO Korean, NO special characters.
+      Example: "benefits-of-left-side-sleeping". ONLY return the slug string.`;
+      generatedSlug = await aiCall(slugPrompt, env, "You are an SEO expert.");
+      generatedSlug = generatedSlug.trim().toLowerCase().replace(/['"“”]/g, "").replace(/[^a-z0-9\-]/g, '-').replace(/\-\-+/g, '-').replace(/^-|-$/g, '');
+      if (!generatedSlug) throw new Error("Empty slug");
+    } catch (e) {
+      generatedSlug = generateSlug(finalTitle);
+    }
+  }
+  await log(`📌 슬러그 확정: ${generatedSlug}`);
+
   // 2. 이미지용 영어 변환
   let englishKeyword = keyword;
   try {
     englishKeyword = await aiCall(`Translate exactly "${keyword}" into a short, descriptive English phrase for image generation. 
-    CRITICAL SAFETY: Ensure the phrase is extremely modest and professional. 
+    CRITICAL SAFETY: Ensure the phrase is modest and professional. 
     ALWAYS include "Korean person" and "fully clothed". 
-    AVOID words like "pregnancy", "breast", "belly", "body" if they might be sensitive. 
-    Example for "임산부": "Korean woman fully clothed in a premium living room". 
     ONLY return the English text.`, env, "You are a translator.");
     englishKeyword = englishKeyword.trim().replace(/['"]/g, '');
     await log(`🗣️ 이미지 변환: ${englishKeyword}`);
@@ -534,17 +590,21 @@ async function performAiGeneration(payload, env, logger = null) {
   let basePrompt = isSEO ? settings.seoPrompt : settings.aeoPrompt;
   if (!basePrompt) {
     basePrompt = isSEO ? 
-      `Write a highly professional, empathetic, and strictly formatted SEO blog post about "{{keyword}}". Title: "{{title}}". \n\nCRITICAL: The output MUST exceed 2,000 Korean characters. Explain in profound detail.\nUse exactly <article class="post-content">, <h2>, <h3>, <p>, <ul>, <strong> tags.` :
-      `Write an elite-level AEO expert answer about "{{keyword}}". Title/Question: "{{title}}". \n\nCRITICAL: The output MUST exceed 1,500 characters. You MUST include a detailed comparison table or summary table using HTML <table> tags. Return ONLY raw HTML for the body.`;
+      `Write a highly professional, empathetic, and strictly formatted SEO blog post about "{{keyword}}". Title: "{{title}}". \n\nCRITICAL: The output MUST exceed 2,000 Korean characters. Explain in profound detail with minimum 5 sections.\nUse exactly <article class="post-content">, <h2>, <h3>, <p>, <ul>, <strong> tags.` :
+      `Write an elite-level AEO expert answer about "{{keyword}}". Title/Question: "{{title}}". \n\nCRITICAL REQUIREMENT:
+      1. Length: MUST exceed 1,500 characters.
+      2. Table: Include a detailed comparison table using HTML <table> tags for clarity.
+      3. Structure: Use <h2>전문가 의견 분석 (E-E-A-T)</h2> and <h2>단계별 처방법 가이드</h2> sections.
+      4. Format: Return ONLY raw HTML for the body content. Do NOT include <h1> or summary box (they are in the template).`;
   }
   basePrompt = basePrompt.replace(/{{keyword}}/g, keyword).replace(/{{title}}/g, finalTitle).replace(/{{subKeywords}}/g, payload.subKeywords || "");
 
   const universalPrompt = `${basePrompt}
   CRITICAL: Your response must be a single JSON object:
   {
-    "html": "The full article body content in HTML format. ${markersText}",
+    "html": "The full body content in HTML format. ${markersText}",
     "faqs": [{"q": "...", "a": "..."}],
-    "summary": "3-line summary"
+    "summary": "Professional 3-line expert summary for the top summary box."
   }
   Rules: ${faqCount} FAQs, HTML field ONLY with tags, properly escaped JSON.`;
 
@@ -583,7 +643,7 @@ async function performAiGeneration(payload, env, logger = null) {
   const data = parseAIJson(textRes);
   let draftHtml = data.html || "";
   const timeStamp = Date.now();
-  const slugBase = generateSlug(finalTitle);
+  const slugBase = generatedSlug;
   let heroPath = "";
   const assetDir = isSEO ? "journal" : "knowledge";
 
