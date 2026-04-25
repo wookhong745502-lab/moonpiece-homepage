@@ -51,7 +51,7 @@ async function atomicUpdateList(key, env, updater) {
       try {
         const text = await obj.text();
         list = JSON.parse(text);
-        etag = obj.httpEtag;
+        etag = obj.httpEtag.replace(/"/g, '');
       } catch (e) {
         console.error(`Atomic read error for ${key}:`, e.message);
         list = [];
@@ -589,7 +589,7 @@ async function generateContentHandler(request, env) {
       const settings = settingsObj ? JSON.parse(await settingsObj.text()) : {};
       const imgModel = (isSEO ? settings.imgSeo : settings.imgAeo) || "@cf/bytedance/stable-diffusion-xl-lightning";
       const selectedStyle = style || settings.defaultStyle || "Professional photography";
-      const defaultNeg = "bare skin, nude, naked, swimsuit, cleavage, exposed body, bare feet, toes, nsfw, ugly, deformed, disfigured eyes, bad hands, distorted face, blurry, low quality, watermark, text, error, horror, creepy, unnatural skin, bad anatomy, extra fingers, missing fingers, fused fingers, too many fingers, three fingers, six fingers, seven fingers, mutated hands, malformed hands, poorly drawn hands, long fingers, broken fingers, overlapping fingers, cloned fingers, disjointed fingers, floating limbs, disconnected limbs, gross proportions, malformed limbs";
+      const defaultNeg = "bare skin, nsfw, low quality, watermark, text, error, blurry, bad anatomy, bad hands";
       const negPrompt = settings.negPrompt || defaultNeg;
       const imgSeoCount = settings.imgCount !== undefined ? parseInt(settings.imgCount) : 3;
       const faqCount = settings.faqCount !== undefined ? parseInt(settings.faqCount) : 3;
@@ -598,7 +598,12 @@ async function generateContentHandler(request, env) {
 
       let englishKeyword = keyword;
       try {
-        englishKeyword = await aiCall(`Translate exactly "${keyword}" into a short, descriptive English phrase for image generation. IMPORTANT: If the keyword refers to a person, ALWAYS include "Korean person" or "Korean woman". Example: "Korean pregnant woman fully clothed in cozy room". ONLY return the English text.`, env, "You are a translator.");
+        englishKeyword = await aiCall(`Translate exactly "${keyword}" into a short, descriptive English phrase for image generation. 
+        CRITICAL SAFETY: Ensure the phrase is extremely modest and professional. 
+        ALWAYS include "Korean person" and "fully clothed". 
+        AVOID words like "pregnancy", "breast", "belly", "body" if they might be sensitive. 
+        Example for "임산부": "Korean woman fully clothed in a premium living room". 
+        ONLY return the English text.`, env, "You are a translator.");
         englishKeyword = englishKeyword.trim().replace(/['"]/g, '');
         await log(`🗣️ 이미지 변환: ${englishKeyword}`);
       } catch (e) {}
@@ -670,10 +675,27 @@ Rules for JSON:
               ? `Photo of Korean ${englishKeyword}, modest, fully clothed, elegant high-end style, premium photography, highly detailed, ${selectedStyle}`
               : `Clean informative infographic of Korean ${englishKeyword}, white background, premium minimalist design, vector style, highly readable, informative charts, ${selectedStyle}. IMPORTANT: Any text inside the infographic must ONLY use Korean, English, or Numbers.`;
             
-            imgPromises.push(env.AI.run(imgModel, { 
-              prompt,
-              negative_prompt: negPrompt
-            }).then(r => { log(`🖼️ 이미지 ${i+1} 완료`); return r; }));
+            const generateImg = async (p, retried = false) => {
+              try {
+                return await env.AI.run(imgModel, { prompt: p, negative_prompt: negPrompt });
+              } catch (e) {
+                if (e.message.includes("3030") && !retried) {
+                  console.warn(`[NSFW Filter Hit] Retrying with safer prompt: ${p}`);
+                  const safePrompt = isSEO 
+                    ? `A Korean woman sitting comfortably, fully clothed, high-end interior, soft lighting, professional photography`
+                    : `Clean infographic of Korean mother, soft colors, minimalist design, no text, premium vector style`;
+                  return await generateImg(safePrompt, true);
+                }
+                console.error(`[Image Gen Error] ${e.message}`);
+                return null;
+              }
+            };
+
+            imgPromises.push(generateImg(prompt).then(r => { 
+              if (r) log(`🖼️ 이미지 ${i+1} 완료`); 
+              else log(`⚠️ 이미지 ${i+1} 생성 실패 (보안 필터 등)`);
+              return r; 
+            }));
           }
           return Promise.all(imgPromises);
         })()
