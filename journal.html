@@ -223,9 +223,10 @@
             try {
                 const res = await fetch(`/list-journals?t=${Date.now()}`);
                 const data = await res.json();
-                allPosts = data.map(p => ({
+                allPosts = data.map((p, index) => ({
                     ...p,
-                    categoryName: nameMap[p.category] || p.category
+                    categoryName: nameMap[p.category] || p.category,
+                    originalIndex: index
                 }));
                 applyFilterAndSearch();
             } catch (e) {
@@ -241,7 +242,11 @@
                 const matchSearch = p.title.includes(searchQuery) || (p.desc && p.desc.includes(searchQuery));
                 const isPublished = p.date <= today;
                 return matchFilter && matchSearch && isPublished;
-            }).sort((a, b) => new Date(b.date) - new Date(a.date));
+            }).sort((a, b) => {
+                const dateDiff = new Date(b.date) - new Date(a.date);
+                if (dateDiff !== 0) return dateDiff;
+                return b.originalIndex - a.originalIndex;
+            });
             renderGrid();
         }
 
