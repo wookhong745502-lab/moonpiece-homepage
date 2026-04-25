@@ -499,7 +499,6 @@ export default {
       }
     }
   }
-  }
 };
 
 // --- Core Logic ---
