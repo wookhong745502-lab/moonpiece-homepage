@@ -424,6 +424,20 @@
             </div>
         </div>
 
+        <!-- Edit Post Page -->
+        <div id="page-edit-post" class="page-content">
+            <div class="flex-center-between mb-12">
+                <h1 class="font-serif text-4xl">포스트 수정 <span class="ai-badge bg-green-500">Block Editor</span></h1>
+                <div class="flex gap-4">
+                    <button onclick="switchPage('manage')" class="btn-primary bg-slate-300 text-slate-800 border-none">취소 및 돌아가기</button>
+                    <button id="edit-save-btn" onclick="saveEditPage()" class="btn-primary border-none">변경사항 저장 및 배포</button>
+                </div>
+            </div>
+            <div id="edit-blocks-container">
+                <!-- Blocks will be dynamically generated here -->
+            </div>
+        </div>
+
         <!-- Content Rules Page -->
         <div id="page-rules" class="page-content">
             <div class="flex justify-between items-center mb-12">
@@ -558,17 +572,7 @@
         </div>
     </main>
 
-    <!-- Modal for Editing Raw HTML -->
-    <div class="modal-overlay" id="edit-modal">
-        <div class="modal">
-            <h2 class="font-serif text-2xl mb-4">포스트 수정 (HTML Raw)</h2>
-            <textarea id="update-editor" rows="15" class="modal-textarea"></textarea>
-            <div class="flex gap-4 justify-end">
-                <button onclick="closeEditModal()" class="px-8 py-4 bg-slate-200 border-none rounded-lg cursor-pointer font-bold">취소</button>
-                <button id="update-btn" onclick="submitEdit()" class="px-8 py-4 bg-moon-600 text-white border-none rounded-lg cursor-pointer font-bold">수정 저장</button>
-            </div>
-        </div>
-    </div>
+    <!-- Modal removed to replace with intuitive block editor -->
 
     <script>
         let draftDataGlobal = null;
@@ -644,6 +648,8 @@
             document.getElementById('aeo-draft-zone').style.display = 'none';
             document.getElementById('auto-results-zone').style.display = 'none';
         }
+
+        let currentEditDoc = null;
 
         async function suggest(type, context) {
             const kwElement = document.getElementById(context + '-keyword') || document.getElementById(context + '-kw');
@@ -1042,7 +1048,7 @@
                     </td>
                     <td><span class="text-sm ${isScheduled ? 'text-amber-600 font-bold' : 'text-slate-500'}">${p.date}</span></td>
                     <td class="table-cell-actions">
-                        <button onclick="openEditModal('${p.url}')" class="btn-edit-link">수정</button>
+                        <button onclick="openEditPage('${p.url}')" class="btn-edit-link">수정</button>
                         <button onclick="deletePost('${p.url}', '${p.type}')" class="text-error bg-transparent border-none cursor-pointer">삭제</button>
                     </td>
                 </tr>
@@ -1061,10 +1067,11 @@
             loadPosts();
         }
 
-        async function openEditModal(url) {
+        async function openEditPage(url) {
             editTargetUrl = url;
-            document.getElementById('update-editor').value = '불러오는 중...';
-            document.getElementById('edit-modal').classList.add('active');
+            switchPage('edit-post');
+            document.getElementById('edit-blocks-container').innerHTML = '<div class="p-8 text-center text-slate-500 font-bold">에디터 로딩 중...</div>';
+            
             try {
                 const res = await fetch('/admin/api/posts/raw', {
                     method: 'POST',
@@ -1073,38 +1080,155 @@
                 });
                 const data = await res.json();
                 if(data.success) {
-                    document.getElementById('update-editor').value = data.html;
+                    const parser = new DOMParser();
+                    currentEditDoc = parser.parseFromString(data.html, 'text/html');
+                    renderEditBlocks();
                 } else {
-                    document.getElementById('update-editor').value = '파일을 찾을 수 없습니다.';
+                    document.getElementById('edit-blocks-container').innerHTML = '<div class="text-error font-bold p-8 text-center">파일을 찾을 수 없습니다.</div>';
                 }
             } catch(e) {
-                document.getElementById('update-editor').value = '통신 에러';
+                document.getElementById('edit-blocks-container').innerHTML = '<div class="text-error font-bold p-8 text-center">통신 에러: ' + e.message + '</div>';
             }
         }
 
-        function closeEditModal() {
-            document.getElementById('edit-modal').classList.remove('active');
-            editTargetUrl = null;
+        function renderEditBlocks() {
+            const container = document.getElementById('edit-blocks-container');
+            container.innerHTML = '';
+
+            // Extract Meta Data
+            const titleNode = currentEditDoc.querySelector('title');
+            const descNode = currentEditDoc.querySelector('meta[name="description"]');
+            const h1Node = currentEditDoc.querySelector('.article-main-heading') || currentEditDoc.querySelector('h1');
+            
+            // Setup Meta Editing Block
+            let html = `
+                <div class="card mb-8">
+                    <h3 class="font-bold mb-6 text-xl text-primary flex items-center gap-2"><span class="material-symbols-outlined">info</span> 메타 정보 수정</h3>
+                    <div class="input-group">
+                        <label>브라우저 상단 타이틀 (Title)</label>
+                        <input type="text" id="edit-meta-title" value="${titleNode ? titleNode.textContent : ''}">
+                    </div>
+                    <div class="input-group">
+                        <label>메타 설명 (Description)</label>
+                        <textarea id="edit-meta-desc" rows="2">${descNode ? descNode.getAttribute('content') : ''}</textarea>
+                    </div>
+                    <div class="input-group mb-0">
+                        <label>본문 메인 제목 (H1)</label>
+                        <input type="text" id="edit-main-h1" value="${h1Node ? h1Node.textContent : ''}">
+                    </div>
+                </div>
+                <div class="card p-0 overflow-hidden bg-slate-50">
+                    <div class="p-6 bg-white border-b border-slate-200">
+                        <h3 class="font-bold text-xl text-primary flex items-center gap-2"><span class="material-symbols-outlined">edit_document</span> 본문 구조 수정</h3>
+                        <p class="text-sm text-slate-500 mt-2">이미지 변경 및 ALT 태그 부여가 가능하며 텍스트 블록별로 수정할 수 있습니다.</p>
+                    </div>
+                    <div id="edit-content-blocks" class="p-6"></div>
+                </div>
+            `;
+            container.innerHTML = html;
+
+            const blocksContainer = document.getElementById('edit-content-blocks');
+            const contentNode = currentEditDoc.querySelector('.article-content') || currentEditDoc.querySelector('.post-content') || currentEditDoc.querySelector('main');
+            
+            if(contentNode) {
+                Array.from(contentNode.children).forEach((child, index) => {
+                    const blockDiv = document.createElement('div');
+                    blockDiv.className = 'mb-6 p-6 border border-slate-200 rounded-xl bg-white shadow-sm hover:border-primary transition-colors';
+                    
+                    if(child.tagName === 'IMG') {
+                        blockDiv.innerHTML = `
+                            <div class="font-extrabold text-sm text-primary mb-4 flex items-center gap-2"><span class="material-symbols-outlined">image</span> 이미지 블록</div>
+                            <div class="flex gap-6 items-start">
+                                <div class="w-1/3">
+                                    <img src="${child.getAttribute('src')}" class="w-full rounded-lg shadow-sm border border-slate-100 bg-slate-50">
+                                </div>
+                                <div class="w-2/3">
+                                    <div class="input-group mb-4">
+                                        <label>이미지 소스 경로 (SRC)</label>
+                                        <input type="text" id="edit-block-${index}-src" value="${child.getAttribute('src')}">
+                                    </div>
+                                    <div class="input-group mb-0">
+                                        <label>이미지 대체 텍스트 (ALT / 접근성 및 SEO 필수)</label>
+                                        <input type="text" id="edit-block-${index}-alt" value="${child.getAttribute('alt') || ''}" placeholder="이미지를 설명하는 텍스트 입력">
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    } else if (child.tagName === 'P' || child.tagName.match(/^H[2-6]$/) || child.tagName === 'UL' || child.tagName === 'OL') {
+                        blockDiv.innerHTML = `
+                            <div class="font-extrabold text-sm text-secondary mb-4 flex items-center gap-2"><span class="material-symbols-outlined">text_fields</span> 텍스트 블록 (${child.tagName})</div>
+                            <textarea id="edit-block-${index}-html" rows="${child.tagName === 'P' ? 4 : 2}" class="w-full p-4 border border-slate-200 rounded-lg text-sm bg-slate-50 focus:bg-white transition-colors" style="line-height:1.6;">${child.innerHTML}</textarea>
+                        `;
+                    } else {
+                        blockDiv.innerHTML = `
+                            <div class="font-extrabold text-sm text-slate-500 mb-4 flex items-center gap-2"><span class="material-symbols-outlined">code</span> 복합 블록 (${child.tagName})</div>
+                            <textarea id="edit-block-${index}-html" rows="3" class="w-full p-4 border border-slate-200 rounded-lg font-mono text-xs bg-slate-100">${child.outerHTML}</textarea>
+                        `;
+                    }
+                    blocksContainer.appendChild(blockDiv);
+                });
+            } else {
+                blocksContainer.innerHTML = '<div class="text-slate-500 font-bold text-center">수정할 본문 콘텐츠 블록을 파싱하지 못했습니다.</div>';
+            }
         }
 
-        async function submitEdit() {
-            if(!editTargetUrl) return;
-            const html = document.getElementById('update-editor').value;
-            const btn = document.getElementById('update-btn');
-            btn.textContent = '저장 중...';
+        async function saveEditPage() {
+            if(!editTargetUrl || !currentEditDoc) return;
+            const btn = document.getElementById('edit-save-btn');
+            btn.textContent = '저장 진행 중...';
+            btn.disabled = true;
+
             try {
+                // Apply Meta Data Updates
+                const titleNode = currentEditDoc.querySelector('title');
+                if(titleNode) titleNode.textContent = document.getElementById('edit-meta-title').value;
+
+                const descNode = currentEditDoc.querySelector('meta[name="description"]');
+                if(descNode) descNode.setAttribute('content', document.getElementById('edit-meta-desc').value);
+
+                const h1Node = currentEditDoc.querySelector('.article-main-heading') || currentEditDoc.querySelector('h1');
+                if(h1Node) h1Node.textContent = document.getElementById('edit-main-h1').value;
+
+                // Apply Block Updates
+                const contentNode = currentEditDoc.querySelector('.article-content') || currentEditDoc.querySelector('.post-content') || currentEditDoc.querySelector('main');
+                if(contentNode) {
+                    Array.from(contentNode.children).forEach((child, index) => {
+                        if(child.tagName === 'IMG') {
+                            const srcInput = document.getElementById(`edit-block-${index}-src`);
+                            const altInput = document.getElementById(`edit-block-${index}-alt`);
+                            if(srcInput) child.setAttribute('src', srcInput.value);
+                            if(altInput) child.setAttribute('alt', altInput.value);
+                        } else if (child.tagName === 'P' || child.tagName.match(/^H[2-6]$/) || child.tagName === 'UL' || child.tagName === 'OL') {
+                            const htmlInput = document.getElementById(`edit-block-${index}-html`);
+                            if(htmlInput) child.innerHTML = htmlInput.value;
+                        } else {
+                            const htmlInput = document.getElementById(`edit-block-${index}-html`);
+                            if(htmlInput) child.outerHTML = htmlInput.value;
+                        }
+                    });
+                }
+
+                // Serialize complete HTML
+                const finalHtml = "<!DOCTYPE html>\n" + currentEditDoc.documentElement.outerHTML;
+
                 const res = await fetch('/admin/api/posts/update', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url: editTargetUrl, html })
+                    body: JSON.stringify({ url: editTargetUrl, html: finalHtml })
                 });
-                await res.json();
-                alert('수정이 완료되었습니다.');
-                closeEditModal();
+                
+                const data = await res.json();
+                if(data.success) {
+                    alert('포스트의 구조적 변경사항이 성공적으로 저장 및 배포되었습니다.');
+                    switchPage('manage');
+                } else {
+                    throw new Error(data.error || 'Server error on update');
+                }
             } catch(e) {
-                alert('에러: ' + e.message);
+                alert('저장 중 오류가 발생했습니다: ' + e.message);
             } finally {
-                btn.textContent = '수정 저장';
+                btn.textContent = '변경사항 저장 및 배포';
+                btn.disabled = false;
             }
         }
 
