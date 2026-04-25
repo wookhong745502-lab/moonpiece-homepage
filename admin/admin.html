@@ -383,16 +383,12 @@
                 </div>
                 <div id="auto-queue-list" class="flex flex-col gap-3 mb-8"></div>
                 
-                <div class="grid grid-cols-2 gap-4">
-                    <button id="auto-gen-btn" class="btn-primary p-6 text-lg" onclick="runAutoPublish()">
-                        <span class="material-symbols-outlined">rocket_launch</span>
-                        지금 즉시 발행 시작 (브라우저 유지)
-                    </button>
-                    <button id="auto-bg-btn" class="btn-primary p-6 text-lg bg-indigo-600" onclick="submitToBackground()">
+                <div class="flex flex-col gap-4">
+                    <button id="auto-bg-btn" class="btn-primary p-6 text-xl bg-indigo-600 w-full" onclick="submitToBackground()">
                         <span class="material-symbols-outlined">schedule_send</span>
-                        백그라운드 예약 발행 (브라우저 종료 가능)
+                        첫 번째 글 즉시 발행 후 백그라운드 예약 시작
                     </button>
-                    <button id="auto-stop-btn" class="btn-primary bg-red-600 hidden p-6 text-xl col-span-2" onclick="stopAutoPublish()">중단하기</button>
+                    <button id="auto-stop-btn" class="btn-primary bg-red-600 hidden p-6 text-xl" onclick="stopBackgroundQueue()">중단하기</button>
                 </div>
             </div>
 
@@ -688,6 +684,8 @@
             document.getElementById('aeo-draft-zone').style.display = 'none';
             document.getElementById('auto-results-zone').style.display = 'none';
         }
+
+        let stopRequested = false;
 
         let currentEditDoc = null;
 
@@ -1434,32 +1432,122 @@
             
             const type = document.getElementById('auto-type').value;
             const intervalHours = parseInt(document.getElementById('auto-interval').value) || 24;
+            const btn = document.getElementById('auto-bg-btn');
+            const stopBtn = document.getElementById('auto-stop-btn');
+            const resultsZone = document.getElementById('auto-results-zone');
+            const logList = document.getElementById('auto-log-list');
 
-            if (!confirm(`브라우저를 닫아도 서버에서 설정된 예약 시간에 맞춰 AI가 글을 하나씩 생성하고 발행하도록 예약하시겠습니까?\n(지금 즉시 모든 글을 만들지 않고, 발행 시점에 맞춰 하나씩 생성합니다.)`)) return;
+            if (!confirm(`첫 번째 글 "${autoQueue[0].keyword}"을(를) 지금 즉시 생성하여 발행하고, 나머지 ${autoQueue.length - 1}개는 ${intervalHours}시간 간격으로 백그라운드 예약하시겠습니까?`)) return;
+
+            btn.disabled = true;
+            btn.textContent = '프로세스 시작 중...';
+            stopBtn.style.display = 'block';
+            resultsZone.style.display = 'block';
+            logList.innerHTML = '';
+            stopRequested = false;
+
+            function addLog(msg, color = '#d4d4d4') {
+                const now = new Date().toLocaleTimeString();
+                const div = document.createElement('div');
+                div.className = 'log-item';
+                div.innerHTML = `<span class="log-time">[${now}]</span> <span style="color:${color}">${msg}</span>`;
+                logList.appendChild(div);
+                logList.parentElement.scrollTop = logList.parentElement.scrollHeight;
+            }
 
             try {
-                const res = await fetch(`/admin/api/bulk/queue?type=${type}`, {
+                // 1. Process FIRST item immediately
+                const firstTask = autoQueue[0];
+                addLog(`🚀 [1/${autoQueue.length}] "${firstTask.keyword}" 즉시 생성 시작...`, '#6366f1');
+                
+                const endpoint = type === 'seo' ? '/admin/api/generate-seo' : '/admin/api/generate-aeo';
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ keyword: firstTask.keyword })
+                });
+
+                const reader = res.body.getReader();
+                const decoder = new TextDecoder();
+                let draft = null;
+
+                while (true) {
+                    if (stopRequested) {
+                        addLog('🛑 사용자가 중단을 요청했습니다.', '#ef4444');
+                        throw new Error('중단됨');
+                    }
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    const chunk = decoder.decode(value);
+                    const lines = chunk.split('\n');
+                    for (const line of lines) {
+                        if (line.startsWith('LOG:')) {
+                            addLog(`  - ${line.slice(4)}`);
+                        } else if (line.trim().startsWith('{')) {
+                            try { draft = JSON.parse(line); } catch(e) {}
+                        }
+                    }
+                }
+
+                if (!draft || !draft.success) throw new Error(draft?.error || '생성 실패');
+
+                addLog(`  - 💾 서버 저장 및 발행 중...`);
+                const pubRes = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        active: true,
-                        type,
-                        intervalHours,
-                        lastRun: 0,
-                        items: autoQueue.map(t => ({ 
-                            keyword: t.keyword, 
-                            status: 'pending',
-                            publishDate: t.publishDate // This is 'YYYY-MM-DD'
-                        }))
+                        ...draft.draft,
+                        isFinal: true,
+                        publishDate: firstTask.publishDate
                     })
                 });
-                const data = await res.json();
-                if (data.success) {
-                    alert('서버 백그라운드 큐에 등록되었습니다. 이제 브라우저를 닫으셔도 됩니다.\n각 글은 예약된 날짜의 발행 시점에 생성됩니다.');
-                    loadBackgroundQueue();
+                const pubData = await pubRes.json();
+                if (!pubData.success) throw new Error(pubData.error || '발행 실패');
+
+                addLog(`✅ "${firstTask.keyword}" 즉시 발행 성공!`, '#22c55e');
+                firstTask.status = 'success';
+                firstTask.path = pubData.path;
+
+                // 2. Submit REMAINING to background
+                const remaining = autoQueue.slice(1);
+                if (remaining.length > 0) {
+                    addLog(`📅 나머지 ${remaining.length}개 주제를 서버 백그라운드 예약으로 등록합니다...`, '#818cf8');
+                    const bgRes = await fetch(`/admin/api/bulk/queue?type=${type}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            active: true,
+                            type,
+                            intervalHours,
+                            lastRun: Date.now(), // Start interval FROM NOW
+                            items: remaining.map(t => ({ 
+                                keyword: t.keyword, 
+                                status: 'pending',
+                                publishDate: t.publishDate
+                            }))
+                        })
+                    });
+                    const bgData = await bgRes.json();
+                    if (bgData.success) {
+                        addLog(`✨ 모든 예약 절차가 완료되었습니다. 브라우저를 닫으셔도 됩니다.`, '#22c55e');
+                    } else {
+                        throw new Error('백그라운드 예약 등록 실패');
+                    }
+                } else {
+                    addLog(`✨ 모든 작업이 완료되었습니다.`, '#22c55e');
                 }
+
+                loadBackgroundQueue();
+
             } catch (e) {
-                alert('큐 등록 실패: ' + e.message);
+                if (e.message !== '중단됨') {
+                    addLog(`❌ 오류 발생: ${e.message}`, '#ef4444');
+                    alert('프로세스 중 오류: ' + e.message);
+                }
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '첫 번째 글 즉시 발행 후 백그라운드 예약 시작';
+                stopBtn.style.display = 'none';
             }
         }
 
@@ -1507,17 +1595,28 @@
         }
 
         async function stopBackgroundQueue() {
-            if (!confirm('현재 진행 중인 서버 백그라운드 발행을 중단하시겠습니까?')) return;
+            if (!confirm('현재 진행 중인 발행 및 예약을 중단하시겠습니까?')) return;
+            
+            // 1. Signal immediate process to stop
+            stopRequested = true;
+            
+            // 2. Stop server-side queue
             const type = document.getElementById('auto-type').value;
-            const res = await fetch(`/admin/api/bulk/queue?type=${type}`);
-            const data = await res.json();
-            data.active = false;
-            await fetch(`/admin/api/bulk/queue?type=${type}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
+            try {
+                const res = await fetch(`/admin/api/bulk/queue?type=${type}`);
+                const data = await res.json();
+                if (data.active) {
+                    data.active = false;
+                    await fetch(`/admin/api/bulk/queue?type=${type}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                }
+            } catch(e) {}
+            
             loadBackgroundQueue();
+            alert('중단 요청이 전송되었습니다.');
         }
 
         function prepareAutoPublish() {
