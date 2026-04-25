@@ -118,14 +118,15 @@ function parseAIJson(raw) {
 }
 
 function generateSlug(text) {
-  if (!text) return "post-" + Date.now();
   return text
     .toString()
     .toLowerCase()
     .trim()
     .replace(/\s+/g, '-')
-    .replace(/[^\w\-가-힣]+/g, '')
+    .replace(/[^\w\-]+/g, '') // Only a-z, 0-9, -, _
     .replace(/\-\-+/g, '-')
+    .replace(/^-+/, '')
+    .replace(/-+$/, '')
     .substring(0, 50);
 }
 
@@ -619,9 +620,14 @@ async function performAiGeneration(payload, env, logger = null) {
     (async () => {
       const imgPromises = [];
       for (let i = 0; i <= actualImgCount; i++) {
-        const prompt = isSEO 
-          ? `Photo of Korean ${englishKeyword}, modest, fully clothed, elegant high-end style, premium photography, highly detailed, ${selectedStyle}`
-          : `Clean informative infographic of Korean ${englishKeyword}, white background, premium minimalist design, vector style, highly readable, informative charts, ${selectedStyle}. Korean/English/Numbers only.`;
+        let baseImgPrompt = isSEO ? settings.imgSeoPrompt : settings.imgAeoPrompt;
+        if (!baseImgPrompt) {
+          baseImgPrompt = isSEO 
+            ? `Photo of Korean {{keyword}}, modest, fully clothed, elegant high-end style, premium photography, highly detailed, ${selectedStyle}`
+            : `Clean informative infographic of Korean {{keyword}}, white background, premium minimalist design, vector style, highly readable, informative charts, ${selectedStyle}. Korean/English/Numbers only.`;
+        }
+        
+        const prompt = baseImgPrompt.replace(/{{keyword}}/g, englishKeyword);
         
         const generateImg = async (p, retried = false) => {
           try {
