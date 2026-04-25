@@ -388,12 +388,14 @@ export default {
       }
 
       if (url.pathname === "/admin/api/bulk/queue") {
+        const type = url.searchParams.get("type") || "seo";
+        const key = `config/bulk_queue_${type}.json`;
         if (request.method === "GET") {
-          const q = await env.JOURNAL_BUCKET.get("config/bulk_queue.json");
+          const q = await env.JOURNAL_BUCKET.get(key);
           return new Response(q ? await q.text() : JSON.stringify({ active: false, items: [] }));
         }
         const data = await request.json();
-        await env.JOURNAL_BUCKET.put("config/bulk_queue.json", JSON.stringify(data));
+        await env.JOURNAL_BUCKET.put(key, JSON.stringify(data));
         return new Response(JSON.stringify({ success: true }));
       }
 
@@ -437,67 +439,66 @@ export default {
 
   async scheduled(event, env, ctx) {
     console.log("[Scheduled] Bulk publishing check...");
-    const queueObj = await env.JOURNAL_BUCKET.get("config/bulk_queue.json");
-    if (!queueObj) return;
+    const types = ['seo', 'aeo'];
     
-    let queueData = JSON.parse(await queueObj.text());
-    if (!queueData.active || !queueData.items || queueData.items.length === 0) return;
-
-    const now = Date.now();
-    const lastRun = queueData.lastRun || 0;
-    const intervalMs = (queueData.intervalHours || 24) * 60 * 60 * 1000;
-
-    // Check if interval has passed
-    if (now - lastRun >= intervalMs) {
-      // Current date in KST (YYYY-MM-DD)
-      const kstDate = new Date(now + 9 * 60 * 60 * 1000).toISOString().split('T')[0];
+    for (const type of types) {
+      const key = `config/bulk_queue_${type}.json`;
+      const queueObj = await env.JOURNAL_BUCKET.get(key);
+      if (!queueObj) continue;
       
-      // Find the next pending item whose scheduled date has arrived
-      const itemIndex = queueData.items.findIndex(i => i.status === 'pending' && (!i.publishDate || i.publishDate <= kstDate));
-      
-      if (itemIndex === -1) {
-        // If everything is pending but for the future, just wait
-        return;
-      }
+      let queueData = JSON.parse(await queueObj.text());
+      if (!queueData.active || !queueData.items || queueData.items.length === 0) continue;
 
-      const task = queueData.items[itemIndex];
-      try {
-        const draft = await performAiGeneration({ type: queueData.type, keyword: task.keyword }, env);
-        const finalSlug = await resolveUniqueSlug(queueData.type, draft.slug, env);
-        const publishDate = task.publishDate || kstDate;
-        const isSEO = queueData.type === 'seo';
-        const targetKey = isSEO ? `journal/${finalSlug}.html` : `knowledge/${finalSlug}.html`;
+      const now = Date.now();
+      const lastRun = queueData.lastRun || 0;
+      const intervalMs = (queueData.intervalHours || 24) * 60 * 60 * 1000;
+
+      if (now - lastRun >= intervalMs) {
+        const kstDate = new Date(now + 9 * 60 * 60 * 1000).toISOString().split('T')[0];
+        const itemIndex = queueData.items.findIndex(i => i.status === 'pending' && (!i.publishDate || i.publishDate <= kstDate));
         
-        const templateData = {
-          title: draft.title, description: draft.summary, desc: draft.summary, summary: draft.summary,
-          category: classifyCategory(task.keyword), publish_date: publishDate, date: publishDate,
-          rich_content: draft.html, content: draft.html,
-          faq_content: (draft.faqs || []).map(f => `<div class="faq-item bg-white p-8 rounded-2xl border border-slate-100 shadow-sm mb-6"><h4 class="text-lg font-bold text-slate-900 mb-3 flex items-start gap-3"><span class="text-moon-600">Q.</span> ${f.q}</h4><p class="text-slate-600 leading-relaxed pl-8">${f.a}</p></div>`).join(''),
-          faq_section: (draft.faqs && draft.faqs.length) ? `<section class="mt-24 p-8 lg:p-16 bg-slate-50 rounded-[3rem] border border-slate-100"><h3 class="text-3xl font-serif font-black mb-10 text-slate-900">도움이 되는 질문 (FAQ)</h3><div class="space-y-4">${draft.faqs.map(f => `<div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm"><h4 class="text-lg font-bold text-slate-900 mb-3 flex gap-3 text-moon-600">Q. <span class="text-slate-900">${f.q}</span></h4><p class="text-slate-600 leading-relaxed pl-8">${f.a}</p></div>`).join('')}</div></section>` : "",
-          og_image: draft.image, slug: finalSlug, json_ld: JSON.stringify(draft.schema),
-          source_name: draft.sourceName, source_url: draft.sourceUrl,
-          source_section: (draft.sourceName && draft.sourceUrl) ? `<div class="mt-16 p-6 bg-slate-50 rounded-2xl border border-slate-100 flex items-center gap-4"><span class="material-symbols-outlined text-moon-600">verified_user</span><div class="text-sm"><span class="text-slate-400 block mb-1">본 콘텐츠는 아래의 정보를 바탕으로 작성되었습니다.</span><a href="${draft.sourceUrl}" target="_blank" rel="noopener" class="font-bold text-slate-900 hover:text-moon-600">${draft.sourceName}</a></div></div>` : "",
-          youtube_section: draft.youtubeId ? `<div class="mt-16"><h3 class="text-2xl font-serif font-black mb-6 flex items-center gap-3 text-slate-900"><span class="material-symbols-outlined text-red-500">play_circle</span> 관련 영상</h3><div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:1.5rem;"><iframe src="https://www.youtube.com/embed/${draft.youtubeId}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allowfullscreen></iframe></div></div>` : ""
-        };
+        if (itemIndex === -1) continue;
 
-        const finalOutput = await renderTemplate(isSEO ? "journal_template.html" : "post_template.html", templateData, env);
-        await env.JOURNAL_BUCKET.put(targetKey, finalOutput, { httpMetadata: { contentType: "text/html" } });
-        await atomicUpdateList(isSEO ? "journal/list.json" : "knowledge/list.json", env, (list) => {
-          list.push({ title: draft.title, desc: draft.summary, url: `/${targetKey}`, date: publishDate, category: templateData.category, image: draft.image, slug: finalSlug });
-          return list;
-        });
+        const task = queueData.items[itemIndex];
+        try {
+          const draft = await performAiGeneration({ type: queueData.type || type, keyword: task.keyword }, env);
+          const finalSlug = await resolveUniqueSlug(queueData.type || type, draft.slug, env);
+          const publishDate = task.publishDate || kstDate;
+          const isSEO = (queueData.type || type) === 'seo';
+          const targetKey = isSEO ? `journal/${finalSlug}.html` : `knowledge/${finalSlug}.html`;
+          
+          const templateData = {
+            title: draft.title, description: draft.summary, desc: draft.summary, summary: draft.summary,
+            category: classifyCategory(task.keyword), publish_date: publishDate, date: publishDate,
+            rich_content: draft.html, content: draft.html,
+            faq_content: (draft.faqs || []).map(f => `<div class="faq-item bg-white p-8 rounded-2xl border border-slate-100 shadow-sm mb-6"><h4 class="text-lg font-bold text-slate-900 mb-3 flex items-start gap-3"><span class="text-moon-600">Q.</span> ${f.q}</h4><p class="text-slate-600 leading-relaxed pl-8">${f.a}</p></div>`).join(''),
+            faq_section: (draft.faqs && draft.faqs.length) ? `<section class="mt-24 p-8 lg:p-16 bg-slate-50 rounded-[3rem] border border-slate-100"><h3 class="text-3xl font-serif font-black mb-10 text-slate-900">도움이 되는 질문 (FAQ)</h3><div class="space-y-4">${draft.faqs.map(f => `<div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm"><h4 class="text-lg font-bold text-slate-900 mb-3 flex gap-3 text-moon-600">Q. <span class="text-slate-900">${f.q}</span></h4><p class="text-slate-600 leading-relaxed pl-8">${f.a}</p></div>`).join('')}</div></section>` : "",
+            og_image: draft.image, slug: finalSlug, json_ld: JSON.stringify(draft.schema),
+            source_name: draft.sourceName, source_url: draft.sourceUrl,
+            source_section: (draft.sourceName && draft.sourceUrl) ? `<div class="mt-16 p-6 bg-slate-50 rounded-2xl border border-slate-100 flex items-center gap-4"><span class="material-symbols-outlined text-moon-600">verified_user</span><div class="text-sm"><span class="text-slate-400 block mb-1">본 콘텐츠는 아래의 정보를 바탕으로 작성되었습니다.</span><a href="${draft.sourceUrl}" target="_blank" rel="noopener" class="font-bold text-slate-900 hover:text-moon-600">${draft.sourceName}</a></div></div>` : "",
+            youtube_section: draft.youtubeId ? `<div class="mt-16"><h3 class="text-2xl font-serif font-black mb-6 flex items-center gap-3 text-slate-900"><span class="material-symbols-outlined text-red-500">play_circle</span> 관련 영상</h3><div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:1.5rem;"><iframe src="https://www.youtube.com/embed/${draft.youtubeId}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allowfullscreen></iframe></div></div>` : ""
+          };
 
-        task.status = 'success';
-        task.path = `/${targetKey}`;
-        queueData.lastRun = now;
-      } catch (e) {
-        console.error(`[Scheduled Error] ${task.keyword}:`, e.message);
-        task.status = 'fail';
-        task.error = e.message;
-        queueData.lastRun = now; 
+          const finalOutput = await renderTemplate(isSEO ? "journal_template.html" : "post_template.html", templateData, env);
+          await env.JOURNAL_BUCKET.put(targetKey, finalOutput, { httpMetadata: { contentType: "text/html" } });
+          await atomicUpdateList(isSEO ? "journal/list.json" : "knowledge/list.json", env, (list) => {
+            list.push({ title: draft.title, desc: draft.summary, url: `/${targetKey}`, date: publishDate, category: templateData.category, image: draft.image, slug: finalSlug });
+            return list;
+          });
+
+          task.status = 'success';
+          task.path = `/${targetKey}`;
+          queueData.lastRun = now;
+        } catch (e) {
+          console.error(`[Scheduled Error] ${type} - ${task.keyword}:`, e.message);
+          task.status = 'fail';
+          task.error = e.message;
+          queueData.lastRun = now; 
+        }
+        await env.JOURNAL_BUCKET.put(key, JSON.stringify(queueData));
       }
-      await env.JOURNAL_BUCKET.put("config/bulk_queue.json", JSON.stringify(queueData));
     }
+  }
   }
 };
 
