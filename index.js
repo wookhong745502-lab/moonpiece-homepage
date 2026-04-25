@@ -600,7 +600,10 @@ async function performAiGeneration(payload, env, logger = null) {
   }
   basePrompt = basePrompt.replace(/{{keyword}}/g, keyword).replace(/{{title}}/g, finalTitle).replace(/{{subKeywords}}/g, payload.subKeywords || "");
 
-  const universalPrompt = `${basePrompt}
+  const universalPrompt = `### PRIMARY DIRECTIVES (USER GUIDELINES):
+  ${basePrompt}
+
+  ### SYSTEM REQUIREMENTS & OUTPUT FORMAT:
   CRITICAL: Your response must be a single JSON object:
   {
     "html": "The full body content in HTML format. ${markersText}",
