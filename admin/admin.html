@@ -417,9 +417,14 @@
 
         <!-- Manage Page -->
         <div id="page-manage" class="page-content">
-            <div class="flex-center-between mb-12">
+            <div class="flex-center-between mb-8">
                 <h1 class="font-serif text-4xl">포스트 관리</h1>
-                <button onclick="migrateClear()" class="btn-primary bg-red-600 border-none">모든 데이터 초기화</button>
+                <div class="flex gap-4">
+                    <button onclick="filterPosts('all')" class="btn-primary py-2 px-6 text-sm bg-slate-800" id="filter-all">전체보기</button>
+                    <button onclick="filterPosts('journal')" class="btn-primary py-2 px-6 text-sm bg-blue-600" id="filter-journal">임산부 저널 (SEO)</button>
+                    <button onclick="filterPosts('knowledge')" class="btn-primary py-2 px-6 text-sm bg-purple-600" id="filter-knowledge">AEO 지식인</button>
+                    <button onclick="migrateClear()" class="btn-primary bg-red-600 border-none ml-8 text-sm">모든 데이터 초기화</button>
+                </div>
             </div>
             
             <div class="card p-0 overflow-hidden">
@@ -1062,18 +1067,38 @@
             finally { btn.disabled = false; btn.textContent = '실서버에 배포 완료하기'; }
         }
 
+        let allPostsGlobal = [];
+
         async function loadPosts() {
             const res = await fetch('/admin/api/posts');
             const posts = await res.json();
+            
+            // Sort by date descending (Newest first)
+            posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+            allPostsGlobal = posts;
+            
+            renderPosts(posts);
+            
+            // Update Stats
+            const now = new Date().toISOString().split('T')[0];
+            let totalPublished = posts.filter(p => p.date <= now).length;
+            let totalScheduled = posts.length - totalPublished;
+            document.getElementById('stat-total').textContent = totalPublished;
+            document.getElementById('stat-scheduled').textContent = totalScheduled;
+        }
+
+        function filterPosts(type) {
+            // Update active button state if desired (optional UI polish)
+            if (type === 'all') renderPosts(allPostsGlobal);
+            else renderPosts(allPostsGlobal.filter(p => p.type === type));
+        }
+
+        function renderPosts(posts) {
             const list = document.getElementById('post-list');
             const now = new Date().toISOString().split('T')[0];
-            let totalPublished = 0;
-            let totalScheduled = 0;
-
+            
             list.innerHTML = posts.map(p => {
                 const isScheduled = p.date > now;
-                if(isScheduled) totalScheduled++; else totalPublished++;
-
                 return `
                 <tr>
                     <td class="table-cell-title">
@@ -1091,8 +1116,6 @@
                     </td>
                 </tr>
             `}).join('');
-            document.getElementById('stat-total').textContent = totalPublished;
-            document.getElementById('stat-scheduled').textContent = totalScheduled;
         }
 
         async function deletePost(url, type) {
