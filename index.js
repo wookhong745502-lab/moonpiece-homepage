@@ -692,11 +692,18 @@ async function performAiGeneration(payload, env, logger = null) {
 
 async function resolveUniqueSlug(type, requestedSlug, env) {
   const listKey = type === 'seo' ? "journal/list.json" : "knowledge/list.json";
+  const prefix = type === 'seo' ? "journal/" : "knowledge/";
   const list = await safeGetJson(listKey, env);
   let slug = generateSlug(requestedSlug || "untitled");
   let finalSlug = slug;
   let counter = 1;
-  while (list.some(item => (item.slug === finalSlug || item.url?.includes(`/${finalSlug}.html`)))) {
+  
+  while (true) {
+    const inList = list.some(item => (item.slug === finalSlug || item.url?.includes(`/${finalSlug}.html`)));
+    const inR2 = await env.JOURNAL_BUCKET.head(`${prefix}${finalSlug}.html`);
+    
+    if (!inList && !inR2) break;
+    
     finalSlug = `${slug}-${counter}`;
     counter++;
   }
