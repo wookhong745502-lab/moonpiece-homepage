@@ -306,7 +306,8 @@ export default {
         return new Response(JSON.stringify({ result }), { headers: { "Content-Type": "application/json" } });
       }
 
-      if (url.pathname === "/admin/api/generate-journal" || url.pathname === "/admin/api/generate-knowledge") {
+      if (url.pathname === "/admin/api/generate-journal" || url.pathname === "/admin/api/generate-knowledge" || 
+          url.pathname === "/admin/api/generate-seo" || url.pathname === "/admin/api/generate-aeo") {
         return await generateContentHandler(request, env);
       }
 
@@ -706,8 +707,16 @@ async function renderTemplate(templateName, data, env) {
 }
 
 async function generateContentHandler(request, env) {
+  const url = new URL(request.url);
   const payload = await request.json();
-  const { isFinal, type, keyword } = payload;
+  // If type is not in body, infer from URL
+  let type = payload.type;
+  if (!type) {
+    if (url.pathname.includes('aeo') || url.pathname.includes('knowledge')) type = 'aeo';
+    else type = 'seo';
+  }
+  
+  const { isFinal, keyword } = payload;
   const isSEO = type === 'seo';
 
   if (isFinal) {
