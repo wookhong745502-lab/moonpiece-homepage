@@ -251,7 +251,7 @@
                 const matchSearch = (p.title || "").includes(searchQuery) || (p.desc && p.desc.includes(searchQuery));
                 const isPublished = p.date <= today;
                 return matchFilter && matchSearch && isPublished;
-            });
+            }).sort((a, b) => new Date(b.date) - new Date(a.date));
             renderGrid();
         }
 
@@ -274,10 +274,15 @@
 
             paginated.forEach(post => {
                 const card = document.createElement('div');
-                card.className = 'masonry-item';
+                card.className = 'masonry-item h-full';
+                
+                // Format date nicely
+                const dateObj = new Date(post.date);
+                const formattedDate = !isNaN(dateObj) ? `${dateObj.getFullYear()}. ${String(dateObj.getMonth() + 1).padStart(2, '0')}. ${String(dateObj.getDate()).padStart(2, '0')}` : post.date;
+
                 card.innerHTML = `
-                    <article class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group cursor-pointer" onclick="location.href='${post.url}'">
-                        <div class="aspect-video bg-moon-100 relative overflow-hidden flex items-center justify-center">
+                    <article class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group cursor-pointer flex flex-col h-full" onclick="location.href='${post.url}'">
+                        <div class="aspect-video bg-moon-100 relative overflow-hidden flex items-center justify-center shrink-0">
                             <img src="${post.image || post.og_image || '/assets/default-post.png'}" 
                                  alt="${post.title}" 
                                  onerror="this.src='https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=800'; this.onerror=null;"
@@ -286,20 +291,21 @@
                         </div>
                         
                         <!-- Content -->
-                        <div class="p-6">
+                        <div class="p-6 flex flex-col flex-1">
                             <h3 class="text-lg font-bold text-slate-900 mb-4 line-clamp-2 leading-snug group-hover:text-moon-600 transition-colors">
                                 <span class="text-moon-500 mr-1 italic underline decoration-moon-200">Q.</span> ${post.title}
                             </h3>
                             
                             <!-- Answer Summary Box -->
-                            <div class="bg-slate-50 rounded-xl p-4 mb-4 border border-slate-100 italic text-slate-600 text-sm leading-relaxed relative">
+                            <div class="bg-slate-50 rounded-xl p-4 mb-4 border border-slate-100 italic text-slate-600 text-sm leading-relaxed relative flex-1">
                                 <span class="text-moon-600 font-bold not-italic font-serif mr-1">A.</span>
                                 <p class="line-clamp-3">${post.desc || ''}</p>
                             </div>
 
                             <!-- Meta info -->
-                            <div class="pt-2 flex justify-end text-slate-300">
-                                <span class="text-[10px] font-medium tracking-tight">${post.date}</span>
+                            <div class="pt-2 flex justify-end items-center text-slate-400 gap-1 mt-auto">
+                                <span class="material-symbols-outlined text-[12px]">calendar_today</span>
+                                <span class="text-[11px] font-medium tracking-tight">${formattedDate}</span>
                             </div>
                         </div>
                     </article>

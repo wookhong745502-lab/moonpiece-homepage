@@ -241,7 +241,7 @@
                 const matchSearch = p.title.includes(searchQuery) || (p.desc && p.desc.includes(searchQuery));
                 const isPublished = p.date <= today;
                 return matchFilter && matchSearch && isPublished;
-            });
+            }).sort((a, b) => new Date(b.date) - new Date(a.date));
             renderGrid();
         }
 
@@ -260,20 +260,28 @@
 
             paginated.forEach(post => {
                 const article = document.createElement('article');
-                article.className = 'bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all border border-slate-50 group cursor-pointer';
+                article.className = 'bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all border border-slate-50 group cursor-pointer flex flex-col h-full';
                 article.onclick = () => location.href = post.url;
+                
+                // Format date nicely (e.g., "2024. 04. 25")
+                const dateObj = new Date(post.date);
+                const formattedDate = !isNaN(dateObj) ? `${dateObj.getFullYear()}. ${String(dateObj.getMonth() + 1).padStart(2, '0')}. ${String(dateObj.getDate()).padStart(2, '0')}` : post.date;
+
                 article.innerHTML = `
-                    <div class="aspect-video bg-moon-100 relative overflow-hidden flex items-center justify-center">
+                    <div class="aspect-video bg-moon-100 relative overflow-hidden flex items-center justify-center shrink-0">
                         <img src="${post.image || post.og_image || '/assets/default-post.png'}" 
                              alt="${post.title}" 
                              onerror="this.src='https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=800'; this.onerror=null;"
                              class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
                         <div class="absolute top-4 left-4 px-3 py-1 bg-white/90 backdrop-blur rounded-full text-xs font-bold text-moon-600 shadow-sm">${post.categoryName}</div>
                     </div>
-                    <div class="p-8">
-                        <h3 class="text-xl font-bold mb-4 line-clamp-2 leading-tight">${post.title}</h3>
-                        <p class="text-slate-500 text-sm line-clamp-3 mb-8 leading-relaxed">${post.desc || ''}</p>
-                        <a href="${post.url}" class="text-moon-600 font-bold flex items-center gap-2 text-sm">자세히 읽기 <span class="material-symbols-outlined text-sm">east</span></a>
+                    <div class="p-8 flex flex-col flex-1">
+                        <div class="text-xs font-bold text-slate-400 mb-3 flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[14px]">calendar_today</span> ${formattedDate}
+                        </div>
+                        <h3 class="text-xl font-bold mb-4 line-clamp-2 leading-tight group-hover:text-moon-600 transition-colors">${post.title}</h3>
+                        <p class="text-slate-500 text-sm line-clamp-3 mb-8 leading-relaxed flex-1">${post.desc || ''}</p>
+                        <a href="${post.url}" class="text-moon-600 font-bold flex items-center gap-2 text-sm mt-auto">자세히 읽기 <span class="material-symbols-outlined text-sm">east</span></a>
                     </div>
                 `;
                 grid.appendChild(article);
