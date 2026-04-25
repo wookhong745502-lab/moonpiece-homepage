@@ -32,6 +32,59 @@ async function safeGetJson(key, env) {
   }
 }
 
+/**
+ * R2 JSON Database 무결성 강화를 위한 원자적 업데이트 함수
+ * @param {string} key R2 Key
+ * @param {object} env Environment
+ * @param {function} updater 기존 리스트를 받아 새로운 리스트를 반환하는 함수
+ */
+async function atomicUpdateList(key, env, updater) {
+  let attempts = 0;
+  const maxAttempts = 5;
+  
+  while (attempts < maxAttempts) {
+    const obj = await env.JOURNAL_BUCKET.get(key);
+    let list = [];
+    let etag = null;
+    
+    if (obj) {
+      try {
+        const text = await obj.text();
+        list = JSON.parse(text);
+        etag = obj.httpEtag;
+      } catch (e) {
+        console.error(`Atomic read error for ${key}:`, e.message);
+        list = [];
+      }
+    }
+    
+    const updatedList = updater(list);
+    
+    // 데이터 구조 검증 (Validation)
+    if (!Array.isArray(updatedList)) {
+      throw new Error("무결성 오류: 데이터는 반드시 배열 형태여야 합니다.");
+    }
+    
+    try {
+      await env.JOURNAL_BUCKET.put(key, JSON.stringify(updatedList), {
+        onlyIf: etag ? { etagMatches: etag } : undefined,
+        httpMetadata: { contentType: "application/json; charset=UTF-8" }
+      });
+      console.log(`[Atomic Success] ${key} updated (Attempt ${attempts + 1})`);
+      return true;
+    } catch (e) {
+      // 412 Precondition Failed: 동시성 충돌 발생 시 재시도
+      if (e.message.includes("412") || e.status === 412) {
+        attempts++;
+        console.warn(`[Atomic Conflict] Retrying ${key} update... (${attempts}/${maxAttempts})`);
+        continue;
+      }
+      throw e;
+    }
+  }
+  throw new Error(`데이터 일관성 확보 실패: ${key} 업데이트가 동시성 문제로 중단되었습니다.`);
+}
+
 function parseAIJson(raw) {
   if (!raw) return {};
   if (typeof raw !== 'string') {
@@ -124,7 +177,7 @@ async function aiCall(prompt, env, system = "You are an elite Korean content arc
 
   if (textEngine === "gemini" && env.GEMINI_API_KEY) {
     const geminiKey = env.GEMINI_API_KEY.trim();
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`, {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -156,7 +209,7 @@ async function aiCall(prompt, env, system = "You are an elite Korean content arc
     // Retry with Gemini as fallback if DeepSeek fails (e.g. 402 out of balance)
     if (env.GEMINI_API_KEY) {
         const geminiKey = env.GEMINI_API_KEY.trim();
-        const fallbackRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`, {
+        const fallbackRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -201,14 +254,28 @@ export default {
         if (cookies['admin_session'] !== 'wookhong_verified') return Response.redirect(`${url.origin}/admin/login.html`, 302);
       }
 
-      // Admin APIs
+      // Admin APIs (Security Verified)
       if (url.pathname === '/admin/api/auth/verify' && request.method === 'POST') {
         const body = await request.json();
-        if (body.bypass || body.token) {
-           return new Response(JSON.stringify({ success: true }), {
-             headers: { "Content-Type": "application/json", "Set-Cookie": "admin_session=wookhong_verified; Path=/; HttpOnly; Secure; SameSite=Lax" }
-           });
+        if (body.token) {
+           // Verify Google ID Token
+           const verifyRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${body.token}`);
+           if (!verifyRes.ok) return new Response(JSON.stringify({ success: false, error: "Invalid token" }), { status: 401 });
+           
+           const payload = await verifyRes.json();
+           const allowedEmail = "wookhong745502"; 
+           
+           if (payload.email && (payload.email.startsWith(allowedEmail) || payload.email === "wookhong745502@gmail.com")) {
+             return new Response(JSON.stringify({ success: true }), {
+               headers: { 
+                 "Content-Type": "application/json", 
+                 "Set-Cookie": "admin_session=wookhong_verified; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=86400" 
+               }
+             });
+           }
+           return new Response(JSON.stringify({ success: false, error: "Unauthorized email" }), { status: 403 });
         }
+        return new Response(JSON.stringify({ success: false, error: "Token missing" }), { status: 400 });
       }
 
       if (url.pathname === "/admin/api/suggest" && request.method === "POST") {
@@ -246,19 +313,21 @@ export default {
         const keys = ["journal/list.json", "knowledge/list.json"];
         const results = {};
         for (const key of keys) {
-          let list = await safeGetJson(key, env);
-          const originalLen = list.length;
-          // Filter: remove items with "Test", "Dummy", "가나다", or very short descriptions
-          list = list.filter(item => {
-            const t = (item.title || "").toLowerCase();
-            const d = (item.desc || "").toLowerCase();
-            const isDummy = t.includes("test") || t.includes("dummy") || t.includes("더미") || t.includes("테스트") || t.includes("asdf") || d.length < 10;
-            return !isDummy;
+          let originalLen = 0;
+          let cleanedLen = 0;
+          
+          await atomicUpdateList(key, env, (list) => {
+            originalLen = list.length;
+            const filtered = list.filter(item => {
+              const t = (item.title || "").toLowerCase();
+              const d = (item.desc || "").toLowerCase();
+              return !(t.includes("test") || t.includes("dummy") || t.includes("더미") || t.includes("테스트") || t.includes("asdf") || d.length < 10);
+            });
+            cleanedLen = filtered.length;
+            return filtered;
           });
-          if (list.length !== originalLen) {
-            await env.JOURNAL_BUCKET.put(key, JSON.stringify(list));
-          }
-          results[key] = { original: originalLen, cleaned: list.length };
+          
+          results[key] = { original: originalLen, cleaned: cleanedLen };
         }
         return new Response(JSON.stringify({ success: true, results }), { headers: { "Content-Type": "application/json" } });
       }
@@ -285,12 +354,15 @@ export default {
       if (url.pathname === "/admin/api/posts/delete" && request.method === "POST") {
         const { url: postUrl, type } = await request.json();
         const key = postUrl.startsWith('/') ? postUrl.slice(1) : postUrl;
-        await env.JOURNAL_BUCKET.delete(key);
         
+        // 원자적 삭제 수행
+        await env.JOURNAL_BUCKET.delete(key);
         const listKey = type === 'journal' ? "journal/list.json" : "knowledge/list.json";
-        let list = await safeGetJson(listKey, env);
-        list = list.filter(p => p.url !== postUrl);
-        await env.JOURNAL_BUCKET.put(listKey, JSON.stringify(list));
+        
+        await atomicUpdateList(listKey, env, (list) => {
+          return list.filter(p => p.url !== postUrl && p.url !== '/' + postUrl);
+        });
+        
         return new Response(JSON.stringify({ success: true }), { headers: { "Content-Type": "application/json" } });
       }
 
@@ -309,23 +381,20 @@ export default {
         const key = postUrl.startsWith('/') ? postUrl.slice(1) : postUrl;
         await env.JOURNAL_BUCKET.put(key, html, { httpMetadata: { contentType: "text/html" } });
         
-        // Update list.json if type is provided
+        // 원자적 업데이트 수행
         if (type) {
             const listKey = type === 'knowledge' ? "knowledge/list.json" : "journal/list.json";
-            let list = await safeGetJson(listKey, env);
-            let updated = false;
-            list = list.map(p => {
-                if (p.url === postUrl || p.url === '/' + key || '/' + p.url === postUrl || '/' + p.url === '/' + key) {
-                    updated = true;
-                    if (title) p.title = title;
-                    if (desc) p.desc = desc;
-                    if (image) p.image = image;
-                }
-                return p;
+            await atomicUpdateList(listKey, env, (list) => {
+              return list.map(p => {
+                  const isMatch = p.url === postUrl || p.url === '/' + key || '/' + p.url === postUrl || '/' + p.url === '/' + key;
+                  if (isMatch) {
+                      if (title) p.title = title;
+                      if (desc) p.desc = desc;
+                      if (image) p.image = image;
+                  }
+                  return p;
+              });
             });
-            if (updated) {
-                await env.JOURNAL_BUCKET.put(listKey, JSON.stringify(list));
-            }
         }
         
         return new Response(JSON.stringify({ success: true }), { headers: { "Content-Type": "application/json" } });
@@ -489,17 +558,18 @@ async function generateContentHandler(request, env) {
       await env.JOURNAL_BUCKET.put(targetKey, finalOutput, { httpMetadata: { contentType: "text/html" } });
 
       const listKey = isSEO ? "journal/list.json" : "knowledge/list.json";
-      let list = await safeGetJson(listKey, env);
-      list.push({
-        title,
-        desc: summary || "",
-        url: `/${targetKey}`,
-        date: publishDate,
-        category: templateData.category,
-        image: payload.image,
-        slug: finalSlug
+      await atomicUpdateList(listKey, env, (list) => {
+        list.push({
+          title,
+          desc: summary || "",
+          url: `/${targetKey}`,
+          date: publishDate,
+          category: templateData.category,
+          image: payload.image,
+          slug: finalSlug
+        });
+        return list;
       });
-      await env.JOURNAL_BUCKET.put(listKey, JSON.stringify(list));
 
       return new Response(JSON.stringify({ success: true, path: `/${targetKey}` }), { headers: { "Content-Type": "application/json" } });
     } catch (e) {

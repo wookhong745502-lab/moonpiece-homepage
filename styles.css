@@ -421,3 +421,62 @@ footer {
         border-radius: 1.5rem;
     }
 }
+
+/* --- Rich Content Enrichment Utilities --- */
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Scrollbar Hide Helper */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;
+}
+
+/* Glassmorphism Effect */
+.glass {
+    background: rgba(255, 255, 255, 0.7);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Section Padding Variants */
+.section-padding-lg {
+    padding-top: var(--section-py-lg);
+    padding-bottom: var(--section-py-lg);
+}
+
+/* Responsive Grid Adjustments */
+@media (max-width: 768px) {
+    .section-padding { padding-top: 3rem; padding-bottom: 3rem; }
+    .section-padding-lg { padding-top: 4rem; padding-bottom: 4rem; }
+}
+
+/* Category Filter Active State */
+.filter-btn.active {
+    background-color: var(--moon-600) !important;
+    color: white !important;
+    box-shadow: 0 10px 25px -5px rgba(124, 58, 237, 0.4);
+}
+
+/* Utility: Animation Delays */
+.anim-delay-100 { animation-delay: 0.1s; }
+.anim-delay-200 { animation-delay: 0.2s; }
+.anim-delay-300 { animation-delay: 0.3s; }
+.anim-delay-400 { animation-delay: 0.4s; }
+.anim-delay-1000 { animation-delay: 1s; }
+
+/* Utility: Icon Fill */
+.icon-fill {
+    font-variation-settings: 'FILL' 1;
+}

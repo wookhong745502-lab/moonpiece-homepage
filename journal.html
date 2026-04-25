@@ -66,43 +66,56 @@
             class="btn-primary mt-6 text-center py-4 rounded-xl bg-moon-600 text-white font-bold">구매하기</a>
     </div>
 
-    <!-- Header -->
-    <header class="section-padding-lg bg-white border-b border-slate-100">
-        <div class="mp-container text-center">
-            <h1 class="text-5xl font-serif text-slate-900 mb-8 font-black">임산부 저널</h1>
-            <p class="text-lg text-slate-500 mb-12 leading-relaxed">임산부의 건강한 숙면을 위한 11년의 연구 데이터. 수면 자세, 통증 완화, 심리 케어까지
-                문피스 수면연구소의 정밀 저널을 만나보세요.</p>
-
-            <div class="relative max-w-2xl mx-auto mb-6">
-                <input type="text" id="top-search-input" placeholder="키워드로 검색해보세요 (예: 불면증, 요통)"
-                    onfocus="this.placeholder = ''" onblur="this.placeholder = '키워드로 검색해보세요 (예: 불면증, 요통)'"
-                    class="w-full pl-14 pr-32 py-5 rounded-full border-2 border-slate-100 bg-slate-50 focus:border-moon-500 focus:bg-white focus:outline-none shadow-sm transition-all text-lg">
-                <span class="material-symbols-outlined absolute left-5 top-5 text-slate-400 text-3xl">search</span>
-                <button onclick="handleSearch('top')"
-                    class="absolute right-2 top-2 bottom-2 px-8 bg-moon-600 text-white rounded-full font-bold hover:bg-moon-500 transition-colors">검색</button>
-            </div>
-
-            <!-- Hot Hashtags -->
-            <div class="flex flex-wrap justify-center gap-2">
-                <button onclick="tagSearch('수면자세')"
-                    class="px-4 py-1.5 rounded-full bg-slate-100 text-slate-600 text-sm font-medium hover:bg-moon-50 hover:text-moon-600 transition-all border border-transparent hover:border-moon-200">#수면자세</button>
-                <button onclick="tagSearch('환도선다')"
-                    class="px-4 py-1.5 rounded-full bg-slate-100 text-slate-600 text-sm font-medium hover:bg-moon-50 hover:text-moon-600 transition-all border border-transparent hover:border-moon-200">#환도선다</button>
-                <button onclick="tagSearch('튼살크림')"
-                    class="px-4 py-1.5 rounded-full bg-slate-100 text-slate-600 text-sm font-medium hover:bg-moon-50 hover:text-moon-600 transition-all border border-transparent hover:border-moon-200">#튼살크림</button>
-                <button onclick="tagSearch('식단관리')"
-                    class="px-4 py-1.5 rounded-full bg-slate-100 text-slate-600 text-sm font-medium hover:bg-moon-50 hover:text-moon-600 transition-all border border-transparent hover:border-moon-200">#식단관리</button>
+    <!-- Premium Search Hero -->
+    <section class="relative pt-40 pb-24 overflow-hidden bg-white">
+        <!-- Animated Background Decor -->
+        <div class="absolute top-0 left-1/4 w-[500px] h-[500px] bg-moon-100 rounded-full blur-[120px] opacity-40 animate-pulse"></div>
+        <div class="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-purple-100 rounded-full blur-[100px] opacity-30 animate-pulse anim-delay-1000"></div>
+        
+        <div class="mp-container relative z-10 text-center">
+            <div class="animate-fade-in">
+                <h1 class="text-4xl lg:text-5xl font-serif text-slate-900 mb-6 font-black leading-tight">
+                    나에게 꼭 맞는 <span class="text-moon-600 underline decoration-moon-200 decoration-8 underline-offset-8">수면 지혜</span>를 찾아보세요
+                </h1>
+                <p class="text-lg text-slate-500 mb-12 max-w-2xl mx-auto">문피스 수면연구소가 제안하는 1,000여 개의 저널 중에서<br>당신의 오늘 밤을 바꿔줄 힌트를 발견하세요.</p>
+                
+                <div class="max-w-4xl mx-auto relative group">
+                    <div class="absolute inset-0 bg-gradient-to-r from-moon-400 to-purple-400 rounded-[3rem] blur-2xl opacity-10 group-focus-within:opacity-20 transition-opacity duration-500"></div>
+                    <div class="relative glass rounded-[2.5rem] p-2 border-2 border-slate-100 shadow-2xl shadow-moon-100 transition-all duration-500 group-focus-within:border-moon-300 group-focus-within:scale-[1.01]">
+                        <div class="flex items-center">
+                            <div class="pl-8 text-slate-400 group-focus-within:text-moon-600 transition-colors">
+                                <span class="material-symbols-outlined text-3xl">search</span>
+                            </div>
+                            <input type="text" id="top-search-input" 
+                                placeholder="어떤 정보가 궁금하신가요?" 
+                                onfocus="this.placeholder = ''" 
+                                onblur="this.placeholder = '어떤 정보가 궁금하신가요?'"
+                                class="w-full pl-6 pr-10 py-6 bg-transparent text-xl font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none">
+                            <button onclick="handleSearch('top')" 
+                                class="mr-2 px-10 py-5 bg-slate-900 text-white rounded-[2rem] font-black text-lg hover:bg-moon-600 hover:scale-105 transition-all shadow-xl active:scale-95">
+                                검색하기
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Tags -->
+                <div class="mt-10 flex flex-wrap justify-center gap-3">
+                    <span class="text-sm font-bold text-slate-400 mr-2 self-center uppercase tracking-widest">Recommended:</span>
+                    <button onclick="tagSearch('수면자세')" class="px-5 py-2 bg-slate-50 hover:bg-moon-50 text-slate-600 hover:text-moon-600 rounded-full text-sm font-bold border border-slate-100 transition-all">#수면자세</button>
+                    <button onclick="tagSearch('환도선다')" class="px-5 py-2 bg-slate-50 hover:bg-moon-50 text-slate-600 hover:text-moon-600 rounded-full text-sm font-bold border border-slate-100 transition-all">#환도선다</button>
+                    <button onclick="tagSearch('부종관리')" class="px-5 py-2 bg-slate-50 hover:bg-moon-50 text-slate-600 hover:text-moon-600 rounded-full text-sm font-bold border border-slate-100 transition-all">#부종관리</button>
+                </div>
             </div>
         </div>
-    </header>
+    </section>
 
-    <!-- Content with Filter & Masonry... -->
-    <!-- I'll restore the actual filter buttons and articles from the original -->
-    <section class="section-padding">
+    <!-- Content with Filter & Masonry -->
+    <section class="section-padding bg-white">
         <div class="mp-container">
             <div class="flex flex-wrap justify-center gap-4 mb-16" id="category-filters">
                 <button onclick="filterCategory('all')"
-                    class="filter-btn active px-8 py-3 rounded-full bg-moon-600 text-white font-bold shadow-lg"
+                    class="filter-btn active px-8 py-3 rounded-full bg-moon-600 text-white font-bold shadow-lg transition-all"
                     data-filter="all">전체</button>
                 <button onclick="filterCategory('sleep')"
                     class="filter-btn px-8 py-3 rounded-full bg-white text-slate-600 font-bold border border-slate-100 hover:bg-moon-50 hover:text-moon-600 transition-all"
@@ -344,8 +357,8 @@
         };
 
         // Search Enter Key
-        topSearch.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSearch('top'); });
-        bottomSearch.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSearch('bottom'); });
+        topSearch?.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSearch('top'); });
+        bottomSearch?.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSearch('bottom'); });
 
         const menuToggle = document.getElementById('menu-toggle');
         const closeMenu = document.getElementById('close-menu');

@@ -72,37 +72,43 @@
         </div>
     </div>
 
-    <!-- Hero Search Section -->
-    <section class="bg-white pt-24 pb-16 border-b border-slate-100">
-        <div class="mp-container text-center">
-            <h1 class="text-4xl md:text-5xl font-serif font-black text-slate-900 mb-4">어떤 점이 궁금하신가요?</h1>
-            <p class="text-slate-500 text-lg mb-10 max-w-2xl mx-auto">
-                엄마와 아기가 가장 편안한 밤을 보낼 수 있도록,<br>문피스가 빅데이터와 전문가 지식으로 궁금한 모든 것에 해결책을 제시해드립니다.
-            </p>
-
-            <!-- Hero Search Bar -->
-            <div class="relative max-w-2xl mx-auto mb-6">
-                <input type="text" id="top-search-input" placeholder="키워드로 검색해보세요 (예: 환도선다, 수면자세)"
-                    onfocus="this.placeholder = ''" onblur="this.placeholder = '키워드로 검색해보세요 (예: 환도선다, 수면자세)'"
-                    class="w-full pl-14 pr-32 py-5 rounded-full border-2 border-slate-100 bg-slate-50 focus:border-moon-500 focus:bg-white focus:outline-none shadow-sm transition-all text-lg">
-                <span class="material-symbols-outlined absolute left-5 top-5 text-slate-400 text-3xl">search</span>
-                <button onclick="handleSearch('top')"
-                    class="absolute right-2 top-2 bottom-2 px-8 bg-moon-600 text-white rounded-full font-bold hover:bg-moon-500 transition-colors">검색</button>
-            </div>
-
-            <!-- Hot Hashtags -->
-            <div class="flex flex-wrap justify-center gap-2">
-                <button onclick="tagSearch('수면자세')"
-                    class="px-4 py-1.5 rounded-full bg-slate-100 text-slate-600 text-sm font-medium hover:bg-moon-50 hover:text-moon-600 transition-all border border-transparent hover:border-moon-200">#수면자세</button>
-                <button onclick="tagSearch('환도선다')"
-                    class="px-4 py-1.5 rounded-full bg-slate-100 text-slate-600 text-sm font-medium hover:bg-moon-50 hover:text-moon-600 transition-all border border-transparent hover:border-moon-200">#환도선다</button>
-                <button onclick="tagSearch('튼살크림')"
-                    class="px-4 py-1.5 rounded-full bg-slate-100 text-slate-600 text-sm font-medium hover:bg-moon-50 hover:text-moon-600 transition-all border border-transparent hover:border-moon-200">#튼살크림</button>
-                <button onclick="tagSearch('식단관리')"
-                    class="px-4 py-1.5 rounded-full bg-slate-100 text-slate-600 text-sm font-medium hover:bg-moon-50 hover:text-moon-600 transition-all border border-transparent hover:border-moon-200">#식단관리</button>
+    <!-- Premium Search Hero -->
+    <section class="relative pt-40 pb-24 overflow-hidden bg-white">
+        <!-- Animated Background Decor -->
+        <div class="absolute top-0 right-1/4 w-[600px] h-[600px] bg-moon-100 rounded-full blur-[150px] opacity-40 animate-pulse"></div>
+        <div class="absolute -bottom-20 left-1/4 w-[400px] h-[400px] bg-indigo-50 rounded-full blur-[100px] opacity-50 animate-pulse decor-pulse-delay"></div>
+        
+        <div class="mp-container relative z-10 text-center">
+            <div class="animate-fade-in">
+                <h1 class="text-4xl lg:text-5xl font-serif text-slate-900 mb-6 font-black leading-tight">
+                    임산부의 모든 궁금증,<br><span class="text-moon-600 underline decoration-moon-200 decoration-8 underline-offset-8">전문가 지식인</span>에서 답변해드려요
+                </h1>
+                <p class="text-lg text-slate-500 mb-12 max-w-2xl mx-auto">2,500개 이상의 검증된 답변 중에서<br>당신에게 필요한 정보를 지금 검색해보세요.</p>
+                
+                <div class="max-w-4xl mx-auto relative group">
+                    <div class="absolute inset-0 bg-gradient-to-r from-moon-400 to-indigo-400 rounded-[3rem] blur-2xl opacity-10 group-focus-within:opacity-20 transition-opacity duration-500"></div>
+                    <div class="relative glass rounded-[2.5rem] p-2 border-2 border-slate-100 shadow-2xl shadow-moon-100 transition-all duration-500 group-focus-within:border-moon-300 group-focus-within:scale-[1.01]">
+                        <div class="flex items-center">
+                            <div class="pl-8 text-slate-400 group-focus-within:text-moon-600 transition-colors">
+                                <span class="material-symbols-outlined text-3xl">search</span>
+                            </div>
+                            <input type="text" id="top-search-input" 
+                                placeholder="궁금한 증상이나 지식을 입력하세요 (예: 환도선다)" 
+                                onfocus="this.placeholder = ''" 
+                                onblur="this.placeholder = '궁금한 증상이나 지식을 입력하세요 (예: 환도선다)'"
+                                class="w-full pl-6 pr-10 py-6 bg-transparent text-xl font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none">
+                            <button onclick="handleSearch('top')" 
+                                class="mr-2 px-10 py-5 bg-slate-900 text-white rounded-[2rem] font-black text-lg hover:bg-moon-600 hover:scale-105 transition-all shadow-xl active:scale-95">
+                                답변 찾기
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
+
+
 
     <!-- Filter & Content Area -->
     <main class="mp-container py-16">
@@ -440,6 +446,10 @@
 
         @media (min-width: 1024px) {
             #knowledge-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        }
+
+        .decor-pulse-delay {
+            animation-delay: 2s;
         }
     </style>
 </body>

@@ -13,7 +13,6 @@
         .login-title { font-size: 1.5rem; }
         .login-desc { color: var(--on-surface-variant); margin-bottom: 2.5rem; }
         .error-msg { color: #c53030; margin-top: 1.5rem; font-size: 0.9rem; font-weight: 700; display: none; }
-        .btn-bypass { width: 100%; font-size: 0.85rem; border-color: var(--outline-variant); color: var(--outline); }
     </style>
 </head>
 <body class="login-body">
@@ -41,8 +40,6 @@
 
         <div id="errorMsg" class="error-msg"></div>
         
-        <!-- 개발용 임시 강제 로그인 버튼 (테스트 완료 후 제거 요망) -->
-        <button onclick="devBypass()" class="btn-outline mt-8 btn-bypass">개발용: 우회 로그인 (Bypass)</button>
     </div>
 
     <script>
@@ -68,16 +65,6 @@
                 errorMsg.textContent = '❌ 서버와 통신할 수 없습니다.';
                 errorMsg.style.display = 'block';
             }
-        }
-
-        async function devBypass() {
-            // 편의를 위해 테스트용 bypass API 
-            const res = await fetch('/admin/api/auth/verify', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ bypass: true })
-            });
-            window.location.href = '/admin/admin.html';
         }
     </script>
 </body>
