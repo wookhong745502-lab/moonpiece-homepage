@@ -156,7 +156,8 @@
             </div>
             <div class="nav-item" onclick="switchPage('seo', this)"><span class="material-symbols-outlined">edit_square</span> SEO 저널 글쓰기</div>
             <div class="nav-item" onclick="switchPage('aeo', this)"><span class="material-symbols-outlined">smart_toy</span> AEO 지식인 글쓰기</div>
-            <div class="nav-item" onclick="switchPage('auto', this)"><span class="material-symbols-outlined">schedule_send</span> 자동 발행 & 예약</div>
+            <div class="nav-item" onclick="switchPage('auto-seo', this)"><span class="material-symbols-outlined">auto_stories</span> SEO 자동 발행</div>
+            <div class="nav-item" onclick="switchPage('auto-aeo', this)"><span class="material-symbols-outlined">psychology</span> AEO 자동 발행</div>
             <div class="nav-item" onclick="switchPage('manage', this)"><span class="material-symbols-outlined">description</span> 포스트 관리</div>
             <div class="nav-item" onclick="switchPage('settings', this)"><span class="material-symbols-outlined">settings</span> API 설정</div>
             <div class="nav-item" onclick="switchPage('rules', this)"><span class="material-symbols-outlined">rule</span> 콘텐츠 가이드라인</div>
@@ -339,29 +340,29 @@
             </div>
         </div>
 
-        <!-- Auto Publish Page -->
+        <!-- Auto Publish Page (Dynamic SEO/AEO) -->
         <div id="page-auto" class="page-content">
             <header class="mb-12">
-                <h1 class="font-serif text-4xl mb-4">대량 자동 예약 발행 <span class="ai-badge">Advanced Scheduler</span></h1>
-                <p>관리자가 입력한 주제들을 바탕으로 AI가 자동으로 글을 쓰고 지정된 간격으로 예약 배포합니다.</p>
+                <h1 class="font-serif text-4xl mb-4"><span id="auto-title-text">대량 자동 예약 발행</span> <span class="ai-badge" id="auto-badge-text">Advanced Scheduler</span></h1>
+                <p id="auto-desc-text">관리자가 입력한 주제들을 바탕으로 AI가 자동으로 글을 쓰고 지정된 간격으로 예약 배포합니다.</p>
             </header>
 
             <div class="card">
                 <div class="input-group">
-                    <label>발행할 주제 목록 (한 줄에 하나씩 제목/키워드 입력)</label>
+                    <label id="auto-label-text">발행할 주제 목록 (한 줄에 하나씩 제목/키워드 입력)</label>
                     <textarea id="auto-keywords" rows="8" placeholder="예:&#10;임산부 불면증 해결&#10;임신 초기 영양제 추천&#10;바디필로우 선택 기준&#10;..."></textarea>
                     <p class="small-hint">입력한 순서대로 지정된 간격에 맞춰 발행됩니다.</p>
                 </div>
 
                 <div class="grid grid-cols-2 gap-8 grid-2col-fixed">
-                    <div class="input-group">
+                    <div class="input-group" style="display:none;">
                         <label>발행 유형</label>
                         <select id="auto-type">
                             <option value="seo">SEO 저널 (롱폼)</option>
                             <option value="aeo">AEO 지식인 (답변형)</option>
                         </select>
                     </div>
-                    <div class="input-group">
+                    <div class="input-group" id="auto-interval-group" style="grid-column: span 2;">
                         <label>발행 간격 (시간 단위)</label>
                         <div class="flex items-center gap-2">
                             <input type="number" id="auto-interval" value="24" min="1">
@@ -653,12 +654,33 @@
         function switchPage(page, element = null) {
             document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            document.getElementById('page-' + page).classList.add('active');
+            
+            let targetPage = page;
+            if (page.startsWith('auto-')) {
+                targetPage = 'auto';
+                const type = page.split('-')[1];
+                document.getElementById('auto-type').value = type;
+                
+                // Update UI text
+                if (type === 'seo') {
+                    document.getElementById('auto-title-text').textContent = 'SEO 저널 대량 발행';
+                    document.getElementById('auto-badge-text').textContent = 'SEO Expert';
+                    document.getElementById('auto-desc-text').textContent = '입력하신 키워드들을 바탕으로 2,500자 이상의 고품질 SEO 저널을 대량으로 생성하고 예약 발행합니다.';
+                    document.getElementById('auto-label-text').textContent = 'SEO 발행 주제 목록 (한 줄에 하나씩)';
+                } else {
+                    document.getElementById('auto-title-text').textContent = 'AEO 지식인 대량 발행';
+                    document.getElementById('auto-badge-text').textContent = 'AEO Master';
+                    document.getElementById('auto-desc-text').textContent = '지식인 스타일의 답변형 콘텐츠를 대량으로 생성하여 예약 발행합니다. 전문 답변과 비교표가 포함됩니다.';
+                    document.getElementById('auto-label-text').textContent = 'AEO 발행 질문 목록 (한 줄에 하나씩)';
+                }
+            }
+
+            document.getElementById('page-' + targetPage).classList.add('active');
             if (element) {
                 element.classList.add('active');
             }
-            if(page === 'manage') loadPosts();
-            if(page === 'auto') loadBackgroundQueue();
+            if(targetPage === 'manage') loadPosts();
+            if(targetPage === 'auto') loadBackgroundQueue();
             
             // Hide draft zones when switching pages
             document.getElementById('seo-draft-zone').style.display = 'none';
@@ -1457,10 +1479,11 @@
             const activeCount = data.items.filter(i => i.status === 'pending').length;
             const successCount = data.items.filter(i => i.status === 'success').length;
             
+            const typeLabel = data.type === 'seo' ? '<span class="ai-badge bg-blue-500">SEO 저널</span>' : '<span class="ai-badge bg-purple-500">AEO 지식인</span>';
             document.getElementById('bg-queue-title').innerHTML = `
                 <div class="flex items-center gap-3">
                     <span class="material-symbols-outlined text-primary ${data.active ? 'animate-spin' : ''}">settings_backup_restore</span>
-                    <span>서버 백그라운드 발행 현황 (${data.active ? '작동 중' : '중단됨'})</span>
+                    <span>${typeLabel} 백그라운드 발행 현황 (${data.active ? '작동 중' : '중단됨'})</span>
                 </div>
                 <div class="text-sm font-normal text-slate-400">전체 ${data.items.length}개 중 ${successCount}개 완료, ${activeCount}개 대기</div>
             `;
