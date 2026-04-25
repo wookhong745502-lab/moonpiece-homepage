@@ -1158,6 +1158,39 @@
                 blocksContainer.appendChild(heroBlock);
             }
 
+            // 1.5. YouTube Video Node 처리
+            const ytIframeNode = currentEditDoc.querySelector('iframe[src*="youtube.com/embed"]');
+            if (ytIframeNode) {
+                const ytBlock = document.createElement('div');
+                ytBlock.className = 'mb-6 p-6 border border-slate-200 rounded-xl bg-white shadow-sm border-l-4 border-l-red-500';
+                
+                // Extract Video ID from src
+                const currentSrc = ytIframeNode.getAttribute('src');
+                const srcMatch = currentSrc.match(/embed\/([^?]+)/);
+                const ytId = srcMatch ? srcMatch[1] : '';
+
+                ytBlock.innerHTML = `
+                    <div class="font-extrabold text-sm text-red-500 mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined">play_circle</span> 유튜브 영상 블록
+                    </div>
+                    <div class="flex gap-6 items-center">
+                        <div class="w-1/3">
+                            <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:0.5rem; border:1px solid #e2e8f0;">
+                                <iframe src="${currentSrc}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allowfullscreen></iframe>
+                            </div>
+                        </div>
+                        <div class="w-2/3">
+                            <div class="input-group mb-0">
+                                <label>유튜브 동영상 ID</label>
+                                <input type="text" id="edit-block-yt-id" value="${ytId}" placeholder="예: dQw4w9WgXcQ">
+                                <p class="text-xs text-slate-500 mt-2">유튜브 URL(v=) 뒤에 있는 11자리 영상 고유 ID를 입력하면 영상이 교체됩니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                blocksContainer.appendChild(ytBlock);
+            }
+
             // 2. 본문 Content 처리
             const contentNode = currentEditDoc.querySelector('.article-content') || currentEditDoc.querySelector('.post-content') || currentEditDoc.querySelector('main');
             
@@ -1230,6 +1263,15 @@
                     const altInput = document.getElementById('edit-block-hero-alt');
                     if(srcInput) heroImgNode.setAttribute('src', srcInput.value);
                     if(altInput) heroImgNode.setAttribute('alt', altInput.value);
+                }
+
+                // YouTube Video Update
+                const ytIframeNode = currentEditDoc.querySelector('iframe[src*="youtube.com/embed"]');
+                if (ytIframeNode) {
+                    const ytIdInput = document.getElementById('edit-block-yt-id');
+                    if (ytIdInput && ytIdInput.value.trim()) {
+                        ytIframeNode.setAttribute('src', `https://www.youtube.com/embed/${ytIdInput.value.trim()}`);
+                    }
                 }
 
                 // Apply Block Updates
