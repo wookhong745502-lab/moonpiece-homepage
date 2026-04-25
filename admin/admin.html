@@ -1128,6 +1128,37 @@
             container.innerHTML = html;
 
             const blocksContainer = document.getElementById('edit-content-blocks');
+
+            // 1. Hero Image Node 처리
+            const heroImgNode = currentEditDoc.querySelector('.hero-img');
+            if (heroImgNode) {
+                const heroBlock = document.createElement('div');
+                heroBlock.className = 'mb-6 p-6 border border-slate-200 rounded-xl bg-white shadow-sm border-l-4 border-l-moon-600';
+                heroBlock.innerHTML = `
+                    <div class="font-extrabold text-sm text-moon-600 mb-4 flex items-center justify-between">
+                        <div class="flex items-center gap-2"><span class="material-symbols-outlined">image</span> 대표(Hero) 이미지 블록</div>
+                        <button onclick="regenerateImage('hero')" class="btn-primary py-1.5 px-3 text-xs bg-moon-600 text-white rounded-md flex items-center gap-1 border-none hover:bg-moon-700 transition-colors cursor-pointer"><span class="material-symbols-outlined text-sm">autorenew</span>이미지 재생성 (AI)</button>
+                    </div>
+                    <div class="flex gap-6 items-start">
+                        <div class="w-1/3">
+                            <img src="${heroImgNode.getAttribute('src')}" id="preview-hero" class="w-full rounded-lg shadow-sm border border-slate-100 bg-slate-50">
+                        </div>
+                        <div class="w-2/3">
+                            <div class="input-group mb-4">
+                                <label>이미지 소스 경로 (SRC)</label>
+                                <input type="text" id="edit-block-hero-src" value="${heroImgNode.getAttribute('src')}">
+                            </div>
+                            <div class="input-group mb-0">
+                                <label>이미지 대체 텍스트 (ALT / 재생성 프롬프트)</label>
+                                <input type="text" id="edit-block-hero-alt" value="${heroImgNode.getAttribute('alt') || ''}" placeholder="이미지 재생성 시 반영될 프롬프트입니다.">
+                            </div>
+                        </div>
+                    </div>
+                `;
+                blocksContainer.appendChild(heroBlock);
+            }
+
+            // 2. 본문 Content 처리
             const contentNode = currentEditDoc.querySelector('.article-content') || currentEditDoc.querySelector('.post-content') || currentEditDoc.querySelector('main');
             
             if(contentNode) {
@@ -1137,10 +1168,13 @@
                     
                     if(child.tagName === 'IMG') {
                         blockDiv.innerHTML = `
-                            <div class="font-extrabold text-sm text-primary mb-4 flex items-center gap-2"><span class="material-symbols-outlined">image</span> 이미지 블록</div>
+                            <div class="font-extrabold text-sm text-primary mb-4 flex items-center justify-between">
+                                <div class="flex items-center gap-2"><span class="material-symbols-outlined">image</span> 이미지 블록</div>
+                                <button onclick="regenerateImage('${index}')" class="btn-primary py-1.5 px-3 text-xs bg-moon-600 text-white rounded-md flex items-center gap-1 border-none hover:bg-moon-700 transition-colors cursor-pointer"><span class="material-symbols-outlined text-sm">autorenew</span>이미지 재생성 (AI)</button>
+                            </div>
                             <div class="flex gap-6 items-start">
                                 <div class="w-1/3">
-                                    <img src="${child.getAttribute('src')}" class="w-full rounded-lg shadow-sm border border-slate-100 bg-slate-50">
+                                    <img src="${child.getAttribute('src')}" id="preview-${index}" class="w-full rounded-lg shadow-sm border border-slate-100 bg-slate-50">
                                 </div>
                                 <div class="w-2/3">
                                     <div class="input-group mb-4">
@@ -1148,8 +1182,8 @@
                                         <input type="text" id="edit-block-${index}-src" value="${child.getAttribute('src')}">
                                     </div>
                                     <div class="input-group mb-0">
-                                        <label>이미지 대체 텍스트 (ALT / 접근성 및 SEO 필수)</label>
-                                        <input type="text" id="edit-block-${index}-alt" value="${child.getAttribute('alt') || ''}" placeholder="이미지를 설명하는 텍스트 입력">
+                                        <label>이미지 대체 텍스트 (ALT / 재생성 프롬프트)</label>
+                                        <input type="text" id="edit-block-${index}-alt" value="${child.getAttribute('alt') || ''}" placeholder="이미지 재생성 시 반영될 프롬프트입니다.">
                                     </div>
                                 </div>
                             </div>
@@ -1188,6 +1222,15 @@
 
                 const h1Node = currentEditDoc.querySelector('.article-main-heading') || currentEditDoc.querySelector('h1');
                 if(h1Node) h1Node.textContent = document.getElementById('edit-main-h1').value;
+
+                // Hero Image Update
+                const heroImgNode = currentEditDoc.querySelector('.hero-img');
+                if (heroImgNode) {
+                    const srcInput = document.getElementById('edit-block-hero-src');
+                    const altInput = document.getElementById('edit-block-hero-alt');
+                    if(srcInput) heroImgNode.setAttribute('src', srcInput.value);
+                    if(altInput) heroImgNode.setAttribute('alt', altInput.value);
+                }
 
                 // Apply Block Updates
                 const contentNode = currentEditDoc.querySelector('.article-content') || currentEditDoc.querySelector('.post-content') || currentEditDoc.querySelector('main');
@@ -1228,6 +1271,41 @@
                 alert('저장 중 오류가 발생했습니다: ' + e.message);
             } finally {
                 btn.textContent = '변경사항 저장 및 배포';
+                btn.disabled = false;
+            }
+        }
+
+        async function regenerateImage(id) {
+            const altInput = document.getElementById(`edit-block-${id}-alt`);
+            if (!altInput || !altInput.value.trim()) {
+                alert('이미지 재생성을 위해 먼저 대체 텍스트(ALT) 입력란에 프롬프트를 작성해주세요.');
+                return;
+            }
+            const alt = altInput.value.trim();
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="material-symbols-outlined text-sm animate-spin">autorenew</span>생성 중...';
+            btn.disabled = true;
+
+            try {
+                const type = editTargetUrl && editTargetUrl.includes('/knowledge/') ? 'aeo' : 'seo';
+                const res = await fetch('/admin/api/regenerate-image', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ alt, type })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById(`edit-block-${id}-src`).value = data.url;
+                    document.getElementById(`preview-${id}`).src = data.url;
+                    alert('새로운 이미지가 생성되었습니다. 우측 상단의 "저장 및 배포"를 누르면 최종 반영됩니다.');
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (e) {
+                alert('이미지 생성 실패: ' + e.message);
+            } finally {
+                btn.innerHTML = originalText;
                 btn.disabled = false;
             }
         }

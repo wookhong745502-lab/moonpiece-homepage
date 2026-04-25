@@ -317,6 +317,36 @@ export default {
         return new Response(JSON.stringify({ success: true }), { headers: { "Content-Type": "application/json" } });
       }
 
+      if (url.pathname === "/admin/api/regenerate-image" && request.method === "POST") {
+        try {
+          const { alt, type } = await request.json();
+          if (!alt) throw new Error("ALT (Prompt) text is required");
+          
+          const settingsObj = await env.JOURNAL_BUCKET.get("config/settings.json");
+          const settings = settingsObj ? JSON.parse(await settingsObj.text()) : {};
+          const isSEO = type !== 'aeo';
+          const imgModel = (isSEO ? settings.imgSeo : settings.imgAeo) || "@cf/bytedance/stable-diffusion-xl-lightning";
+          const defaultNeg = "bare skin, nude, naked, swimsuit, cleavage, exposed body, bare feet, toes, nsfw, ugly, deformed, disfigured eyes, bad hands, distorted face, blurry, low quality, watermark, text, error, horror, creepy, unnatural skin, bad anatomy, extra fingers, missing fingers, fused fingers, too many fingers, three fingers, six fingers, seven fingers, mutated hands, malformed hands, poorly drawn hands, long fingers, broken fingers, overlapping fingers, cloned fingers, disjointed fingers, floating limbs, disconnected limbs, gross proportions, malformed limbs";
+          const negPrompt = settings.negPrompt || defaultNeg;
+
+          // AI Image Generation Call
+          const imgRes = await env.AI.run(imgModel, {
+            prompt: `High quality, ${alt}`,
+            negative_prompt: negPrompt
+          });
+
+          // Upload to R2 Bucket
+          const timeStamp = Date.now();
+          const assetDir = isSEO ? "journal" : "knowledge";
+          const newKey = `assets/${assetDir}/regen-${timeStamp}.png`;
+          await env.JOURNAL_BUCKET.put(newKey, imgRes, { httpMetadata: { contentType: "image/png" } });
+
+          return new Response(JSON.stringify({ success: true, url: `/${newKey}` }), { headers: { "Content-Type": "application/json" } });
+        } catch(e) {
+          return new Response(JSON.stringify({ success: false, error: e.message }), { headers: { "Content-Type": "application/json" } });
+        }
+      }
+
       if (url.pathname.startsWith("/journal/") || url.pathname.startsWith("/knowledge/") || url.pathname.startsWith("/assets/")) {
         const key = decodeURIComponent(url.pathname.slice(1));
         const obj = await env.JOURNAL_BUCKET.get(key);
