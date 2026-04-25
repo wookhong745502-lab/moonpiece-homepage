@@ -374,6 +374,12 @@ export default {
           const h = new Headers();
           obj.writeHttpMetadata(h);
           h.set("Access-Control-Allow-Origin", "*");
+          
+          // 강제 캐시 무효화 헤더 추가 (Cloudflare Edge 캐싱 및 브라우저 캐싱 방지)
+          h.set("Cache-Control", "no-cache, no-store, must-revalidate");
+          h.set("Pragma", "no-cache");
+          h.set("Expires", "0");
+
           return new Response(obj.body, { headers: h });
         }
       }
