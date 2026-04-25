@@ -1623,28 +1623,23 @@
         }
 
         async function stopBackgroundQueue() {
-            if (!confirm('현재 진행 중인 발행 및 예약을 중단하시겠습니까?')) return;
+            if (!confirm('현재 진행 중인 발행 및 예약을 중단하고 목록을 초기화하시겠습니까?')) return;
             
             // 1. Signal immediate process to stop
             stopRequested = true;
             
-            // 2. Stop server-side queue
+            // 2. Stop server-side queue and clear items
             const type = document.getElementById('auto-type').value;
             try {
-                const res = await fetch(`/admin/api/bulk/queue?type=${type}`);
-                const data = await res.json();
-                if (data.active) {
-                    data.active = false;
-                    await fetch(`/admin/api/bulk/queue?type=${type}`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(data)
-                    });
-                }
+                await fetch(`/admin/api/bulk/queue?type=${type}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ active: false, items: [], type })
+                });
             } catch(e) {}
             
             loadBackgroundQueue();
-            alert('중단 요청이 전송되었습니다.');
+            alert('중단 및 초기화되었습니다.');
         }
 
         function prepareAutoPublish() {
