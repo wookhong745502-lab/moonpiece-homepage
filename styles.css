@@ -483,11 +483,6 @@ footer {
 
 /* --- 디자인 업그레이드 & 모바일 가독성 및 하이라이트 강화 --- */
 
-/* 은은한 밤하늘 그라데이션 유틸리티 */
-.bg-moon-gradient {
-    background: linear-gradient(135deg, #0b0f19 0%, #1e1b4b 50%, #31105e 100%) !important;
-}
-
 /* Noto Serif KR 제목 텍스트 가독성 (자간 조절 및 행간) */
 h1, h2, h3, h4, .font-serif {
     letter-spacing: -0.02em;
