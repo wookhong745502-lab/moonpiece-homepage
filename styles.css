@@ -3,12 +3,12 @@
 
 :root {
     /* Colors - Moonpiece Design System (Restored & Standardized) */
-    --moon-50: #f5f3ff;
-    --moon-100: #ede9fe;
-    --moon-200: #ddd6fe;
-    --moon-500: #8b5cf6;
-    --moon-600: #7c3aed;
-    --moon-900: #4c1d95;
+    --moon-50: #faf9f5;
+    --moon-100: #f3eee3;
+    --moon-200: #fef3c7;
+    --moon-500: #a1826c;
+    --moon-600: #7c5e4b;
+    --moon-900: #332d29;
     
     --primary: var(--moon-600);
     --primary-container: var(--moon-50);
@@ -71,7 +71,7 @@ h1, h2, h3, h4, .font-serif {
     background: rgba(255, 255, 255, 0.85);
     -webkit-backdrop-filter: blur(15px);
     backdrop-filter: blur(15px);
-    border-bottom: 1px solid rgba(124, 58, 237, 0.1);
+    border-bottom: 1px solid rgba(124, 94, 75, 0.1);
 }
 
 .nav-mp-container {
@@ -132,7 +132,7 @@ h1, h2, h3, h4, .font-serif {
 .btn-primary:hover {
     background: var(--moon-900);
     transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(124, 58, 237, 0.2);
+    box-shadow: 0 10px 20px rgba(124, 94, 75, 0.2);
 }
 
 /* Hamburger */
@@ -329,7 +329,7 @@ footer {
 
 .faq-item:hover {
     border-color: var(--moon-300);
-    box-shadow: 0 30px 60px rgba(124, 58, 237, 0.12);
+    box-shadow: 0 30px 60px rgba(124, 94, 75, 0.12);
     transform: translateY(-8px);
 }
 
@@ -466,7 +466,7 @@ footer {
 .filter-btn.active {
     background-color: var(--moon-600) !important;
     color: white !important;
-    box-shadow: 0 10px 25px -5px rgba(124, 58, 237, 0.4);
+    box-shadow: 0 10px 25px -5px rgba(124, 94, 75, 0.4);
 }
 
 /* Utility: Animation Delays */
